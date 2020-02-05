@@ -6,9 +6,6 @@
 				<div class="title wx_title" v-if="loginType == 2">微信登录</div>
         <div class="login-input" v-if="loginType == 1">
           <el-form ref="form" :model="form" label-width="49px">
-            <!-- <el-form-item>
-              <el-input autocomplete="off" clearable v-model="form.username" placeholder="姓名"></el-input>
-            </el-form-item>-->
             <el-form-item label="账号">
               <el-input autocomplete="off" clearable v-model="form.jobnumber" placeholder="请输入账号"></el-input>
             </el-form-item>
@@ -39,10 +36,9 @@ export default {
   data() {
     return {
       form: {
-        //username: '', //姓名
-        jobnumber: '', //工号
-        password: '', //密码
-        remember: false //是否记住密码
+        jobnumber: '', // 账号
+        password: '', // 密码
+        remember: false // 是否记住密码
       },
       loginState: true, // 避免多次点击
 			lgoin_style: '',
@@ -67,7 +63,6 @@ export default {
       this.loginState = false
 
       if (
-        // this.form.username === '' ||
         this.form.jobnumber === '' ||
         this.form.password === ''
       ) {
@@ -85,7 +80,6 @@ export default {
     },
     loginFn() {
       let params = new URLSearchParams()
-      // params.append('username', this.form.username)
       params.append('number', this.form.jobnumber)
       params.append('password', this.form.password)
       params.append('remember', this.form.remember ? 'yes' : 'no')
@@ -99,7 +93,6 @@ export default {
       this.loginState = true
       if (res.data.result) {
         let userInfo = {
-          // username: this.form.username,
           number: this.form.jobnumber,
           password: this.form.password,
           remember: this.form.remember ? 'yes' : 'no'
@@ -122,13 +115,11 @@ export default {
         let remember = localStorage.getItem('remember') === 'yes' ? true : false
 
         if (remember) {
-          // this.form.username = localStorage.getItem('username')
           this.form.jobnumber = localStorage.getItem('jobnumber')
           this.form.password = localStorage.getItem('password')
           this.form.remember = true
         } else {
           // console.log('无数据')
-          // this.form.username = ''; //姓名
           // this.form.jobnumber = ''; //工号
           // this.form.password = '',  //密码
           // this.form.remember = false;  //是否记住密码
@@ -196,15 +187,6 @@ export default {
 	height: 28px;
 	border: 1px solid rgb(31,31,31);
 }
-/* .login .el-checkbox__inner {
-  width: 20px;
-  height: 20px;
-}
-.login .el-checkbox__inner::after {
-  height: 10px;
-  left: 7px;
-  top: 3px;
-} */
 .login .el-form-item {
   margin-bottom: 13px;
 }
