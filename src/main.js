@@ -6,9 +6,12 @@ import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 import App from './App'
 import router from './router'
+import wlGantt from 'wl-gantt'
+import "wl-gantt/lib/wl-gantt.css"
 
 Vue.config.productionTip = false
-Vue.use(ElementUI);
+Vue.use(ElementUI)
+Vue.use(wlGantt)
 
 /* eslint-disable no-new */
 new Vue({
