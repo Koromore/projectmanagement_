@@ -1,0 +1,144 @@
+<template>
+  <div id="gantt">
+    <!-- <img src="./assets/logo.png" /> -->
+    <div class="wl-gantt-demo">
+      <wlGantt :data="data" start-date="2019-9-02" end-date="2020-11-24"></wlGantt>
+    </div>
+  </div>
+</template>
+
+<script>
+import wlGantt from '@/components/gantt.vue'
+// import wlGantt from '@/pages/wl-gantt'
+
+export default {
+  name: 'gantti',
+  components: {
+    wlGantt
+  },
+  data() {
+    return {
+      data: [
+        // {
+        //   id: 1,
+        //   pid: 0,
+        //   name: '旅行',
+        //   startDate: '2019-09-07',
+        //   endDate: '2019-09-09',
+        //   children: [
+        //     {
+        //       id: '1',
+        //       pid: 1,
+        //       name: '云台之间',
+        //       pre: '1-1-1',
+        //       startDate: '2019-09-01',
+        //       endDate: '2019-09-09',
+        //       children: [
+        //         {
+        //           id: '1-1-1',
+        //           pid: '1-1',
+        //           name: '日落云巅',
+        //           startDate: '2019-09-01',
+        //           endDate: '2019-09-09'
+        //         }
+        //       ]
+        //     },
+        //     {
+        //       id: '1-2',
+        //       pid: 1,
+        //       pre: '1-1-1',
+        //       name: '天空之镜',
+        //       startDate: '2019-09-08',
+        //       endDate: '2019-10-02'
+        //     },
+        //     {
+        //       id: '1-3',
+        //       name: '蓬莱之岛',
+        //       pid: 1,
+        //       startDate: '2019-10-20',
+        //       endDate: '2019-11-10'
+        //     },
+        //     {
+        //       id: '1-4',
+        //       pid: 1,
+        //       name: '西塘之南',
+        //       startDate: '2019-12-02',
+        //       endDate: '2019-12-07'
+        //     },
+        //     {
+        //       pid: 1,
+        //       id: '1-5',
+        //       name: '凤凰之缘',
+        //       startDate: '2020-01-01',
+        //       endDate: '2020-01-10'
+        //     }
+        //   ]
+        // },
+        {
+          id: 2,
+          name: '租房子',
+          startDate: '2019-09-20',
+          endDate: '2019-12-31'
+        },
+        {
+          id: 3,
+          name: '云台之间',
+          startDate: '2019-09-01',
+          endDate: '2019-09-09'
+        },
+        {
+          id: 4,
+          name: '日落云巅',
+          startDate: '2019-09-01',
+          endDate: '2019-09-09'
+        },
+        {
+          id: 5,
+          name: '天空之镜',
+          startDate: '2019-09-08',
+          endDate: '2019-10-02'
+        },
+        {
+          id: 6,
+          name: '蓬莱之岛',
+          startDate: '2019-10-20',
+          endDate: '2019-11-10'
+        },
+        {
+          id: 7,
+          name: '西塘之南',
+          startDate: '2019-12-02',
+          endDate: '2019-12-07'
+        },
+        {
+          id: 8,
+          name: '凤凰之缘',
+          startDate: '2020-01-01',
+          endDate: '2020-01-10'
+        }
+      ]
+    }
+  },
+  methods: {
+    timeChange(row) {
+      console.log(row)
+    }
+  }
+}
+</script>
+
+<style scoped>
+#gantt {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  padding: 20px 25px 0;
+}
+
+.wl-gantt-demo {
+  margin: 40px auto;
+  width: 1000px;
+}
+</style>

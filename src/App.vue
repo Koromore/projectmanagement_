@@ -15,7 +15,7 @@ export default {
 
 <style>
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'SourceHanSansSC', 'Avenir', Helvetica, Arial, sans-serif;
 }
 /* reset */
 * { -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }

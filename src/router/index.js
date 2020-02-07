@@ -4,14 +4,14 @@ import axios from 'axios'
 import store from '../store/index'
 import Login from '@/pages/login/login'
 import Home from '@/pages/home/home'
-import Gantt from '@/pages/gantt/gantt'
+import Gantti from '@/pages/gantti/gantti'
 
 
 Vue.prototype.$axios = axios;
 Vue.use(Router)
 
 const router = new Router({
-	mode: 'history',
+	// mode: 'history',
 	routes: [
 		{
 			path: '/',
@@ -39,9 +39,9 @@ const router = new Router({
 			component: Login
 		},
 		{
-			path: '/gantt',
-			name: "gantt",
-			component: Gantt
+			path: '/gantti',
+			name: "gantti",
+			component: Gantti
 		}
 	]
 })
