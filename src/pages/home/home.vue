@@ -29,7 +29,8 @@
       <el-container>
         <!-- 内容 -->
         <el-main>
-          <Project></Project>
+          <!-- <Project></Project> -->
+          <Statistics></Statistics>
         </el-main>
 
       </el-container>
@@ -38,12 +39,14 @@
 </template>
 <script>
 import Header from '@/pages/header'
-import Project from '@/pages/project/project'
+import Project from '@/components/project'
+import Statistics from '@/components/statistics'
 export default {
   name: 'login',
   components: {
     Header,
-    Project
+    Project,
+    Statistics
   },
   data() {
     // const item = {

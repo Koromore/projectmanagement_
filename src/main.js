@@ -8,10 +8,13 @@ import App from './App'
 import router from './router'
 import wlGantt from 'wl-gantt'
 import "wl-gantt/lib/wl-gantt.css"
+import echarts from 'echarts'
+
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(wlGantt)
+Vue.prototype.$echarts = echarts
 
 /* eslint-disable no-new */
 new Vue({
