@@ -19,7 +19,7 @@ export default {
 }
 /* reset */
 * { -webkit-tap-highlight-color: rgba(0, 0, 0, 0); }
-html, body {}
+/* html, body {} */
 body { background: #fff;margin: 0; position: relative; font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;  -webkit-text-size-adjust: 100%; }
 p, h1, h2, h3, form, dl, dd, table { margin: 0;  color: #000;}
 ul, ol { padding: 0; margin: 0; }

@@ -1,5 +1,5 @@
 <template>
-  <div class="project" :style="project_style">
+  <div class="task" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
         <!-- <div class="grid-content bg-purple-dark"> -->
@@ -15,13 +15,13 @@
           </el-select>
         </el-col>
         <el-col :span="6" class="tab tab1">
-          <el-col :span="8" @click.native="tab1_change(1)" :class='[tab1_act=="1" ? "act" : ""]'>官网</el-col>
-          <el-col :span="8" @click.native="tab1_change(2)" :class='[tab1_act=="2" ? "act" : ""]'>口碑</el-col>
-          <el-col :span="8" @click.native="tab1_change(3)" :class='[tab1_act=="3" ? "act" : ""]'>数字营销</el-col>
+          <el-col :span="8" class="act">官网</el-col>
+          <el-col :span="8">口碑</el-col>
+          <el-col :span="8">数字营销</el-col>
         </el-col>
         <el-col :span="4" class="tab tab2">
-          <el-col :span="12" @click.native="tab2_change(1)" :class='[tab2_act=="1" ? "act" : ""]'>专项</el-col>
-          <el-col :span="12" @click.native="tab2_change(2)" :class='[tab2_act=="2" ? "act" : ""]'>日常</el-col>
+          <el-col :span="12" class="act">专项</el-col>
+          <el-col :span="12">日常</el-col>
         </el-col>
         <el-col :span="8" class="tab tab3">
           <el-col :span="6">新项目</el-col>
@@ -52,7 +52,7 @@
           <el-col :span="3">操作</el-col>
         </el-col>
         <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
-          <el-col :span="3" @click.native="project_details(item.id)">{{item.name}}</el-col>
+          <el-col :span="3">{{item.name}}</el-col>
           <el-col
             :span="3"
             :class="{'state_color1': item.state == 1,
@@ -100,7 +100,7 @@
 </template>
 <script>
 export default {
-  name: 'project',
+  name: 'task',
   data() {
     return {
       loginState: true, // 避免多次点击
@@ -125,7 +125,6 @@ export default {
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
-          id: 1,
           name: '皓影赠礼',
           state: 4,
           state_text: '延期',
@@ -137,7 +136,6 @@ export default {
           operation: '操作'
         },
         {
-          id: 2,
           name: '皓影赠礼',
           state: 1,
           state_text: '审核中',
@@ -149,7 +147,6 @@ export default {
           operation: '操作'
         },
         {
-          id: 3,
           name: '皓影赠礼',
           state: 2,
           state_text: '执行中',
@@ -160,7 +157,6 @@ export default {
           operation: '操作'
         },
         {
-          id: 4,
           name: '皓影赠礼',
           state: 3,
           state_text: '已完成',
@@ -171,7 +167,6 @@ export default {
           operation: '操作'
         },
         {
-          id: 5,
           name: '皓影赠礼',
           state: 3,
           state_text: '已完成',
@@ -182,13 +177,8 @@ export default {
           operation: '操作'
         }
       ],
-      // 我参与 我发起选项卡
       tabs_activity: 1,
-      table_show: true,
-      // 项目类型1选择
-      tab1_act: 1,
-      // 项目类型2选择
-      tab2_act: 1
+      table_show: true
     }
   },
   // 方法
@@ -200,26 +190,6 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
-    // 
-    tab1_change(e){
-      // console.log(e)
-      if (e == 1) {
-        this.tab1_act = 1
-      }else if(e == 2){
-        this.tab1_act = 2
-      }else if(e == 3){
-        this.tab1_act = 3
-      }
-    },
-    // 
-    tab2_change(e){
-      // console.log(e)
-      if (e == 1) {
-        this.tab2_act = 1
-      }else if(e == 2){
-        this.tab2_act = 2
-      }
-    },
     // 选项卡
     table_tab(e) {
       if(e == 1){
@@ -229,10 +199,6 @@ export default {
         this.tabs_activity = 2,
         this.table_show = false
       }
-    },
-    // 项目详情
-    project_details(e) {
-      console.log(e)
     }
   },
   // 钩子函数
@@ -246,13 +212,13 @@ export default {
 /* .project {
   background: red;
 } */
-.project .top {
+.task .top {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
 }
-.project .top .tab {
+.task .top .tab {
   height: 26px;
   text-align: center;
   background-color: rgb(247, 247, 247);
@@ -264,50 +230,50 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.project .top .tab div {
+.task .top .tab div {
   height: 26px;
   line-height: 26px;
   font-size: 12px;
   box-sizing: border-box;
   cursor: pointer;
 }
-.project .top .tab1 div,
-.project .top .tab2 div {
+.task .top .tab1 div,
+.task .top .tab2 div {
   border-left: 1px solid #bbb;
 }
-.project .top .tab1 div:hover,
-.project .top .tab2 div:hover {
+.task .top .tab1 div:hover,
+.task .top .tab2 div:hover {
   background: rgb(16, 142, 233);
   color: white;
 }
-.project .top .tab1 div:nth-of-type(1),
-.project .top .tab2 div:nth-of-type(1) {
+.task .top .tab1 div:nth-of-type(1),
+.task .top .tab2 div:nth-of-type(1) {
   border: none;
 }
-.project .top .tab div.act {
+.task .top .tab div.act {
   background: rgb(16, 142, 233);
   color: white;
 }
-.project .top .tab3{
+.task .top .tab3{
   border: none;
   color: white
 }
-.project .top .tab3 div:nth-of-type(1){
+.task .top .tab3 div:nth-of-type(1){
   background: rgb(16, 142, 233);
 }
-.project .top .tab3 div:nth-of-type(2){
+.task .top .tab3 div:nth-of-type(2){
   background: rgb(255, 0, 0);
 }
-.project .top .tab3 div:nth-of-type(3){
+.task .top .tab3 div:nth-of-type(3){
   background: rgb(245, 185, 106);
 }
-.project .top .tab3 div:nth-of-type(4){
+.task .top .tab3 div:nth-of-type(4){
   background: rgb(77, 159, 103);
 }
 .el-button + .el-button {
   margin: 0;
 }
-.project .tabs {
+.task .tabs {
   font-weight: 700;
   font-size: 20px;
   box-sizing: border-box;
@@ -317,7 +283,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.project .tabs div {
+.task .tabs div {
   height: 36px;
   line-height: 36px;
   color: rgba(164, 167, 170, 1);
@@ -325,15 +291,15 @@ export default {
   padding-bottom: 13px;
   cursor: pointer;
 }
-.project .tabs div:nth-of-type(2) {
+.task .tabs div:nth-of-type(2) {
   margin-left: 32px;
 }
-.project .tabs .act {
+.task .tabs .act {
   border-bottom: 2px solid black;
   color: black;
 }
-.project .table .title,
-.project .table .list {
+.task .table .title,
+.task .table .list {
   width: 100%;
   height: 48px;
   font-size: 14px;
@@ -344,23 +310,16 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.project .table .title {
+.task .table .title {
   font-weight: bold;
   background: rgb(236, 235, 235);
 }
-.project .table .title div {
+.task .table .title div {
   height: 48px;
   line-height: 48px;
 }
-.project .table .list {
+.task .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
-}
-.project .table .list div:nth-of-type(1){
-  cursor: pointer;
-}
-.project .table .list div{
-  height: 48px;
-  line-height: 48px;
 }
 .state_color1 {
   color: rgb(236, 185, 21);

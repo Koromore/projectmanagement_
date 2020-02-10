@@ -2,7 +2,7 @@
   <div class="home">
     <Header></Header>
     <el-container :style="home_style">
-      <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+      <el-aside width="360px" style="background-color: rgb(238, 241, 246)">
         <!-- 左菜单栏 -->
         <div class="title">
           <i class="el-icon-s-home"></i>
@@ -29,8 +29,10 @@
       <el-container>
         <!-- 内容 -->
         <el-main>
+          <!-- <Statistics></Statistics> -->
           <!-- <Project></Project> -->
-          <Statistics></Statistics>
+          <!-- <ProjectDetails></ProjectDetails> -->
+          <Task></Task>
         </el-main>
 
       </el-container>
@@ -40,13 +42,18 @@
 <script>
 import Header from '@/pages/header'
 import Project from '@/components/project'
+import ProjectDetails from '@/components/project_details'
+
 import Statistics from '@/components/statistics'
+import Task from '@/components/task'
 export default {
   name: 'login',
   components: {
     Header,
     Project,
-    Statistics
+    Statistics,
+    Task,
+    ProjectDetails
   },
   data() {
     // const item = {
