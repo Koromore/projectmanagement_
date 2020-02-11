@@ -35,6 +35,7 @@
         <div @click="table_tab(1)" :class='[tabs_activity=="1" ? "act" : ""]'>我发起</div>
         <div @click="table_tab(2)" :class='[tabs_activity=="2" ? "act" : ""]'>我参与</div>
       </el-col>
+      <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-if="table_show">
         <el-col :span="24" class="title">
           <el-col :span="3">名称</el-col>
@@ -67,6 +68,7 @@
           <el-col :span="3">{{item.operation}}</el-col>
         </el-col>
       </el-col>
+      <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-if="!table_show">
         <el-col :span="24" class="title">
           <el-col :span="3">名称</el-col>
@@ -232,7 +234,8 @@ export default {
     },
     // 项目详情
     project_details(e) {
-      console.log(e)
+      this.$emit('on-close', e)
+      // this.$router.push({ path: 'project_details', query: { id: e }})
     }
   },
   // 钩子函数

@@ -5,6 +5,7 @@ import store from '../store/index'
 import Login from '@/pages/login/login'
 import Home from '@/pages/home/home'
 import Gantti from '@/pages/gantti/gantti'
+import ProjectDetails from '@/components/project_details'
 
 
 Vue.prototype.$axios = axios;
@@ -42,6 +43,11 @@ const router = new Router({
 			path: '/gantti',
 			name: "gantti",
 			component: Gantti
+		},
+		{
+			path: '/project_details',
+			name: "project_details",
+			component: ProjectDetails
 		}
 	]
 })

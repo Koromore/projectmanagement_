@@ -29,7 +29,7 @@
           <el-col :span="2">操作</el-col>
         </el-col>
         <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
-          <el-col :span="2" @click.native="project_details(item.id)">{{item.department}}</el-col>
+          <el-col :span="2">{{item.department}}</el-col>
           <el-col :span="2">{{item.task}}</el-col>
           <el-col
             :span="2"
@@ -46,6 +46,7 @@
           <el-col :span="2">{{item.operation}}</el-col>
         </el-col>
       </el-col>
+      <!--  -->
       <el-col :span="24" class="table table2" v-if="!table_show">
         <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
@@ -197,16 +198,11 @@ export default {
         this.tabs_activity = 2,
         this.table_show = false
       }
-    },
-    // 项目详情
-    project_details(e) {
-      console.log(e)
     }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
-    // this.getlocalStorage()
   }
 }
 </script>
