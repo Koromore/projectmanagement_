@@ -65,7 +65,7 @@ export default {
   data() {
     return {
       home_style: '',
-      show_acti: 6
+      show_acti: 1
     }
   },
   // 方法

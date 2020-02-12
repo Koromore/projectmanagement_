@@ -79,13 +79,14 @@ export default {
       }
     },
     loginFn() {
-      let params = new URLSearchParams()
-      params.append('number', this.form.jobnumber)
-      params.append('password', this.form.password)
-      params.append('remember', this.form.remember ? 'yes' : 'no')
-      this.$axios
-        .post('/api/index.php?mod=login&ac=login', params)
-        .then(this.loginSuccess)
+      // let params = new URLSearchParams()
+      // params.append('number', this.form.jobnumber)
+      // params.append('password', this.form.password)
+      // params.append('remember', this.form.remember ? 'yes' : 'no')
+      // this.$axios
+      //   .post('/api/index.php?mod=login&ac=login', params)
+      //   .then(this.loginSuccess)
+      this.$router.push({ path: '/home' })
     },
     loginSuccess(res) {
       //艾辉

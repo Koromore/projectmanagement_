@@ -107,7 +107,6 @@
             @keyup.enter.native="handleInputConfirm"
             @blur="handleInputConfirm"
           ></el-input>
-          <!-- <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button> -->
         </el-col>
 
         <el-col :span="13" :offset="3">
@@ -116,8 +115,6 @@
         <el-col :span="6">
           <el-button type="primary" @click="showInput">添加</el-button>
         </el-col>
-
-        <!-- <el-col :span="24">{{dynamicTags}}</el-col> -->
         <el-col :span="12" :offset="6" class="batton">
           <el-button type="info">取消</el-button>
           <el-button type="primary">提交</el-button>
@@ -131,7 +128,7 @@ export default {
   name: 'topheader',
   data() {
     return {
-      drawer: true,
+      drawer: false,
       // 新增
       new_task: {
         parent_task: '',
@@ -217,6 +214,7 @@ export default {
 .header-right .add_du {
   width: 100px;
   color: white;
+  font-size: 16px;
 }
 .topheader .el-dropdown {
   font-size: 15px;
