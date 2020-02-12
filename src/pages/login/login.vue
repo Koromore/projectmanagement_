@@ -22,7 +22,7 @@
           </el-form>
         </div>
 				<div class="wxlogin" v-if="loginType == 2">
-					<img src="/static/images/login/wxcode.png" width="49%" alt="" srcset="">
+					<img src="static/images/login/wxcode.png" width="49%" alt="" srcset="">
 					<div>请使用微信扫描二维码登录</div>
 					<div>“映盛项目管理系统”</div>
 				</div>
@@ -138,7 +138,7 @@ export default {
 </script>
 <style scoped>
 .login {
-  background: url('/static/images/login/login_bg.png') 0 0 no-repeat black;
+  background: url('../../../static/images/login/login_bg.png') 0 0 no-repeat black;
 }
 .login-title {
   width: 100%;

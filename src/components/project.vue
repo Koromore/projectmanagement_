@@ -43,14 +43,14 @@
           <el-col :span="3">总任务数/待完成</el-col>
           <el-col :span="3">
             预计时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="3">
             完成时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="3">下达人</el-col>
-          <el-col :span="3">操作</el-col>
+          <el-col :span="5">操作</el-col>
         </el-col>
         <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
           <el-col :span="3" @click.native="project_details(item.id)">{{item.name}}</el-col>
@@ -65,7 +65,11 @@
           <el-col :span="3">{{item.presetTime}}</el-col>
           <el-col :span="3">{{item.finishTime}}</el-col>
           <el-col :span="3">{{item.assignPeople}}</el-col>
-          <el-col :span="3">{{item.operation}}</el-col>
+          <el-col :span="5">
+            <el-button type="info" @click="feedback(item.id)">反馈</el-button>
+            <el-button type="info" @click="redact(item.id)">编辑</el-button>
+            <el-button type="primary" @click="achieve(item.id)">完成</el-button>
+          </el-col>
         </el-col>
       </el-col>
       <!-- 我参与 -->
@@ -75,11 +79,11 @@
           <el-col :span="3">状态</el-col>
           <el-col :span="3">
             预计时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="3">
             完成时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="3">下达人</el-col>
         </el-col>
@@ -236,6 +240,15 @@ export default {
     project_details(e) {
       this.$emit('on-close', e)
       // this.$router.push({ path: 'project_details', query: { id: e }})
+    },
+    feedback(e) {
+      console.log('反馈' + e)
+    },
+    redact(e) {
+      console.log('编辑' + e)
+    },
+    achieve(e) {
+      console.log('完成' + e)
     }
   },
   // 钩子函数
@@ -346,6 +359,9 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+}
+.project .table .list:hover{
+  background: #F7F7F7;
 }
 .project .table .title {
   font-weight: bold;

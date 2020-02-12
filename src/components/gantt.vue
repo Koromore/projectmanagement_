@@ -49,7 +49,7 @@
         :key="month.id"
         :label="month.name"
         >
-        <template slot-scope="scope" v-if="dateType === 'yearAndMonth'">
+        <template slot-scope="scope" v-if="dateType === 'monthAndDay'">
           <div :class="dayGanttType(scope.row, month.full_date, 'months')"></div>
         </template>
         <!-- <el-table-column
@@ -101,7 +101,7 @@ export default {
     // 日期类型
     dateType: {
       type: String,
-      default: "yearAndMonth" // monthAndDay,yearAndMonth,yearAndWeek
+      default: "monthAndDay" // monthAndDay,yearAndMonth,yearAndWeek
     },
     // 树表配置项
     props: Object,

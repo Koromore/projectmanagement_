@@ -44,7 +44,7 @@
           <el-col :span="3">父任务</el-col>
           <el-col :span="3">
             预计时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="3">操作</el-col>
         </el-col>
@@ -61,7 +61,10 @@
           >{{item.state_text}}</el-col>
           <el-col :span="3">{{item.last_task}}</el-col>
           <el-col :span="3">{{item.presetTime}}</el-col>
-          <el-col :span="3">{{item.operation}}</el-col>
+          <el-col :span="3">
+            <el-button type="info" @click="sponsor_feedback(item.id)">反馈</el-button>
+            <el-button type="primary" @click="sponsor_achieve(item.id)">完成</el-button>
+          </el-col>
         </el-col>
       </el-col>
       <!-- 我参与 -->
@@ -73,11 +76,11 @@
           <el-col :span="2">执行人</el-col>
           <el-col :span="2">
             预计时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="2">
             完成时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
           <el-col :span="2">下达人</el-col>
           <el-col :span="2">成果</el-col>
@@ -98,7 +101,9 @@
           <el-col :span="2">{{item.finishTime}}</el-col>
           <el-col :span="2">{{item.assignPeople}}</el-col>
           <el-col :span="2">{{item.result}}</el-col>
-          <el-col :span="2">{{item.operation}}</el-col>
+          <el-col :span="2">
+            <el-button type="primary" @click="join_achieve(item.id)">完成</el-button>
+          </el-col>
         </el-col>
       </el-col>
     </el-row>
@@ -131,6 +136,7 @@ export default {
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
+          id: 1,
           name: '皓影赠礼',
           department: '网络营销',
           task: '产品原型',
@@ -141,6 +147,7 @@ export default {
           operation: '操作'
         },
         {
+          id: 2,
           name: '皓影赠礼',
           department: '网络营销',
           task: '产品原型',
@@ -151,6 +158,7 @@ export default {
           operation: '操作'
         },
         {
+          id: 3,
           name: '皓影赠礼',
           department: '网络营销',
           task: '产品原型',
@@ -161,6 +169,7 @@ export default {
           operation: '操作'
         },
         {
+          id: 4,
           name: '皓影赠礼',
           department: '网络营销',
           task: '产品原型',
@@ -171,6 +180,7 @@ export default {
           operation: '操作'
         },
         {
+          id: 5,
           name: '皓影赠礼',
           department: '网络营销',
           task: '产品原型',
@@ -299,6 +309,15 @@ export default {
       }else if(e == 2){
         this.tab2_act = 2
       }
+    },
+    sponsor_feedback(e) {
+      console.log('我发起反馈' + e)
+    },
+    sponsor_achieve(e) {
+      console.log('我发起完成' + e)
+    },
+    join_achieve(e) {
+      console.log('我参与完成' + e)
     }
   },
   // 钩子函数
@@ -409,6 +428,9 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+}
+.task .table .list:hover{
+  background: #F7F7F7;
 }
 .task .table .title {
   font-weight: bold;

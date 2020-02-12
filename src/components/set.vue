@@ -1,15 +1,44 @@
 <template>
-  <div class="task" :style="project_style">
+  <div class="set" :style="project_style">
     <el-row>
       <!--  -->
       <el-col :span="24" class="tabs">
-        <div @click="table_tab(1)" :class='[tabs_activity=="1" ? "act" : ""]'>业务类型</div>
-        <div @click="table_tab(2)" :class='[tabs_activity=="2" ? "act" : ""]'>客户</div>
+        <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">业务类型</div>
+        <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">客户</div>
       </el-col>
+      <!--  -->
+      <el-col :span="24" class="add">
+        <el-button type="primary" @click="drawer = true">新增</el-button>
+      </el-col>
+      <el-drawer title="新增框" :visible.sync="drawer" :with-header="false">
+        <el-row class="add_box">
+          <el-col :span="24" class="new_name">
+            <el-col :span="6" class="title title1">名称</el-col>
+            <el-col :span="13">
+              <el-input placeholder="请输入内容" v-model="new_name" clearable></el-input>
+            </el-col>
+            <el-col :span="6" class="title title2">业务</el-col>
+            <el-col :span="18" :offset="6">
+              <el-checkbox-group v-model="checkList">
+                <el-checkbox label="复选框 A"></el-checkbox>
+                <el-checkbox label="复选框 B"></el-checkbox>
+                <el-checkbox label="复选框 C"></el-checkbox>
+                <el-checkbox label="复选框 D"></el-checkbox>
+                <el-checkbox label="复选框 E"></el-checkbox>
+                <el-checkbox label="复选框 F"></el-checkbox>
+              </el-checkbox-group>
+            </el-col>
+          </el-col>
+          <el-col :span="12" :offset="6" class="batton">
+            <el-button type="info">取消</el-button>
+            <el-button type="primary">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
       <!-- 业务类型 -->
       <el-col :span="24" class="table table1" v-if="table_show">
         <el-col :span="24" class="title">
-          <el-col :span="5">部门</el-col>
+          <el-col :span="5">名称</el-col>
           <el-col :span="5">操作</el-col>
         </el-col>
         <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
@@ -46,6 +75,7 @@ export default {
     return {
       loginState: true, // 避免多次点击
       project_style: '',
+      drawer: false,
       // 客户列表
       client_list: [
         {
@@ -117,7 +147,11 @@ export default {
       // 项目类型1选择
       tab1_act: 1,
       // 项目类型2选择
-      tab2_act: 1
+      tab2_act: 1,
+      // 新增
+      new_name: '',
+      //
+      checkList: []
     }
   },
   // 方法
@@ -131,12 +165,10 @@ export default {
     },
     // 选项卡
     table_tab(e) {
-      if(e == 1){
-        this.tabs_activity = 1,
-        this.table_show = true
-      }else if(e == 2){
-        this.tabs_activity = 2,
-        this.table_show = false
+      if (e == 1) {
+        ;(this.tabs_activity = 1), (this.table_show = true)
+      } else if (e == 2) {
+        ;(this.tabs_activity = 2), (this.table_show = false)
       }
     },
     // 业务类型修改
@@ -167,7 +199,7 @@ export default {
 /* .project {
   background: red;
 } */
-.task .top {
+.set .top {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -176,35 +208,41 @@ export default {
 .el-button + .el-button {
   margin: 0;
 }
-.task .tabs {
-  font-weight: 700;
+.set .add {
+  /* width: 99px; */
+  box-sizing: border-box;
+  margin: 0 0 13px 13px;
+}
+.set .add button {
+  width: 99px;
+}
+.set .tabs {
   font-size: 20px;
   box-sizing: border-box;
   padding: 13px 0;
+
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
 }
-.task .tabs div {
+.set .tabs div {
   width: 130px;
   height: 36px;
   line-height: 36px;
   text-align: center;
   color: rgba(164, 167, 170, 1);
   box-sizing: border-box;
+  border-bottom: 1px solid rgb(164, 167, 170);
   padding-bottom: 13px;
   cursor: pointer;
 }
-.task .tabs div:nth-of-type(2) {
-  margin-left: 32px;
+.set .tabs .act {
+  border-bottom: 2px solid rgb(16, 142, 233);
+  color: rgb(16, 142, 233);
 }
-.task .tabs .act {
-  border-bottom: 2px solid black;
-  color: black;
-}
-.task .table .title,
-.task .table .list {
+.set .table .title,
+.set .table .list {
   width: 100%;
   height: 48px;
   font-size: 14px;
@@ -215,27 +253,46 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.task .table .title {
+.set .table .list:hover{
+  background: #F7F7F7;
+}
+.set .table .title {
   font-weight: bold;
   background: rgb(236, 235, 235);
 }
-.task .table .title div {
+.set .table .title div {
   height: 48px;
   line-height: 48px;
 }
-.task .table .list {
+.set .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
-.state_color1 {
-  color: rgb(236, 185, 21);
+.set .add_box {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 36px 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: space-between;
 }
-.state_color2 {
-  color: rgb(1, 176, 114);
+.set .add_box .title {
+  text-align: center;
 }
-.state_color3 {
-  color: rgb(172, 171, 171);
+.set .add_box .title2 {
+  margin-top: 64px;
 }
-.state_color4 {
-  color: rgb(255, 0, 0);
+.set .add_box .new_name {
+  height: 40px;
+  line-height: 40px;
+}
+.set .add_box .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.set .add_box .batton button {
+  width: 128px;
 }
 </style>

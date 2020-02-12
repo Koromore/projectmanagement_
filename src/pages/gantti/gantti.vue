@@ -122,7 +122,16 @@ export default {
   methods: {
     timeChange(row) {
       console.log(row)
+    },
+    // 获取页面传参
+    getParams(){
+      let id = this.$route.query.id
+      console.log(id)
     }
+  },
+  created(){
+    let seif = this
+    seif.getParams()
   }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="task" :style="project_style">
+  <div class="document" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
         <el-col :span="4" class>
@@ -47,19 +47,73 @@
           <!-- <el-col :span="3">父任务</el-col> -->
           <el-col :span="3">
             更新时间
-            <img src="/static/images/project/down.png" width="24" alt srcset />
+            <img src="static/images/project/down.png" width="24" alt srcset />
           </el-col>
-          <el-col :span="3">更新人</el-col>
+          <el-col :span="5">更新人</el-col>
         </el-col>
-        <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
-          <el-col :span="3">{{item.name}}</el-col>
-          <el-col :span="3">{{item.department}}</el-col>
+        <el-col
+          :span="24"
+          class="list"
+          v-for="item in tableData"
+          :key="item.index"
+          @click.native="drawer = true"
+        >
+          <el-col :span="3">
+            <img src="static/images/document/pt.png" width="32" alt srcset />
+            
+            {{item.file_name}}
+            <img class="operation" src="static/images/document/change.png" width="18" alt srcset />
+          </el-col>
+          <el-col :span="3">{{item.client}}</el-col>
+          <el-col :span="3">{{item.project}}</el-col>
           <el-col :span="3">{{item.task}}</el-col>
-          <el-col :span="3">{{item.last_task}}</el-col>
-          <el-col :span="3">{{item.presetTime}}</el-col>
-          <el-col :span="3">{{item.operation}}</el-col>
+          <el-col :span="3">{{item.update_time}}</el-col>
+          <el-col :span="5">
+            <span>{{item.update_people}}</span>
+            <span class="operation">
+              <img src="static/images/document/up.png" alt srcset />
+              <img src="static/images/document/down.png" alt srcset />
+              <img src="static/images/document/link.png" alt srcset />
+              <img src="static/images/document/time.png" alt srcset />
+            </span>
+          </el-col>
         </el-col>
       </el-col>
+      <el-drawer title="历史文档" :visible.sync="drawer" :with-header="false">
+      <el-row class="records_document">
+          <el-col :span="23" :offset="1" class="title">历史</el-col>
+          <el-col :span="23" :offset="1" class="records_document_list" :style="style1">
+            <el-scrollbar>
+              <el-timeline>
+                <el-timeline-item
+                  v-for="item in records_document_list"
+                  :key="item.index"
+                  :timestamp="item.time"
+                  placement="top"
+                >
+                  <el-card class="content">
+                    <p>完成成果：{{item.result}}</p>
+                    <p>更新人：{{item.people}}</p>
+                    <br />
+                    <br />
+                    <div>
+                      <img src="static/images/document/pt.png" width="36" alt srcset />
+                      <span>{{item.file_name}}</span>
+                      <img
+                        class="down"
+                        src="static/images/document/down.png"
+                        width="21"
+                        alt
+                        srcset
+                      />
+                    </div>
+                  </el-card>
+                </el-timeline-item>
+              </el-timeline>
+            </el-scrollbar>
+          </el-col>
+        </el-row>
+      </el-drawer>
     </el-row>
   </div>
 </template>
@@ -71,6 +125,7 @@ export default {
       loginState: true, // 避免多次点击
       project_style: '',
       input1: '',
+      drawer: false,
       // 客户列表
       client_list: [
         {
@@ -91,54 +146,106 @@ export default {
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
-          name: '皓影赠礼',
-          department: '网络营销',
+          id: 1,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
           task: '产品原型',
-          state: 1,
-          state_text: '审核中',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
+          update_time: '20-01-21',
+          update_people: '解雨臣'
         },
         {
-          name: '皓影赠礼',
-          department: '网络营销',
+          id: 2,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
           task: '产品原型',
-          state: 2,
-          state_text: '执行中',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
+          update_time: '20-01-21',
+          update_people: '解雨臣'
         },
         {
-          name: '皓影赠礼',
-          department: '网络营销',
+          id: 3,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
           task: '产品原型',
-          state: 4,
-          state_text: '延期',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
+          update_time: '20-01-21',
+          update_people: '解雨臣'
         },
         {
-          name: '皓影赠礼',
-          department: '网络营销',
+          id: 4,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
           task: '产品原型',
-          state: 4,
-          state_text: '延期',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
+          update_time: '20-01-21',
+          update_people: '解雨臣'
         },
         {
-          name: '皓影赠礼',
-          department: '网络营销',
+          id: 5,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
           task: '产品原型',
-          state: 4,
-          state_text: '延期',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
+          update_time: '20-01-21',
+          update_people: '解雨臣'
+        },
+        {
+          id: 6,
+          file_name: '文档',
+          file_format: 'ppt',
+          client: '广汽本田',
+          project: '皓影赠礼',
+          task: '产品原型',
+          update_time: '20-01-21',
+          update_people: '解雨臣'
+        }
+      ],
+      records_document_list: [
+        {
+          time: '2018/4/2 20:46',
+          result: '完成',
+          people: '解雨臣',
+          file_name: '文档',
+          file_format: 'ppt',
+          file_url: ''
+        },
+        {
+          time: '2018/4/2 20:46',
+          result: '完成',
+          people: '解雨臣',
+          file_name: '文档',
+          file_format: 'ppt',
+          file_url: ''
+        },
+        {
+          time: '2018/4/2 20:46',
+          result: '完成',
+          people: '解雨臣',
+          file_name: '文档',
+          file_format: 'ppt',
+          file_url: ''
+        },
+        {
+          time: '2018/4/2 20:46',
+          result: '完成',
+          people: '解雨臣',
+          file_name: '文档',
+          file_format: 'ppt',
+          file_url: ''
+        },
+        {
+          time: '2018/4/2 20:46',
+          result: '完成',
+          people: '解雨臣',
+          file_name: '文档',
+          file_format: 'ppt',
+          file_url: ''
         }
       ],
       tabs_activity: 1,
@@ -146,7 +253,8 @@ export default {
       // 项目类型1选择
       tab1_act: 1,
       // 项目类型2选择
-      tab2_act: 1
+      tab2_act: 1,
+      style1: ''
     }
   },
   // 方法
@@ -155,26 +263,26 @@ export default {
     widthheight() {
       let winWidth = window.innerWidth
       let winHeight = window.innerHeight
-      let height = winHeight - 75
-      // this.project_style = 'height:' + height + 'px;'
+      let height1 = winHeight - 100
+      this.style1 = 'height:' + height1 + 'px;'
     },
-    // 
-    tab1_change(e){
+    //
+    tab1_change(e) {
       // console.log(e)
       if (e == 1) {
         this.tab1_act = 1
-      }else if(e == 2){
+      } else if (e == 2) {
         this.tab1_act = 2
-      }else if(e == 3){
+      } else if (e == 3) {
         this.tab1_act = 3
       }
     },
-    // 
-    tab2_change(e){
+    //
+    tab2_change(e) {
       // console.log(e)
       if (e == 1) {
         this.tab2_act = 1
-      }else if(e == 2){
+      } else if (e == 2) {
         this.tab2_act = 2
       }
     }
@@ -190,13 +298,13 @@ export default {
 /* .project {
   background: red;
 } */
-.task .top {
+.document .top {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
 }
-.task .top .tab {
+.document .top .tab {
   height: 26px;
   text-align: center;
   background-color: rgb(247, 247, 247);
@@ -208,31 +316,31 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.task .top .tab div {
+.document .top .tab div {
   height: 26px;
   line-height: 26px;
   font-size: 12px;
   box-sizing: border-box;
   cursor: pointer;
 }
-.task .top .tab1 div,
-.task .top .tab2 div {
+.document .top .tab1 div,
+.document .top .tab2 div {
   border-left: 1px solid #bbb;
 }
-.task .top .tab1 div:hover,
-.task .top .tab2 div:hover {
+.document .top .tab1 div:hover,
+.document .top .tab2 div:hover {
   background: rgb(16, 142, 233);
   color: white;
 }
-.task .top .tab1 div:nth-of-type(1),
-.task .top .tab2 div:nth-of-type(1) {
+.document .top .tab1 div:nth-of-type(1),
+.document .top .tab2 div:nth-of-type(1) {
   border: none;
 }
-.task .top .tab div.act {
+.document .top .tab div.act {
   background: rgb(16, 142, 233);
   color: white;
 }
-.task .top .tab3 {
+.document .top .tab3 {
   height: 72px;
   border: none;
   color: white;
@@ -240,7 +348,7 @@ export default {
 .el-button + .el-button {
   margin: 0;
 }
-.task .tabs {
+.document .tabs {
   font-weight: 700;
   font-size: 20px;
   box-sizing: border-box;
@@ -250,7 +358,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.task .tabs div {
+.document .tabs div {
   height: 36px;
   line-height: 36px;
   color: rgba(164, 167, 170, 1);
@@ -258,15 +366,15 @@ export default {
   padding-bottom: 13px;
   cursor: pointer;
 }
-.task .tabs div:nth-of-type(2) {
+.document .tabs div:nth-of-type(2) {
   margin-left: 32px;
 }
-.task .tabs .act {
+.document .tabs .act {
   border-bottom: 2px solid black;
   color: black;
 }
-.task .table .title,
-.task .table .list {
+.document .table .title,
+.document .table .list {
   width: 100%;
   height: 48px;
   font-size: 14px;
@@ -277,27 +385,60 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.task .table .title {
+.document .table .list:hover {
+  background: #f7f7f7;
+}
+.document .table .list .operation {
+  display: none;
+}
+.document .table .list:hover .operation {
+  display: inline;
+}
+.document .table .list .operation img {
+  width: 18px;
+  margin-left: 9px;
+}
+.document .table .title {
   font-weight: bold;
   background: rgb(236, 235, 235);
 }
-.task .table .title div {
+.document .table .title div {
   height: 48px;
   line-height: 48px;
 }
-.task .table .list {
+.document .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
-.state_color1 {
-  color: rgb(236, 185, 21);
+.document >>> .el-drawer__body {
+  height: 100%;
 }
-.state_color2 {
-  color: rgb(1, 176, 114);
+.document >>> .el-scrollbar {
+  height: 100%;
 }
-.state_color3 {
-  color: rgb(172, 171, 171);
+.document >>> .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
-.state_color4 {
-  color: rgb(255, 0, 0);
+.document .records_document_box {
+  height: 100%;
+}
+.document .records_document {
+  height: 100%;
+}
+.document .records_document .title {
+  font-weight: bold;
+  height: 100px;
+  line-height: 100px;
+}
+.document .records_document .el-card {
+  font-size: 16px;
+}
+.document .records_document .el-card:hover {
+  background: #eee;
+}
+.document .records_document .el-card .down {
+  display: none;
+}
+.document .records_document .el-card:hover .down {
+  display: inline-block;
 }
 </style>

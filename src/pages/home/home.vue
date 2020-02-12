@@ -8,7 +8,7 @@
           <i class="el-icon-s-home"></i>
           统计
         </div>
-        <div :class="[show_acti=='2'?'title act':'title']" @click="change_show(2)">
+        <div :class="[show_acti=='2' || show_acti=='6'?'title act':'title']" @click="change_show(2)">
           <i class="el-icon-tickets"></i>
           项目管理
         </div>
@@ -65,7 +65,7 @@ export default {
   data() {
     return {
       home_style: '',
-      show_acti: 2
+      show_acti: 6
     }
   },
   // 方法
@@ -101,7 +101,6 @@ export default {
   padding-top: 36px;
 }
 .el-aside .title {
-  /* background: red; */
   font-family: 'SourceHanSansSC';
   font-size: 20px;
   color: rgb(16, 16, 16);
