@@ -190,7 +190,6 @@ export default {
 <style >
 .topheader {
   padding-bottom: 75px;
-  /* height: 0px; */
   background-color: rgb(13, 13, 13);
 }
 .header-left {

@@ -10,11 +10,15 @@ import router from './router'
 import wlGantt from 'wl-gantt'
 import "wl-gantt/lib/wl-gantt.css"
 import echarts from 'echarts'
+import gunter from './components/gante_test/gante'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(wlGantt)
+Vue.use(gunter)
 Vue.prototype.$echarts = echarts
+
+
 
 /* eslint-disable no-new */
 new Vue({

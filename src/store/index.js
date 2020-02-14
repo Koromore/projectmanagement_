@@ -13,6 +13,8 @@ export default new Vuex.Store({
         password: '',   //密码
         remember:false,   //是否记住密码
         isLogin:'error', //是否登陆
+
+        refresh: 0 // 是否刷新页面
     },
     action:{
 
@@ -28,27 +30,6 @@ export default new Vuex.Store({
 
             //全局vuex 登陆状态
             state.isLogin = window.sessionStorage.getItem('isLogin') || 'error';
-
-
-            // try {
-            //     //判断用户是否勾选了记住账号信息
-            //     if(data.remember==='yes'){
-            //         console.log('需要存储登录信息')
-            //         localStorage.username = data.username;
-            //         localStorage.jobnumber = data.number;
-            //         localStorage.password = data.password;
-            //         localStorage.remember = data.remember;
-            //     }else{
-            //         console.log('不需要存储登录信息')
-            //         //清空 localStorage 的值
-            //         localStorage.removeItem('username');
-            //         localStorage.removeItem('jobnumber');
-            //         localStorage.removeItem('password');
-            //         localStorage.removeItem('remember');
-            //     }
-            // } catch (err) {
-            //     console.log(err);
-            // }
         },
         //退出登录
         logout(state,data){
@@ -65,5 +46,9 @@ export default new Vuex.Store({
                 }
             }
         }
+        // ,
+        // refreshChange(state, num){
+        //     state.refresh = num
+        // }
     }
 })

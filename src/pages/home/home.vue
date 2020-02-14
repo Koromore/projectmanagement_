@@ -90,6 +90,8 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
+
+    sessionStorage.setItem("refresh", 0);
   }
 }
 </script>
