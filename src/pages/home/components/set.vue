@@ -18,14 +18,13 @@
               <el-input placeholder="请输入内容" v-model="new_name" clearable></el-input>
             </el-col>
             <el-col :span="6" class="title title2">业务</el-col>
-            <el-col :span="18" :offset="6">
+            <el-col :span="13" :offset="6">
               <el-checkbox-group v-model="checkList">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="复选框 D"></el-checkbox>
-                <el-checkbox label="复选框 E"></el-checkbox>
-                <el-checkbox label="复选框 F"></el-checkbox>
+                <el-checkbox label="官网"></el-checkbox>
+                <el-checkbox label="官微"></el-checkbox>
+                <el-checkbox label="数字营销"></el-checkbox>
+                <el-checkbox label="口碑"></el-checkbox>
+                <el-checkbox label="APP"></el-checkbox>
               </el-checkbox-group>
             </el-col>
           </el-col>
@@ -36,34 +35,42 @@
         </el-row>
       </el-drawer>
       <!-- 业务类型 -->
-      <el-col :span="24" class="table table1" v-if="table_show">
-        <el-col :span="24" class="title">
-          <el-col :span="5">名称</el-col>
-          <el-col :span="5">操作</el-col>
-        </el-col>
-        <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
-          <el-col :span="5">{{item.business}}</el-col>
-          <el-col :span="5">
-            <el-button size="small" type="info" @click="business_change(item.id)">修改</el-button>
-            <el-button size="small" type="primary" @click="business_del(item.id)">删除</el-button>
-          </el-col>
-        </el-col>
+      <el-col :span="24" class="table table1" v-show="table_show">
+        <el-table
+          ref="filterTable"
+          :data="tableData1"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
+        >
+          <el-table-column prop="business" label="名称"></el-table-column>
+
+          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+            <template slot-scope="scope">
+              <el-button size="small" type="info" @click="business_change(scope.row.id)">修改</el-button>
+              <el-button size="small" type="primary" @click="business_del(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-col>
       <!-- 客户 -->
-      <el-col :span="24" class="table table2" v-if="!table_show">
-        <el-col :span="24" class="title">
-          <el-col :span="5">客户</el-col>
-          <el-col :span="9">业务</el-col>
-          <el-col :span="5">操作</el-col>
-        </el-col>
-        <el-col :span="24" class="list" v-for="item in tableData2" :key="item.index">
-          <el-col :span="5">{{item.client}}</el-col>
-          <el-col :span="9">{{item.business}}</el-col>
-          <el-col :span="5">
-            <el-button size="small" type="info" @click="client_change(item.id)">修改</el-button>
-            <el-button size="small" type="primary" @click="client_del(item.id)">删除</el-button>
-          </el-col>
-        </el-col>
+      <el-col :span="24" class="table table2" v-show="!table_show">
+        <el-table
+          ref="filterTable"
+          :data="tableData2"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
+        >
+          <el-table-column prop="client" label="客户"></el-table-column>
+          <el-table-column prop="business" label="业务"></el-table-column>
+          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+            <template slot-scope="scope">
+              <el-button size="small" type="info" @click="client_change(scope.row.id)">修改</el-button>
+              <el-button size="small" type="primary" @click="client_del(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-col>
     </el-row>
   </div>
@@ -94,7 +101,7 @@ export default {
       // 客户列表选择结果
       client: '广汽本田',
       // 1审核中 2执行中 3已完成 4延期
-      tableData: [
+      tableData1: [
         {
           id: 1,
           business: '网站',
@@ -252,8 +259,8 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
-.set .table .list:hover{
-  background: #F7F7F7;
+.set .table .list:hover {
+  background: #f7f7f7;
 }
 .set .table .title {
   font-weight: bold;

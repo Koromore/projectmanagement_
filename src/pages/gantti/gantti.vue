@@ -100,7 +100,7 @@ export default {
           gunter_id: 1,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '延期',
             state: 4,
             start_time: '2018-12-20',
@@ -115,7 +115,7 @@ export default {
           gunter_id: 2,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '审核中',
             state: 1,
             start_time: '2018-12-19',
@@ -129,7 +129,7 @@ export default {
           gunter_id: 3,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '执行中',
             state: 2,
             start_time: '2018-12-19',
@@ -143,7 +143,7 @@ export default {
           gunter_id: 4,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '已完成',
             state: 3,
             start_time: '2018-12-19',
@@ -157,7 +157,7 @@ export default {
           gunter_id: 5,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '已完成',
             state: 3,
             start_time: '2018-12-19',
@@ -171,7 +171,7 @@ export default {
           gunter_id: 6,
           params: {
             title: '网络营销',
-            execute_pop: '张起灵',
+            execute_pop: '张三',
             state_text: '已完成',
             state: 3,
             start_time: '2018-12-19',
@@ -240,7 +240,7 @@ export default {
     },
     // 返回上一页
     return_() {
-			this.$router.push({ path: '/home', query: { id: 2 } })
+			this.$router.go(-1)
 			sessionStorage.setItem("refresh", 0);
     },
     refresh() {

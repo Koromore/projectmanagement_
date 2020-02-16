@@ -70,14 +70,14 @@
           </el-col>
           <!-- </el-col> -->
 
-          <el-col :span="12" :offset="6" class="batton">
+          <el-col :span="14" :offset="5" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
         </el-row>
       </el-drawer>
       <el-drawer title="历史记录" :visible.sync="drawer2" :with-header="false">
-      <el-row class="records">
+        <el-row class="records">
           <el-col :span="23" :offset="1" class="title">历史记录</el-col>
           <el-col :span="23" :offset="1" class="records_list" :style="style1">
             <el-scrollbar>
@@ -99,19 +99,17 @@
         </el-row>
       </el-drawer>
       <el-col :span="24" class="table table1" v-if="table_show">
-        <el-col :span="24" class="title">
+        <!-- <el-col :span="24" class="title">
           <el-col :span="2">部门</el-col>
           <el-col :span="2">任务</el-col>
           <el-col :span="2">状态</el-col>
           <el-col :span="2">执行人</el-col>
           <el-col :span="2">
             预计时间
-            <!-- <img src="static/images/project/down.png" width="24" alt srcset /> -->
             <i class="el-icon-sort"></i>
           </el-col>
           <el-col :span="2">
             完成时间
-            <!-- <img src="static/images/project/down.png" width="24" alt srcset /> -->
             <i class="el-icon-sort"></i>
           </el-col>
           <el-col :span="2">下达人</el-col>
@@ -137,7 +135,64 @@
             <el-button size="small" type="info" @click="feedback(item.id)">反馈</el-button>
             <el-button size="small" type="primary" @click="achieve(item.id)">完成</el-button>
           </el-col>
-        </el-col>
+        </el-col>-->
+        <el-table
+          ref="filterTable"
+          :data="tableData"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
+        >
+          <el-table-column prop="department" label="部门"></el-table-column>
+          <el-table-column prop="task" label="任务"></el-table-column>
+          <el-table-column prop="state_text" label="状态">
+            <div
+              slot-scope="scope"
+              class="cell"
+              :class="{'state_color1': scope.row.state == 1,
+                  'state_color2': scope.row.state == 2,
+                  'state_color3': scope.row.state == 3,
+                  'state_color4': scope.row.state == 4}"
+            >{{scope.row.state_text}}</div>
+          </el-table-column>
+          <el-table-column prop="carryPeople" label="执行人"></el-table-column>
+          <el-table-column prop="presetTime" label="预计时间">
+            <template slot="header">
+              预计时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
+          <el-table-column prop="finishTime" label="完成时间">
+            <template slot="header">
+              完成时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
+          <el-table-column prop="assignPeople" label="下达人"></el-table-column>
+          <el-table-column prop="result" label="成果"></el-table-column>
+          <el-table-column prop="操作" label="操作" filter-placement="bottom-end">
+            <template slot-scope="scope">
+              <el-button
+                size="small"
+                v-if="scope.row.state == 4 "
+                type="info"
+                @click="redact(scope.row.id)"
+              >忽略</el-button>
+              <el-button
+                size="small"
+                v-if="scope.row.state == 1"
+                type="info"
+                @click="feedback(scope.row.id)"
+              >反馈</el-button>
+              <el-button
+                size="small"
+                v-if="scope.row.state != 3"
+                type="primary"
+                @click="achieve(scope.row.id)"
+              >完成</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-col>
       <!--  -->
       <el-col :span="24" class="table table2" v-if="!table_show">
@@ -186,6 +241,21 @@
           <el-col :span="24" class="span">附件</el-col>
         </el-col>
       </el-col>
+      <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
+        <el-row class="feedback">
+          <el-col :span="24">
+            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="24">
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
+            </el-col>
+          </el-col>
+          <el-col :span="14" :offset="5" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
     </el-row>
   </div>
 </template>
@@ -198,6 +268,7 @@ export default {
       project_style: '',
       drawer1: false,
       drawer2: false,
+      drawer3: false,
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
@@ -325,7 +396,9 @@ export default {
           file_url: ''
         }
       ],
-      style1: ''
+      style1: '',
+      // 反馈信息
+      result: ''
     }
   },
   // 方法
@@ -345,14 +418,18 @@ export default {
         ;(this.tabs_activity = 2), (this.table_show = false)
       }
     },
+    redact(e) {
+      console.log('忽略' + e)
+    },
     feedback(e) {
       console.log('反馈' + e)
+      this.drawer3 = true
     },
     achieve(e) {
       console.log('完成' + e)
     },
     gantt(e) {
-      this.$router.push({ path: '/gantti', query: { id: 2 }})
+      this.$router.push({ path: '/gantti', query: { id: 2 } })
     }
   },
   // 钩子函数
@@ -390,13 +467,13 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.project_details .detail_list{
+.project_details .detail_list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-around;
 }
-.project_details .detail_list img{
+.project_details .detail_list img {
   width: 24px;
 }
 .el-button + .el-button {
@@ -540,7 +617,7 @@ export default {
   justify-content: space-between;
 }
 .project_details .add_box .batton button {
-  width: 128px;
+  width: 36%;
 }
 .project_details >>> .el-drawer__body {
   height: 100%;
@@ -568,5 +645,26 @@ export default {
 .project_details .records .el-card:hover {
   background: #eee;
 }
-
+.project_details .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.project_details .batton button {
+  width: 36%;
+}
+.feedback {
+  height: 100%;
+  padding: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-content: space-between;
+}
+.feedback .title{
+  font-size: 18px;
+  margin-bottom: 13px;
+}
 </style>

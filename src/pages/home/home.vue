@@ -2,25 +2,28 @@
   <div class="home">
     <Header></Header>
     <el-container :style="home_style">
-      <el-aside width="360px" style="background-color: rgb(238, 241, 246)">
+      <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
         <!-- 左菜单栏 -->
-        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1)">
+        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')">
           <i class="el-icon-s-home"></i>
           统计
         </div>
-        <div :class="[show_acti=='2' || show_acti=='6'?'title act':'title']" @click="change_show(2)">
+        <div
+          :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
+          @click="change_show(2,'project')"
+        >
           <i class="el-icon-tickets"></i>
           项目管理
         </div>
-        <div :class="[show_acti=='3'?'title act':'title']" @click="change_show(3)">
+        <div :class="[show_acti=='3'?'title act':'title']" @click="change_show(3,'task')">
           <i class="el-icon-finished"></i>
           任务管理
         </div>
-        <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4)">
+        <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4,'document')">
           <i class="el-icon-folder-opened"></i>
           文档管理
         </div>
-        <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5)">
+        <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5,'set')">
           <i class="el-icon-setting"></i>
           设置
         </div>
@@ -29,15 +32,8 @@
       <el-container>
         <!-- 内容 -->
         <el-main>
-          <Statistics v-if="show_acti == 1"></Statistics>
-          <Project v-if="show_acti == 2" @on-close="beClose"></Project>
-          
-          <Task v-if="show_acti == 3"></Task>
-          <Document v-if="show_acti == 4"></Document>
-          <Set v-if="show_acti == 5"></Set>
-          <ProjectDetails v-if="show_acti == 6"></ProjectDetails>
+          <router-view></router-view>
         </el-main>
-
       </el-container>
     </el-container>
   </div>
@@ -65,7 +61,7 @@ export default {
   data() {
     return {
       home_style: '',
-      show_acti: 1
+      show_acti: 4
     }
   },
   // 方法
@@ -78,11 +74,17 @@ export default {
       this.home_style = 'height:' + height + 'px;'
     },
     // 页面切换
-    change_show(e) {
+    change_show(e, url) {
       this.show_acti = e
+      // this.$router.push({ path: '/home/components/' + url })
+      if (this.$route.path == '/home/components/' + url) {
+        return ''
+      } else {
+        this.$router.push({ path: '/home/components/' + url })
+      }
     },
     // 项目详情页面显示
-    beClose(e){
+    beClose(e) {
       console.log(e)
       this.show_acti = 6
     }
@@ -91,7 +93,7 @@ export default {
   mounted() {
     this.widthheight()
 
-    sessionStorage.setItem("refresh", 0);
+    sessionStorage.setItem('refresh', 0)
   }
 }
 </script>
@@ -104,7 +106,7 @@ export default {
 }
 .el-aside .title {
   font-family: 'SourceHanSansSC';
-  font-size: 20px;
+  font-size: 16px;
   color: rgb(16, 16, 16);
   padding: 0 20px;
   cursor: pointer;
@@ -119,15 +121,18 @@ export default {
   white-space: nowrap;
   list-style: none;
 }
-.el-aside .title:hover{
+.el-aside .title:hover {
   background: #fff;
 }
-.el-aside .title.act{
+.el-aside .title.act {
   background: #fff;
 }
 .el-aside .title i {
   width: 24px;
-  font-size: 24px;
+  font-size: 18px;
   margin-right: 5px;
+}
+.el-main {
+  min-width: 1472px;
 }
 </style>

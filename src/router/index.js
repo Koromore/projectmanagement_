@@ -5,14 +5,12 @@ import store from '../store/index'
 import Login from '@/pages/login/login'
 import Home from '@/pages/home/home'
 import Gantti from '@/pages/gantti/gantti'
-import ProjectDetails from '@/components/project_details'
-
 
 Vue.prototype.$axios = axios;
 Vue.use(Router)
 
 const router = new Router({
-	// mode: 'history',
+	mode: 'hash',
 	routes: [
 		{
 			path: '/',
@@ -25,9 +23,61 @@ const router = new Router({
 			path: '/home',
 			name: 'home',
 			component: Home,
+			redirect: '/home/components/statistics',
+			component: resolve => require(['@/pages/home/home'], resolve),
 			meta: {
 				requireAuth: true,
-			}
+			},
+			children: [
+				{
+					path: '/home/components/statistics',
+					name: 'statistics',
+					component: resolve => require(['@/pages/home/components/statistics'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				},
+				{
+					path: '/home/components/project',
+					name: 'project',
+					component: resolve => require(['@/pages/home/components/project'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				},
+				{
+					path: '/home/components/task',
+					name: 'task',
+					component: resolve => require(['@/pages/home/components/task'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				},
+				{
+					path: '/home/components/document',
+					name: 'document',
+					component: resolve => require(['@/pages/home/components/document'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				},
+				{
+					path: '/home/components/set',
+					name: 'set',
+					component: resolve => require(['@/pages/home/components/set'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				},
+				{
+					path: '/home/components/project_details',
+					name: 'project_details',
+					component: resolve => require(['@/pages/home/components/project_details'], resolve),
+					meta: {
+						requireAuth: true,
+					}
+				}
+			]
 		},
 		{
 			path: '/login',
@@ -43,11 +93,6 @@ const router = new Router({
 			path: '/gantti',
 			name: "gantti",
 			component: Gantti
-		},
-		{
-			path: '/project_details',
-			name: "project_details",
-			component: ProjectDetails
 		}
 	]
 })

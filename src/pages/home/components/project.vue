@@ -79,12 +79,13 @@
         <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-if="table_show">
+      <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
           ref="filterTable"
           :data="tableData1"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称"></el-table-column>
           <el-table-column prop="state_text" label="状态">
@@ -98,8 +99,18 @@
             >{{scope.row.state_text}}</div>
           </el-table-column>
           <el-table-column prop="num" label="总任务数/待完成"></el-table-column>
-          <el-table-column prop="presetTime" label="预计时间" :render-header="renderHeader"></el-table-column>
-          <el-table-column prop="finishTime" label="完成时间" :render-header="renderHeader"></el-table-column>
+          <el-table-column prop="presetTime" label="预计时间">
+            <template slot="header">
+              预计时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
+          <el-table-column prop="finishTime" label="完成时间">
+            <template slot="header">
+              完成时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
@@ -132,12 +143,14 @@
         </el-table>
       </el-col>
       <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-if="!table_show">
+      <el-col :span="24" class="table table2" v-show="!table_show">
         <el-table
           ref="filterTable"
-          :data="tableData1"
+          :data="tableData2"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
+          @cell-click="project_details"
         >
           <el-table-column prop="name" label="名称"></el-table-column>
           <el-table-column prop="state_text" label="状态">
@@ -150,11 +163,36 @@
                   'state_color4': scope.row.state == 4}"
             >{{scope.row.state_text}}</div>
           </el-table-column>
-          <el-table-column prop="presetTime" label="预计时间" :render-header="renderHeader"></el-table-column>
-          <el-table-column prop="finishTime" label="完成时间" :render-header="renderHeader"></el-table-column>
+          <el-table-column prop="presetTime" label="预计时间">
+            <template slot="header">
+              预计时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
+          <el-table-column prop="finishTime" label="完成时间">
+            <template slot="header">
+              完成时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
           <el-table-column prop="assignPeople" label="下达人" filter-placement="bottom-end"></el-table-column>
         </el-table>
       </el-col>
+      <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer2" :with-header="false">
+        <el-row class="feedback">
+          <el-col :span="24">
+            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="24">
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
+            </el-col>
+          </el-col>
+          <el-col :span="14" :offset="5" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
     </el-row>
   </div>
 </template>
@@ -163,6 +201,7 @@ export default {
   name: 'project',
   data() {
     return {
+      drawer2: false,
       // plain: false,
       autofocus: true,
       loginState: true, // 避免多次点击
@@ -294,7 +333,9 @@ export default {
       // 项目类型1选择
       tab1_act: 1,
       // 项目类型2选择
-      tab2_act: 1
+      tab2_act: 1,
+      // 反馈内容
+      result: ''
     }
   },
   // 方法
@@ -338,12 +379,9 @@ export default {
       }
     },
     // 项目详情
-    project_details(e) {
-      this.$emit('on-close', e)
-      // this.$router.push({ path: 'project_details', query: { id: e }})
-    },
     feedback(e) {
       console.log('反馈' + e)
+      this.drawer2 = true
     },
     redact(e) {
       console.log('编辑' + e)
@@ -367,16 +405,16 @@ export default {
       const property = column['property']
       return row[property] === value
     },
-    // 表头图标
-    renderHeader(h, { column }) {
-      // h即为cerateElement的简写，具体可看vue官方文档
-      return h('div', [
-        h('span', column.label),
-        h('i', {
-          class: 'el-icon-sort',
-          style: 'margin-left:5px;font-size: 18px;'
-        })
-      ])
+    // 表格点击事件项目详情
+    project_details(row, column, event, cell) {
+      // console.log(row)
+      // console.log(column)
+      // console.log(event)
+      // console.log(cell)
+      if (column.property == 'name') {
+        // console.log("123")
+        this.$router.push({ path: '/home/components/project_details', query: { id: row.id }})
+      }
     }
   },
   // 钩子函数
@@ -511,5 +549,27 @@ export default {
 }
 .state_color4 {
   color: rgb(255, 0, 0);
+}
+.project .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.project .batton button {
+  width: 36%;
+}
+.feedback {
+  height: 100%;
+  padding: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-content: space-between;
+}
+.feedback .title{
+  font-size: 18px;
+  margin-bottom: 13px;
 }
 </style>

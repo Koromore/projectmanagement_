@@ -71,56 +71,47 @@
       </el-col>
       <!--  -->
       <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-if="table_show">
-        <el-col :span="24" class="title">
-          <el-col :span="3">文档</el-col>
-          <el-col :span="3">客户</el-col>
-          <el-col :span="3">
-            项目
-            <i class="el-icon-caret-bottom"></i>
-          </el-col>
-          <el-col :span="3">
-            任务
-            <i class="el-icon-caret-bottom"></i>
-          </el-col>
-          <el-col :span="3">
-            更新时间
-            <i class="el-icon-sort"></i>
-          </el-col>
-          <el-col :span="5">更新人</el-col>
-        </el-col>
-        <el-col
-          :span="24"
-          class="list"
-          v-for="item in tableData"
-          :key="item.index"
-          @click.native="drawer = true"
+      <el-col :span="24" class="table table1">
+        <el-table
+          ref="filterTable"
+          :data="tableData"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{height: '57px'}"
         >
-          <el-col :span="3">
-            <img src="static/images/document/pt.png" width="32" alt srcset />
-            {{item.file_name}}
-            <img
-              class="operation"
-              src="static/images/document/change.png"
-              width="18"
-              alt
-              srcset
-            />
-          </el-col>
-          <el-col :span="3">{{item.client}}</el-col>
-          <el-col :span="3">{{item.project}}</el-col>
-          <el-col :span="3">{{item.task}}</el-col>
-          <el-col :span="3">{{item.update_time}}</el-col>
-          <el-col :span="5">
-            <span>{{item.update_people}}</span>
-            <span class="operation">
-              <img src="static/images/document/up.png" alt srcset />
-              <img src="static/images/document/down.png" alt srcset />
-              <img src="static/images/document/link.png" alt srcset />
-              <img src="static/images/document/time.png" alt srcset />
-            </span>
-          </el-col>
-        </el-col>
+          <el-table-column prop="file_name" label="文档">
+            <template slot-scope="scope">
+              <img src="static/images/document/pt.png" width="32" alt srcset />
+              {{scope.row.file_name}}
+              <span class="operation"><i class="el-icon-edit"></i></span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="client" label="客户"></el-table-column>
+          <el-table-column
+            prop="project"
+            label="项目"
+            :filters="[{text: '皓影赠礼1', value: '皓影赠礼1'}, {text: '皓影赠礼2', value: '皓影赠礼2'}, {text: '皓影赠礼3', value: '皓影赠礼3'}, {text: '皓影赠礼4', value: '皓影赠礼4'}, {text: '皓影赠礼5', value: '皓影赠礼5'}, {text: '皓影赠礼6', value: '皓影赠礼6'}]"
+            :filter-method="filterProject"
+          ></el-table-column>
+          <el-table-column prop="task" label="任务"></el-table-column>
+          <el-table-column prop="update_time" label="更新时间">
+            <template slot="header">
+              更新时间
+              <i class="el-icon-sort"></i>
+            </template>
+          </el-table-column>
+          <el-table-column prop="update_people" label="更新人">
+            <template slot-scope="scope">
+              {{scope.row.update_people}}
+              <span class="operation">
+                <i class="el-icon-upload2"></i>
+                <i class="el-icon-download"></i>
+                <i class="el-icon-share"></i>
+                <i class="el-icon-time"></i>
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
       </el-col>
       <el-drawer title="历史文档" :visible.sync="drawer" :with-header="false">
         <el-row class="records_document">
@@ -187,7 +178,7 @@ export default {
           file_name: '文档',
           file_format: 'ppt',
           client: '广汽本田',
-          project: '皓影赠礼',
+          project: '皓影赠礼1',
           task: '产品原型',
           update_time: '20-01-21',
           update_people: '张三'
@@ -197,8 +188,8 @@ export default {
           file_name: '文档',
           file_format: 'ppt',
           client: '广汽本田',
-          project: '皓影赠礼',
-          task: '产品原型',
+          project: '皓影赠礼2',
+          task: '后台开发',
           update_time: '20-01-21',
           update_people: '张三'
         },
@@ -207,8 +198,8 @@ export default {
           file_name: '文档',
           file_format: 'ppt',
           client: '广汽本田',
-          project: '皓影赠礼',
-          task: '产品原型',
+          project: '皓影赠礼3',
+          task: '策划方案',
           update_time: '20-01-21',
           update_people: '张三'
         },
@@ -216,9 +207,9 @@ export default {
           id: 4,
           file_name: '文档',
           file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼',
-          task: '产品原型',
+          client: '丰田',
+          project: '皓影赠礼4',
+          task: '内容撰写',
           update_time: '20-01-21',
           update_people: '张三'
         },
@@ -226,9 +217,9 @@ export default {
           id: 5,
           file_name: '文档',
           file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼',
-          task: '产品原型',
+          client: '丰田',
+          project: '皓影赠礼5',
+          task: '内容撰写',
           update_time: '20-01-21',
           update_people: '张三'
         },
@@ -236,9 +227,9 @@ export default {
           id: 6,
           file_name: '文档',
           file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼',
-          task: '产品原型',
+          client: '丰田',
+          project: '皓影赠礼6',
+          task: '内容撰写',
           update_time: '20-01-21',
           update_people: '张三'
         }
@@ -322,6 +313,10 @@ export default {
       } else if (e == 2) {
         this.tab2_act = 2
       }
+    },
+    // 筛选所属项目
+    filterProject(value, row) {
+      return row.project === value
     }
   },
   // 钩子函数
@@ -384,69 +379,17 @@ export default {
 .el-button + .el-button {
   margin: 0;
 }
-.document .tabs {
-  font-weight: 700;
-  font-size: 20px;
-  box-sizing: border-box;
-  padding: 13px 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
+.document .table{
+  margin-top: 24px;
 }
-.document .tabs div {
-  height: 36px;
-  line-height: 36px;
-  color: rgba(164, 167, 170, 1);
-  box-sizing: border-box;
-  padding-bottom: 13px;
-  cursor: pointer;
-}
-.document .tabs div:nth-of-type(2) {
-  margin-left: 32px;
-}
-.document .tabs .act {
-  border-bottom: 2px solid black;
-  color: black;
-}
-.document .table .title,
-.document .table .list {
-  width: 100%;
-  height: 48px;
-  font-size: 14px;
-  box-sizing: border-box;
-  padding-left: 36px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.document .table .list:hover {
-  background: #f7f7f7;
-}
-.document .table .list .operation {
-  display: none;
-}
-.document .table .list:hover .operation {
-  display: inline;
-}
-.document .table .list .operation img {
-  width: 18px;
-  margin-left: 9px;
-}
-.document .table .title {
-  font-weight: bold;
-  background: rgb(236, 235, 235);
-}
-.document .table .title .el-icon-sort {
+.document .table .operation i{
   font-size: 18px;
 }
-.document .table .title div {
-  height: 48px;
-  line-height: 48px;
+.document .table .el-table__row .operation{
+  display: none;
 }
-.document .table .list {
-  border-bottom: 1px solid rgb(187, 187, 187);
+.document .table .el-table__row:hover .operation{
+  display: inline;
 }
 .document >>> .el-drawer__body {
   height: 100%;

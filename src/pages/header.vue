@@ -5,12 +5,14 @@
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
         <div :span="3" class="header-right">
           <div class="add_du" @click="drawer = true">
-            <img src="static/images/hander/add_du.png" width="32" alt srcset />
+            <!-- <img src="static/images/hander/add_du.png" width="32" alt srcset /> -->
+            <i class="el-icon-folder-add"></i>
             创建
           </div>
           <el-col :span="8">
             <el-badge :value="3" class="item">
-              <img src="static/images/hander/news.png" alt srcset />
+              <!-- <img src="static/images/hander/news.png" alt srcset /> -->
+              <i class="el-icon-bell"></i>
             </el-badge>
             <!-- <div>消息</div> -->
             <el-dropdown trigger="hover">
@@ -67,23 +69,10 @@
             v-model="new_task.demand"
           ></el-input>
         </el-col>
-        <el-col :span="18" :offset="6">
+        <el-col :span="18" :offset="3">
           <el-radio v-model="radio2" label="1">项目经理</el-radio>
           <el-radio v-model="radio2" label="2">执行部门</el-radio>
         </el-col>
-        <!-- <el-col :span="24">
-          <el-col :span="6" class="title title2">执行部门</el-col>
-          <el-col :span="18" :offset="6">
-            <el-checkbox-group v-model="new_task.department">
-              <el-checkbox label="复选框 A"></el-checkbox>
-              <el-checkbox label="复选框 B"></el-checkbox>
-              <el-checkbox label="复选框 C"></el-checkbox>
-              <el-checkbox label="复选框 D"></el-checkbox>
-              <el-checkbox label="复选框 E"></el-checkbox>
-              <el-checkbox label="复选框 F"></el-checkbox>
-            </el-checkbox-group>
-          </el-col>
-        </el-col>-->
         <el-col :span="16" :offset="3">
           <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
         </el-col>
@@ -109,15 +98,15 @@
           ></el-input>
         </el-col>
 
-        <el-col :span="13" :offset="3">
+        <el-col :span="9" :offset="3">
           <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
         </el-col>
-        <el-col :span="6">
-          <el-button type="primary" @click="showInput">添加</el-button>
+        <el-col :span="6" :offset="1">
+          <el-button size="small" type="primary" @click="showInput">添加</el-button>
         </el-col>
-        <el-col :span="12" :offset="6" class="batton">
-          <el-button type="info">取消</el-button>
-          <el-button type="primary">提交</el-button>
+        <el-col :span="14" :offset="5" class="batton">
+          <el-button size="small" type="info">取消</el-button>
+          <el-button size="small" type="primary">提交</el-button>
         </el-col>
       </el-row>
     </el-drawer>
@@ -215,6 +204,13 @@ export default {
   color: white;
   font-size: 16px;
 }
+.header-right .add_du i{
+  font-size: 18px;
+}
+.header-right .el-icon-bell{
+  color: white;
+  font-size: 24px;
+}
 .topheader .el-dropdown {
   font-size: 15px;
 }
@@ -239,7 +235,7 @@ export default {
   align-items: center;
 }
 .topheader .el-header .logo {
-  height: 72px;
+  height: 49px;
 }
 .el-badge__content {
   border: 0;
@@ -268,7 +264,7 @@ export default {
   justify-content: space-between;
 }
 .topheader .add_box .batton button {
-  width: 128px;
+  width: 36%;
 }
 .topheader .add_box .know_pop span{
   margin-left: 0;
