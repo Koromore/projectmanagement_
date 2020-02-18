@@ -4,7 +4,7 @@
       <el-header style="height: 75px;">
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
         <div :span="3" class="header-right">
-          <div class="add_du" @click="drawer = true">
+          <div class="add_du" @click="add_box">
             <!-- <img src="static/images/hander/add_du.png" width="32" alt srcset /> -->
             <i class="el-icon-folder-add"></i>
             创建
@@ -38,78 +38,7 @@
         </div>
       </el-header>
     </el-row>
-    <!-- 抽屉 -->
-    <el-drawer title="添加任务" :visible.sync="drawer" :with-header="false">
-      <el-row class="add_box">
-        <el-col :span="24" class="title">创建项目</el-col>
-        <el-col :span="6" class="title title1">名称</el-col>
-        <el-col :span="13">
-          <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
-        </el-col>
-        <el-col :span="6" class="title title1">分类</el-col>
-        <el-col :span="13">
-          <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
-        </el-col>
-        <el-col :span="18" :offset="6">
-          <el-radio v-model="radio1" label="1">专项</el-radio>
-          <el-radio v-model="radio1" label="2">日常</el-radio>
-        </el-col>
-
-        <el-col :span="6" class="title title1">预计时间</el-col>
-        <el-col :span="13">
-          <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
-        </el-col>
-
-        <el-col :span="6" class="title title1">需求</el-col>
-        <el-col :span="13">
-          <el-input
-            type="textarea"
-            :autosize="{ minRows: 6, maxRows: 8}"
-            placeholder="请输入内容"
-            v-model="new_task.demand"
-          ></el-input>
-        </el-col>
-        <el-col :span="18" :offset="3">
-          <el-radio v-model="radio2" label="1">项目经理</el-radio>
-          <el-radio v-model="radio2" label="2">执行部门</el-radio>
-        </el-col>
-        <el-col :span="16" :offset="3">
-          <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
-        </el-col>
-        <el-col :span="24">
-          <el-col :span="6" class="title title1">知晓人</el-col>
-        </el-col>
-        <el-col :span="18" :offset="3" class="know_pop">
-          <el-tag
-            :key="tag"
-            v-for="tag in dynamicTags"
-            closable
-            :disable-transitions="false"
-            @close="handleClose(tag)"
-          >{{tag}}</el-tag>
-          <el-input
-            class="input-new-tag"
-            v-if="inputVisible"
-            v-model="inputValue"
-            ref="saveTagInput"
-            size="small"
-            @keyup.enter.native="handleInputConfirm"
-            @blur="handleInputConfirm"
-          ></el-input>
-        </el-col>
-
-        <el-col :span="9" :offset="3">
-          <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
-        </el-col>
-        <el-col :span="6" :offset="1">
-          <el-button size="small" type="primary" @click="showInput">添加</el-button>
-        </el-col>
-        <el-col :span="14" :offset="5" class="batton">
-          <el-button size="small" type="info">取消</el-button>
-          <el-button size="small" type="primary">提交</el-button>
-        </el-col>
-      </el-row>
-    </el-drawer>
+    
   </div>
 </template>
 <script>
@@ -117,22 +46,8 @@ export default {
   name: 'topheader',
   data() {
     return {
-      drawer: false,
-      // 新增
-      new_task: {
-        parent_task: '',
-        new_name: '',
-        department: [],
-        presetTime: '',
-        task_type: '',
-        demand: ''
-      },
-      radio1: '1',
-      radio2: '2',
-      dynamicTags: ['标签一', '标签二', '标签三', '标签四'],
-      inputVisible: false,
-      inputValue: '',
-      add_list: ''
+      drawer: true
+      
     }
   },
   methods: {
@@ -145,34 +60,11 @@ export default {
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
     },
-    // 添加标签
-    showInput() {
-      let list = this.dynamicTags
-      let add_list = this.add_list
-      let cf = true
-      if (add_list) {
-        for (let i = 0; i < list.length; i++) {
-          const element = list[i]
-          if (element == add_list) {
-            console.log('请勿重复添加')
-            cf = false
-          }
-        }
-        if (cf) {
-          list.push(add_list)
-          this.add_list = ''
-        }
-      }
-    },
-
-    handleInputConfirm() {
-      let inputValue = this.inputValue
-      if (inputValue) {
-        this.dynamicTags.push(inputValue)
-      }
-      this.inputVisible = false
-      this.inputValue = ''
+    // 向父组件传值打开抽屉
+    add_box(){
+      this.$emit('func',this.drawer)
     }
+    
   }
 }
 </script>
@@ -180,6 +72,8 @@ export default {
 .topheader {
   padding-bottom: 75px;
   background-color: rgb(13, 13, 13);
+  position: fixed;
+  top: 0;
 }
 .header-left {
   height: 75px;
@@ -241,44 +135,7 @@ export default {
   border: 0;
 }
 
-.topheader .add_box {
-  height: 100%;
-  box-sizing: border-box;
-  padding: 36px 0;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  align-content: space-between;
-}
-.topheader .add_box .title {
-  text-align: center;
-}
-/* .topheader .add_box .new_name {
-  height: 40px;
-  line-height: 40px;
-} */
-.topheader .add_box .batton {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.topheader .add_box .batton button {
-  width: 36%;
-}
-.topheader .add_box .know_pop span{
-  margin-left: 0;
-  margin-right: 9px;
-}
-.topheader >>> .el-drawer__body {
-  height: 100%;
-}
-.topheader >>> .el-scrollbar {
-  height: 100%;
-}
-.topheader >>> .el-scrollbar__wrap {
-  overflow-x: hidden;
-}
+
 .topheader .records_box {
   height: 100%;
 }

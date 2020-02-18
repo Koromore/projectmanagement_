@@ -8,7 +8,7 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="add">
-        <el-button size="small" type="primary" @click="drawer = true">新增</el-button>
+        <el-button size="small" type="primary" @click="drawer_show()">新增</el-button>
       </el-col>
       <el-drawer title="新增框" :visible.sync="drawer" :with-header="false">
         <el-row class="add_box">
@@ -47,8 +47,10 @@
 
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-button size="small" type="info" @click="business_change(scope.row.id)">修改</el-button>
-              <el-button size="small" type="primary" @click="business_del(scope.row.id)">删除</el-button>
+              <el-button size="small" type="info" @click="drawer_show()">修改</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="business_del(scope.row.id)">
+                <el-button size="small" type="primary" slot="reference">删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -66,8 +68,10 @@
           <el-table-column prop="business" label="业务"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-button size="small" type="info" @click="client_change(scope.row.id)">修改</el-button>
-              <el-button size="small" type="primary" @click="client_del(scope.row.id)">删除</el-button>
+              <el-button size="small" type="info" @click="drawer_show(scope.row.id)">修改</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="client_del(scope.row.id)">
+                <el-button size="small" type="primary" slot="reference">删除</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -169,6 +173,9 @@ export default {
       let winHeight = window.innerHeight
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
+    },
+    drawer_show() {
+      this.drawer = true
     },
     // 选项卡
     table_tab(e) {

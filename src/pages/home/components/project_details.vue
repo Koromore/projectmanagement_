@@ -20,15 +20,26 @@
         >项目需求</el-col>
       </el-col>
       <el-col :span="4" :offset="16" class="detail_list">
-        <img @click="drawer1 = true" src="static/images/project_detail/add.png" alt srcset />
-        <img @click="gantt(1)" src="static/images/project_detail/gantt.png" alt srcset />
-        <img @click="drawer2 = true" src="static/images/project_detail/history.png" alt srcset />
-        <img src="static/images/project_detail/sousuo.png" alt srcset />
+        <el-col :span="24" v-show="!sousuo_show">
+          <img @click="drawer1 = true" src="static/images/project_detail/add.png" alt srcset />
+          <img @click="gantt(1)" src="static/images/project_detail/gantt.png" alt srcset />
+          <img @click="drawer2 = true" src="static/images/project_detail/history.png" alt srcset />
+          <img @click="sousuoShow" src="static/images/project_detail/sousuo.png" alt srcset />
+        </el-col>
+        <el-col :span="24" class="sousuo" v-show="sousuo_show">
+          <el-col :span="20">
+            <el-input placeholder="请输入内容" v-model="sousuo_input" size="small">
+              <i slot="suffix" class="el-input__icon el-icon-search" @click="sousuo"></i>
+            </el-input>
+          </el-col>
+          <el-col :span="3" :offset="1">
+            <i class="el-icon-circle-close" @click="sousuoShow"></i>
+          </el-col>
+        </el-col>
       </el-col>
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer1" :with-header="false">
         <el-row class="add_box">
-          <!-- <el-col :span="24" class="new_name"> -->
           <el-col :span="6" class="title title1">父任务</el-col>
           <el-col :span="13">
             <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
@@ -99,43 +110,6 @@
         </el-row>
       </el-drawer>
       <el-col :span="24" class="table table1" v-if="table_show">
-        <!-- <el-col :span="24" class="title">
-          <el-col :span="2">部门</el-col>
-          <el-col :span="2">任务</el-col>
-          <el-col :span="2">状态</el-col>
-          <el-col :span="2">执行人</el-col>
-          <el-col :span="2">
-            预计时间
-            <i class="el-icon-sort"></i>
-          </el-col>
-          <el-col :span="2">
-            完成时间
-            <i class="el-icon-sort"></i>
-          </el-col>
-          <el-col :span="2">下达人</el-col>
-          <el-col :span="2">成果</el-col>
-          <el-col :span="4">操作</el-col>
-        </el-col>
-        <el-col :span="24" class="list" v-for="item in tableData" :key="item.index">
-          <el-col :span="2">{{item.department}}</el-col>
-          <el-col :span="2">{{item.task}}</el-col>
-          <el-col
-            :span="2"
-            :class="{'state_color1': item.state == 1,
-                  'state_color2': item.state == 2,
-                  'state_color3': item.state == 3,
-                  'state_color4': item.state == 4}"
-          >{{item.state_text}}</el-col>
-          <el-col :span="2">{{item.carryPeople}}</el-col>
-          <el-col :span="2">{{item.presetTime}}</el-col>
-          <el-col :span="2">{{item.finishTime}}</el-col>
-          <el-col :span="2">{{item.assignPeople}}</el-col>
-          <el-col :span="2">{{item.result}}</el-col>
-          <el-col :span="4">
-            <el-button size="small" type="info" @click="feedback(item.id)">反馈</el-button>
-            <el-button size="small" type="primary" @click="achieve(item.id)">完成</el-button>
-          </el-col>
-        </el-col>-->
         <el-table
           ref="filterTable"
           :data="tableData"
@@ -169,27 +143,31 @@
             </template>
           </el-table-column>
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
-          <el-table-column prop="result" label="成果"></el-table-column>
-          <el-table-column prop="操作" label="操作" filter-placement="bottom-end">
+          <el-table-column prop="result" label="成果">
+            <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
+              <img src="static/images/document/pt.png" width="32" alt srcset />
+              <div>策划方案</div>
+            </div>
+          </el-table-column>
+          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
             <template slot-scope="scope">
-              <el-button
-                size="small"
-                v-if="scope.row.state == 4 "
-                type="info"
-                @click="redact(scope.row.id)"
-              >忽略</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="redact(scope.row.id)">
+                <el-button size="small" v-if="scope.row.state == 4 " type="info" slot="reference">忽略</el-button>
+              </el-popconfirm>
               <el-button
                 size="small"
                 v-if="scope.row.state == 1"
                 type="info"
                 @click="feedback(scope.row.id)"
               >反馈</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.state != 3"
-                type="primary"
-                @click="achieve(scope.row.id)"
-              >完成</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="achieve(scope.row.id)">
+                <el-button
+                  size="small"
+                  v-if="scope.row.state != 3"
+                  type="primary"
+                  slot="reference"
+                >完成</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -269,6 +247,8 @@ export default {
       drawer1: false,
       drawer2: false,
       drawer3: false,
+      sousuo_show: true,
+      sousuo_input: '',// 所搜框内容
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
@@ -317,8 +297,8 @@ export default {
           id: 4,
           department: '策划',
           task: '策划方案',
-          state: 4,
-          state_text: '延期',
+          state: 3,
+          state_text: '已完成',
           color: 'color:red;',
           carryPeople: '解雨臣',
           presetTime: '20-01-21',
@@ -331,8 +311,8 @@ export default {
           id: 5,
           department: '网络营销',
           task: '产品原型',
-          state: 4,
-          state_text: '延期',
+          state: 3,
+          state_text: '已完成',
           color: 'color:red;',
           carryPeople: '解雨臣',
           presetTime: '20-01-21',
@@ -420,6 +400,7 @@ export default {
     },
     redact(e) {
       console.log('忽略' + e)
+      // this.pop_up()
     },
     feedback(e) {
       console.log('反馈' + e)
@@ -427,10 +408,48 @@ export default {
     },
     achieve(e) {
       console.log('完成' + e)
+      // this.pop_up()
     },
     gantt(e) {
       this.$router.push({ path: '/gantti', query: { id: 2 } })
+    },
+    sousuoShow(e) {
+      this.sousuo_show = !this.sousuo_show
+      // console.log(e)
+    },
+    sousuo(){
+      console.log(this.sousuo_input)
     }
+    // 提示框
+    // pop_up() {
+    //   const h = this.$createElement
+    //   this.$msgbox({
+    //     title: '操作提示',
+    //     message: '确认执行此操作吗？',
+    //     showCancelButton: true,
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     beforeClose: (action, instance, done) => {
+    //       if (action === 'confirm') {
+    //         instance.confirmButtonLoading = true
+    //         instance.confirmButtonText = '执行中...'
+    //         setTimeout(() => {
+    //           done()
+    //           setTimeout(() => {
+    //             instance.confirmButtonLoading = false
+    //           }, 300)
+    //         }, 1500)
+    //       } else {
+    //         done()
+    //       }
+    //     }
+    //   }).then(action => {
+    //     this.$message({
+    //       type: 'info',
+    //       message: '操作成功'
+    //     })
+    //   })
+    // }
   },
   // 钩子函数
   mounted() {
@@ -467,7 +486,7 @@ export default {
   justify-content: flex-start;
   align-items: center;
 }
-.project_details .detail_list {
+.project_details .detail_list > div {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -475,6 +494,13 @@ export default {
 }
 .project_details .detail_list img {
   width: 24px;
+}
+.project_details .detail_list .sousuo {
+  display: flex;
+  align-items: center;
+}
+.project_details .detail_list .sousuo i{
+  font-size: 21px;
 }
 .el-button + .el-button {
   margin: 0;
@@ -545,6 +571,13 @@ export default {
 .project_details .table1 .list div {
   height: 48px;
   line-height: 48px;
+}
+.project_details .table1 .result{
+  font-size: 13px;
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .project_details .table2 {
   display: flex;
@@ -663,7 +696,7 @@ export default {
   justify-content: flex-start;
   align-content: space-between;
 }
-.feedback .title{
+.feedback .title {
   font-size: 18px;
   margin-bottom: 13px;
 }

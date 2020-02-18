@@ -8,7 +8,7 @@
         <div id="project_state" :style="{width: '100%', height: '300px'}"></div>
       </el-col>
       <el-col :span="21" class="gantt_box">
-        <div id="client_state" :style="{width: '100%', height: '500px'}"></div>
+        <div id="client_state" :style="{width: '100%', height: '450px'}"></div>
       </el-col>
     </el-row>
   </div>

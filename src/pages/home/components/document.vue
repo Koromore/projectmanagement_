@@ -2,7 +2,7 @@
   <div class="document" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <el-col :span="6" class>
+        <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
             <el-select v-model="client" placeholder="请选择" size="small">
@@ -15,7 +15,7 @@
             </el-select>
           </el-col>
         </el-col>
-        <el-col :span="4" class="tab tab1">
+        <el-col :span="6" class="tab tab1">
           <el-button-group>
             <el-button
               type="primary"
@@ -81,8 +81,10 @@
         >
           <el-table-column prop="file_name" label="文档">
             <template slot-scope="scope">
+              <span>
               <img src="static/images/document/pt.png" width="32" alt srcset />
-              {{scope.row.file_name}}
+              <span>{{scope.row.file_name}}</span>
+              </span>
               <span class="operation"><i class="el-icon-edit"></i></span>
             </template>
           </el-table-column>
@@ -107,7 +109,7 @@
                 <i class="el-icon-upload2"></i>
                 <i class="el-icon-download"></i>
                 <i class="el-icon-share"></i>
-                <i class="el-icon-time"></i>
+                <i class="el-icon-time" @click="drawer_show(scope.row.id)"></i>
               </span>
             </template>
           </el-table-column>
@@ -293,6 +295,9 @@ export default {
       let winHeight = window.innerHeight
       let height1 = winHeight - 100
       this.style1 = 'height:' + height1 + 'px;'
+    },
+    drawer_show(e){
+      this.drawer = true
     },
     //
     tab1_change(e) {

@@ -2,7 +2,7 @@
   <div class="task" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <el-col :span="6" class>
+        <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
             <el-select v-model="client" placeholder="请选择" size="small">
@@ -15,7 +15,7 @@
             </el-select>
           </el-col>
         </el-col>
-        <el-col :span="4" class="tab tab1">
+        <el-col :span="6" class="tab tab1">
           <el-button-group>
             <el-button
               type="primary"
@@ -61,10 +61,21 @@
         </el-col>
         <el-col :span="8" class="tab tab3">
           <el-button-group>
-            <el-button type="primary" size="small">&nbsp;&nbsp;新项目&nbsp;&nbsp;</el-button>
-            <el-button type="danger" size="small">&nbsp;&nbsp;&nbsp;&nbsp;延时&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            <el-button type="warning" size="small">&nbsp;&nbsp;审核中&nbsp;&nbsp;</el-button>
-            <el-button type="success" size="small">&nbsp;&nbsp;执行中&nbsp;&nbsp;</el-button>
+            <el-tooltip class="item" effect="dark" content="新项目" placement="bottom">
+              <el-button type="primary" size="small">&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
+              <el-button
+                type="danger"
+                size="small"
+              >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
+              <el-button type="warning" size="small">&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
+              <el-button type="success" size="small">&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
+            </el-tooltip>
           </el-button-group>
         </el-col>
       </el-col>
@@ -80,7 +91,7 @@
           :data="tableData1"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
+          :row-style="{'height': '57px','text_aling':'left'}"
         >
           <el-table-column
             prop="name"
@@ -126,12 +137,14 @@
                 @click="sponsor_feedback(scope.row.id)"
                 v-if="scope.row.state != 3"
               >反馈</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.state == 1"
-                type="primary"
-                @click="sponsor_achieve(scope.row.id)"
-              >完成</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="sponsor_achieve(scope.row.id)">
+                <el-button
+                  size="small"
+                  type="primary"
+                  slot="reference"
+                  v-if="scope.row.state == 1"
+                >完成</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -143,11 +156,13 @@
           :data="tableData2"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
-          @cell-click="task_details"
+          :row-style="{'height': '57px'}"
+          align="left"
         >
           <el-table-column prop="department" label="部门"></el-table-column>
-          <el-table-column prop="task" label="任务"></el-table-column>
+          <el-table-column prop="task" label="任务">
+            <el-link slot-scope="scope" @click="task_detail(scope.row.id)">{{scope.row.task}}</el-link>
+          </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <div
               slot-scope="scope"
@@ -158,12 +173,23 @@
                   'state_color4': scope.row.state == 4}"
             >{{scope.row.state_text}}</div>
           </el-table-column>
-          <el-table-column prop="carryPeople" label="执行人">
-            <!-- <template slot-scope="scope">
-              {{scope.row.carryPeople}}
-              <el-input v-model="input" placeholder="请输入内容"></el-input>
-              <span>跟换</span>
-            </template>-->
+          <el-table-column prop="carryPeople" label="执行人" width="164">
+            <template slot-scope="scope">
+              <div v-show="change_carryPeople_show != scope.$index">
+                {{scope.row.carryPeople}}
+                <el-link type="primary" @click="change_carryPeople(scope.$index)" v-show="scope.row.state == 2 || scope.row.state == 4">更换</el-link>
+              </div>
+              <div v-show="change_carryPeople_show == scope.$index">
+                <el-input
+                  placeholder="请输入内容"
+                  v-model="tableData2[scope.$index].carryPeople"
+                  class="input-with-select"
+                  size="small "
+                >
+                  <el-button slot="append" type="primary" @click="change_carryPeople('true')">确认</el-button>
+                </el-input>
+              </div>
+            </template>
           </el-table-column>
           <el-table-column prop="presetTime" label="预计时间">
             <template slot="header">
@@ -178,27 +204,32 @@
             </template>
           </el-table-column>
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
-          <el-table-column prop="result" label="成果"></el-table-column>
+          <el-table-column prop="result" label="成果">
+            <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
+              <img src="static/images/document/pt.png" width="32" alt srcset />
+              <div>策划方案</div>
+            </div>
+          </el-table-column>
           <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-button
-                size="small"
-                v-if="scope.row.state == 4 "
-                type="info"
-                @click="join_redact(scope.row.id)"
-              >忽略</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_redact(scope.row.id)">
+                <el-button size="small" v-if="scope.row.state == 4 " type="info" slot="reference">忽略</el-button>
+              </el-popconfirm>
               <el-button
                 size="small"
                 v-if="scope.row.state == 2"
                 type="info"
+                slot="reference"
                 @click="join_feedback(scope.row.id)"
               >反馈</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.state == 2 || scope.row.state == 4"
-                type="primary"
-                @click="join_achieve(scope.row.id)"
-              >完成</el-button>
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_achieve(scope.row.id)">
+                <el-button
+                  size="small"
+                  v-if="scope.row.state == 2 || scope.row.state == 4"
+                  type="primary"
+                  slot="reference"
+                >完成</el-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -298,6 +329,21 @@
           </el-col>
         </el-row>
       </el-drawer>
+      <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
+        <el-row class="feedback">
+          <el-col :span="24">
+            <el-col :span="6" class="title">延期原因</el-col>
+            <el-col :span="24">
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
+            </el-col>
+          </el-col>
+          <el-col :span="14" :offset="5" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
     </el-row>
   </div>
 </template>
@@ -309,6 +355,8 @@ export default {
       // 抽屉控制
       drawer1: false,
       drawer2: false,
+      drawer3: false,
+      change_carryPeople_show: "true",
       loginState: true, // 避免多次点击
       project_style: '',
       // 客户列表
@@ -394,10 +442,10 @@ export default {
           state: 4,
           state_text: '延期',
           color: 'color:red;',
-          carryPeople: '张三',
+          carryPeople: '张三1',
           presetTime: '20-01-21',
           finishTime: '20-02-22',
-          assignPeople: '张三',
+          assignPeople: '张三1',
           result: '成果',
           operation: '操作'
         },
@@ -408,10 +456,10 @@ export default {
           state: 1,
           state_text: '审核中',
           color: 'color:red;',
-          carryPeople: '张三',
+          carryPeople: '张三2',
           presetTime: '20-01-21',
           finishTime: '20-02-22',
-          assignPeople: '张三',
+          assignPeople: '张三2',
           result: '成果',
           operation: '操作'
         },
@@ -422,10 +470,10 @@ export default {
           state: 4,
           state_text: '延期',
           color: 'color:red;',
-          carryPeople: '张三',
+          carryPeople: '张三3',
           presetTime: '20-01-21',
           finishTime: '20-02-22',
-          assignPeople: '张三',
+          assignPeople: '张三3',
           result: '成果',
           operation: '操作'
         },
@@ -436,10 +484,10 @@ export default {
           state: 2,
           state_text: '执行中',
           color: 'color:red;',
-          carryPeople: '张三',
+          carryPeople: '张三4',
           presetTime: '20-01-21',
           finishTime: '20-02-22',
-          assignPeople: '张三',
+          assignPeople: '张三4',
           result: '成果',
           operation: '操作'
         },
@@ -450,16 +498,16 @@ export default {
           state: 3,
           state_text: '已完成',
           color: 'color:red;',
-          carryPeople: '张三',
+          carryPeople: '张三5',
           presetTime: '20-01-21',
           finishTime: '20-02-22',
-          assignPeople: '张三',
+          assignPeople: '张三5',
           result: '成果',
           operation: '操作'
         }
       ],
       result: '',
-      tabs_activity: 2,
+      tabs_activity: 1,
       table_show: true,
       // 项目类型1选择
       tab1_act: 1,
@@ -484,7 +532,7 @@ export default {
           label: '延期'
         }
       ],
-      state_value: '2'
+      state_value: '1'
     }
   },
   // 方法
@@ -530,6 +578,7 @@ export default {
     },
     sponsor_achieve(e) {
       console.log('我发起完成' + e)
+      this.drawer3 = true
     },
     join_redact(e) {
       console.log('我参与忽略' + e)
@@ -540,6 +589,7 @@ export default {
     },
     join_achieve(e) {
       console.log('我参与完成' + e)
+      this.drawer3 = true
     },
     // 筛选所属项目
     filterName(value, row) {
@@ -551,16 +601,52 @@ export default {
     filterState(value, row) {
       return row.state_text === value
     },
-    // 点击单元格
-    task_details(row, column, cell, event) {
-      // console.log(row)
-      console.log(column)
-      // console.log(cell)
-      // console.log(event)
-      if (column.property == 'task') {
-        this.drawer1 = true
-      }
+    task_detail() {
+      this.drawer1 = true
+    },
+    change_carryPeople(e){
+       this.change_carryPeople_show = e
     }
+    // 点击单元格
+    // task_details(row, column, cell, event) {
+    //   // console.log(row)
+    //   console.log(column)
+    //   // console.log(cell)
+    //   // console.log(event)
+    //   if (column.property == 'task') {
+    //     this.drawer1 = true
+    //   }
+    // },
+    // 提示框
+    // pop_up() {
+    //   const h = this.$createElement
+    //   this.$msgbox({
+    //     title: '操作提示',
+    //     message: '确认执行此操作吗？',
+    //     showCancelButton: true,
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     beforeClose: (action, instance, done) => {
+    //       if (action === 'confirm') {
+    //         instance.confirmButtonLoading = true
+    //         instance.confirmButtonText = '执行中...'
+    //         setTimeout(() => {
+    //           done()
+    //           setTimeout(() => {
+    //             instance.confirmButtonLoading = false
+    //           }, 300)
+    //         }, 1500)
+    //       } else {
+    //         done()
+    //       }
+    //     }
+    //   }).then(action => {
+    //     this.$message({
+    //       type: 'info',
+    //       message: '操作成功'
+    //     })
+    //   })
+    // }
   },
   // 钩子函数
   mounted() {
@@ -609,12 +695,15 @@ export default {
   color: white;
   border: 1px solid #409eff;
 }
+.task .top .tab3 >>> .el-button {
+  width: 80px;
+}
 .el-button + .el-button {
   margin: 0;
 }
 .task .tabs {
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
   box-sizing: border-box;
   padding: 13px 0;
   display: flex;
@@ -760,7 +849,7 @@ export default {
   justify-content: flex-start;
   align-content: space-between;
 }
-.feedback .title{
+.feedback .title {
   font-size: 18px;
   margin-bottom: 13px;
 }
