@@ -54,7 +54,7 @@
         </el-col>
 
         <el-col :span="6" class="title title1">预计时间</el-col>
-        <el-col :span="13">
+        <el-col :span="13" class="presetTime">
           <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
         </el-col>
 
@@ -67,7 +67,7 @@
             v-model="new_task.demand"
           ></el-input>
         </el-col>
-        <el-col :span="18" :offset="3">
+        <el-col :span="18" :offset="6">
           <el-radio v-model="radio2" label="1">项目经理</el-radio>
           <el-radio v-model="radio2" label="2">执行部门</el-radio>
         </el-col>
@@ -75,7 +75,7 @@
           <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
         </el-col>
         <el-col :span="16" :offset="3" v-show="radio2 == 2">
-          <el-checkbox-group v-model="checkList">
+          <el-checkbox-group v-model="checkList" class="check_box">
             <el-checkbox label="武汉策划"></el-checkbox>
             <el-checkbox label="上海研发"></el-checkbox>
             <el-checkbox label="北京网络销售"></el-checkbox>
@@ -111,7 +111,7 @@
         <el-col :span="6" :offset="1">
           <el-button size="small" type="primary" @click="showInput">添加</el-button>
         </el-col>
-        <el-col :span="14" :offset="5" class="batton">
+        <el-col :span="12" :offset="7" class="batton">
           <el-button size="small" type="info">取消</el-button>
           <el-button size="small" type="primary">提交</el-button>
         </el-col>
@@ -121,23 +121,11 @@
 </template>
 <script>
 import Header from '@/pages/header'
-// import Statistics from '@/components/statistics'
-// import Project from '@/components/project'
-// import ProjectDetails from '@/components/project_details'
-// import Task from '@/components/task'
-// import Document from '@/components/document'
-// import Set from '@/components/set'
 
 export default {
   name: 'login',
   components: {
     Header
-    // Project,
-    // Statistics,
-    // Task,
-    // ProjectDetails,
-    // Document,
-    // Set
   },
   data() {
     return {
@@ -216,13 +204,35 @@ export default {
     },
     getMsgFormSon(data) {
       this.drawer = data
+    },
+    router_url(){
+      let url = this.$route.path
+      let url1 = '/home/components/statistics'
+      let url2 = '/home/components/project'
+      let url2_ = '/home/components/project_details'
+      let url3 = '/home/components/task'
+      let url4 = '/home/components/document'
+      let url5 = '/home/components/set'
+      if(url == url1){
+        this.show_acti = 1
+      }else if (url == url2) {
+        this.show_acti = 2
+      }else if (url == url2_) {
+        this.show_acti = 2
+      }else if (url == url3) {
+        this.show_acti = 3
+      }else if (url == url4) {
+        this.show_acti = 4
+      }else if (url == url5) {
+        this.show_acti = 5
+      }
     }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
-
     sessionStorage.setItem('refresh', 0)
+    this.router_url()
   }
 }
 </script>
@@ -273,10 +283,19 @@ export default {
   align-items: center;
   align-content: space-between;
 }
-.home .add_box .title {
+.home .add_box>.title:nth-of-type(1){
   text-align: center;
+  font-weight: 600;
+  font-size: 18px;
 }
-
+.home .add_box .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.home .add_box .presetTime>div{
+  width: 100%;
+}
 .home .add_box .batton {
   display: flex;
   flex-wrap: wrap;

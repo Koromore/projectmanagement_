@@ -35,7 +35,10 @@ export default {
       // 绘制图表
       myChart.setOption({
         // 标题
-        title: { text: '业务占比' },
+        title: {
+          text: '业务占比',
+          padding: 16
+        },
         // 颜色
         color: [
           '#85AFE4',
@@ -117,7 +120,7 @@ export default {
       let myChart = this.$echarts.init(document.getElementById('project_state'))
       // 绘制图表
       myChart.setOption({
-        title: { text: '项目状态' },
+        title: { text: '项目状态',padding: 16 },
         color: ['#C9C9C9', '#FF0000', '#23D7BB'],
         tooltip: {
           trigger: 'item',
@@ -164,7 +167,6 @@ export default {
           }
         ]
       })
-      
     },
     // 客户状态甘特图
     client_state_gantt() {
@@ -181,7 +183,8 @@ export default {
                 // 没有设置 `align`，则 `align` 为 right
               }
             }
-          }
+          },
+          padding: 16
         },
         color: ['#FF0000', '#F5B96A', '#23D7BB'],
         tooltip: {
@@ -192,7 +195,8 @@ export default {
           }
         },
         legend: {
-          data: ['邮件营销', '联盟广告', '视频广告']
+          data: ['邮件营销', '联盟广告', '视频广告'],
+          top: 16
         },
         grid: {
           left: '3%',
@@ -245,9 +249,9 @@ export default {
           }
         ]
       }),
-      myChart.on('click', function(params) {
-        console.log(params)
-      })
+        myChart.on('click', function(params) {
+          console.log(params)
+        })
     }
   },
   // 钩子函数

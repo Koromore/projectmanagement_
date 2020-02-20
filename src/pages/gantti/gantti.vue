@@ -198,20 +198,20 @@ export default {
       let th_data = {
         title: {
           value: '部门',
-          width: 150,
+          width: 130,
           showToast: true,
           listen_click: false
         },
         execute_pop: {
           value: '执行人',
-          width: 130,
+          width: 90,
           showToast: true,
           chooseTime: false
           // time_mode: 1
         },
         state_text: {
           value: '状态',
-          width: 130,
+          width: 90,
           showToast: true,
           chooseTime: false
           // time_mode: 2
@@ -224,7 +224,7 @@ export default {
         ganteData: data,
         start_time: new Date('2018/12/15').getTime(),
         end_time: new Date('2019/2/4').getTime(),
-        tabe_width: '459px',
+        tabe_width: '360px',
         open: true,
         height: height,
         time_mode: 1,
@@ -287,6 +287,7 @@ export default {
   font-size: 36px;
   color: rgb(16, 16, 16);
   line-height: 54px;
+  margin-bottom: 32px;
 }
 /* .wl-gantt-demo {
   margin: 40px auto;

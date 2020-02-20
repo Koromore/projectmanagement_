@@ -61,7 +61,7 @@
         </el-col>
         <el-col :span="8" class="tab tab3">
           <el-button-group>
-            <el-tooltip class="item" effect="dark" content="新项目" placement="bottom">
+            <el-tooltip class="item" effect="dark" content="新任务" placement="bottom">
               <el-button type="primary" size="small">&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
@@ -107,12 +107,7 @@
             :filter-method="filterDepartment"
           ></el-table-column>
           <el-table-column prop="task" label="任务"></el-table-column>
-          <el-table-column
-            prop="state_text"
-            label="执行状态"
-            :filters="[{text: '审核中', value: '审核中'}, {text: '执行中', value: '执行中'}, {text: '已完成', value: '已完成'}, {text: '延期', value: '延期'}]"
-            :filter-method="filterState"
-          >
+          <el-table-column prop="state_text" label="执行状态">
             <div
               slot-scope="scope"
               class="cell"
@@ -134,10 +129,10 @@
               <el-button
                 size="small"
                 type="info"
-                @click="sponsor_feedback(scope.row.id)"
+                @click="sponsor_feedback(scope.row.id,scope.row.task)"
                 v-if="scope.row.state != 3"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="sponsor_achieve(scope.row.id)">
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="sponsor_achieve(scope.row.id,scope.row.task,scope.row.state)">
                 <el-button
                   size="small"
                   type="primary"
@@ -177,7 +172,11 @@
             <template slot-scope="scope">
               <div v-show="change_carryPeople_show != scope.$index">
                 {{scope.row.carryPeople}}
-                <el-link type="primary" @click="change_carryPeople(scope.$index)" v-show="scope.row.state == 2 || scope.row.state == 4">更换</el-link>
+                <el-link
+                  type="primary"
+                  @click="change_carryPeople(scope.$index)"
+                  v-show="scope.row.state == 2 || scope.row.state == 4"
+                >更换</el-link>
               </div>
               <div v-show="change_carryPeople_show == scope.$index">
                 <el-input
@@ -206,7 +205,7 @@
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
           <el-table-column prop="result" label="成果">
             <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
-              <img src="static/images/document/pt.png" width="32" alt srcset />
+              <img src="static/images/document/ppt.png" width="24" alt srcset />
               <div>策划方案</div>
             </div>
           </el-table-column>
@@ -220,9 +219,9 @@
                 v-if="scope.row.state == 2"
                 type="info"
                 slot="reference"
-                @click="join_feedback(scope.row.id)"
+                @click="join_feedback(scope.row.id,scope.row.task)"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_achieve(scope.row.id)">
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_achieve(scope.row.id,scope.row.task,scope.row.state)">
                 <el-button
                   size="small"
                   v-if="scope.row.state == 2 || scope.row.state == 4"
@@ -237,13 +236,13 @@
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
         <el-row class="task_details">
-          <el-col :span="6">执行部门：</el-col>
+          <el-col :span="6" class="title">执行部门：</el-col>
           <el-col :span="18">设计部</el-col>
-          <el-col :span="6">任务类型：</el-col>
+          <el-col :span="6" class="title">任务类型：</el-col>
           <el-col :span="18">网站设计</el-col>
-          <el-col :span="6">执行人：</el-col>
+          <el-col :span="6" class="title">执行人：</el-col>
           <el-col :span="18">张三</el-col>
-          <el-col :span="6">状态：</el-col>
+          <el-col :span="6" class="title">状态：</el-col>
           <el-col :span="18">
             <el-select
               v-model="state_value"
@@ -262,33 +261,33 @@
               ></el-option>
             </el-select>
           </el-col>
-          <el-col :span="6">预计时间：</el-col>
+          <el-col :span="6" class="title">预计时间：</el-col>
           <el-col :span="18">20-01-21</el-col>
-          <el-col :span="6">完成时间：</el-col>
+          <el-col :span="6" class="title">完成时间：</el-col>
           <el-col :span="18">20-01-21</el-col>
-          <el-col :span="6">需求：</el-col>
+          <el-col :span="6" class="title">需求：</el-col>
           <el-col :span="18">PC网站设计，客户需求商务简约风，以皓影为主题，突出产品的价值定位及车型特点。</el-col>
-          <el-col :span="6">附件：</el-col>
+          <el-col :span="6" class="title">附件：</el-col>
           <el-col :span="18">
             <div class="smname">
-              <img src="static/images/document/pt.png" width="36" alt srcset />
+              <img src="static/images/document/ppt.png" width="24" alt srcset />
               <br />参考资料
             </div>
           </el-col>
           <el-divider content-position="right"></el-divider>
-          <el-col :span="6">完成结果：</el-col>
+          <el-col :span="6" class="title">完成结果：</el-col>
           <el-col :span="18">
             <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
           </el-col>
-          <el-col :span="6">附件：</el-col>
+          <el-col :span="6" class="title">附件：</el-col>
           <el-col :span="18">
             <div class="smname">
-              <img src="static/images/document/pt.png" width="36" alt srcset />
+              <img src="static/images/document/ppt.png" width="24" alt srcset />
               <br />最终成果
             </div>
           </el-col>
           <el-divider content-position="right"></el-divider>
-          <el-col :span="6">反馈意见：</el-col>
+          <el-col :span="6" class="title">反馈意见：</el-col>
           <el-col :span="18" class="suggest">
             <el-scrollbar>
               <el-col :span="24" class="suggest_list">
@@ -308,7 +307,7 @@
               </el-col>
             </el-scrollbar>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -318,12 +317,13 @@
       <el-drawer title="任务" :visible.sync="drawer2" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer2_task}}</el-col>
             <el-col :span="6" class="title">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
             </el-col>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -333,12 +333,13 @@
       <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer3_task}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
             </el-col>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -356,7 +357,9 @@ export default {
       drawer1: false,
       drawer2: false,
       drawer3: false,
-      change_carryPeople_show: "true",
+      drawer2_task: '',
+      drawer3_task: '',
+      change_carryPeople_show: 'true',
       loginState: true, // 避免多次点击
       project_style: '',
       // 客户列表
@@ -572,24 +575,32 @@ export default {
         this.tab2_act = 2
       }
     },
-    sponsor_feedback(e) {
+    sponsor_feedback(e,task) {
       console.log('我发起反馈' + e)
       this.drawer2 = true
+      this.drawer2_task = task
     },
-    sponsor_achieve(e) {
+    sponsor_achieve(e,task,state) {
       console.log('我发起完成' + e)
-      this.drawer3 = true
+      if (state == 4) {
+        this.drawer3 = true
+        this.drawer3_task = task
+      }
     },
     join_redact(e) {
       console.log('我参与忽略' + e)
     },
-    join_feedback(e) {
+    join_feedback(e,task) {
       console.log('我参与反馈' + e)
       this.drawer2 = true
+      this.drawer2_task = task
     },
-    join_achieve(e) {
+    join_achieve(e,task,state) {
       console.log('我参与完成' + e)
-      this.drawer3 = true
+      if (state == 4) {
+        this.drawer3 = true
+        this.drawer3_task = task
+      }
     },
     // 筛选所属项目
     filterName(value, row) {
@@ -598,14 +609,11 @@ export default {
     filterDepartment(value, row) {
       return row.department === value
     },
-    filterState(value, row) {
-      return row.state_text === value
-    },
     task_detail() {
       this.drawer1 = true
     },
-    change_carryPeople(e){
-       this.change_carryPeople_show = e
+    change_carryPeople(e) {
+      this.change_carryPeople_show = e
     }
     // 点击单元格
     // task_details(row, column, cell, event) {
@@ -789,6 +797,11 @@ export default {
   align-content: space-between;
   align-items: flex-start;
 }
+.task .task_details .title{
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
 .task .task_details .smname {
   width: 72px;
   text-align: center;
@@ -848,6 +861,10 @@ export default {
   align-items: flex-start;
   justify-content: flex-start;
   align-content: space-between;
+}
+.feedback .title:nth-of-type(1) {
+  font-weight: 600;
+  text-align: center;
 }
 .feedback .title {
   font-size: 18px;

@@ -82,7 +82,7 @@
           <el-table-column prop="file_name" label="文档">
             <template slot-scope="scope">
               <span>
-              <img src="static/images/document/pt.png" width="32" alt srcset />
+              <img src="static/images/document/ppt.png" width="24" alt srcset />
               <span>{{scope.row.file_name}}</span>
               </span>
               <span class="operation"><i class="el-icon-edit"></i></span>
@@ -133,9 +133,10 @@
                     <br />
                     <br />
                     <div>
-                      <img src="static/images/document/pt.png" width="36" alt srcset />
+                      <img src="static/images/document/ppt.png" width="24" alt srcset />
                       <span>{{item.file_name}}</span>
-                      <img class="down" src="static/images/document/down.png" width="21" alt srcset />
+                      <!-- <img class="down" src="static/images/document/down.png" width="21" alt srcset /> -->
+                      <i class="el-icon-download down"></i>
                     </div>
                   </el-card>
                 </el-timeline-item>
@@ -424,6 +425,7 @@ export default {
 }
 .document .records_document .el-card .down {
   display: none;
+  font-size: 18px;
 }
 .document .records_document .el-card:hover .down {
   display: inline-block;

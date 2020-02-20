@@ -15,30 +15,30 @@
               <i class="el-icon-bell"></i>
             </el-badge>
             <!-- <div>消息</div> -->
-            <el-dropdown trigger="hover">
-              <span class="el-dropdown-link">
-                <!-- {{this.$store.state.username}} -->
-                <i class="el-icon-caret-bottom el-icon--right"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item class="clearfix">
-                  <router-link tag="span" to="/changePassword">修改密码</router-link>
-                </el-dropdown-item>
-                <el-dropdown-item divided class="clearfix">
-                  <span @click="logout">退出</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
           </el-col>
           <!-- 头像 -->
-          <el-avatar
+          <div class="portrait">张三</div>
+          <el-dropdown trigger="hover">
+            <span class="el-dropdown-link">
+              <!-- {{this.$store.state.username}} -->
+              <i class="el-icon-caret-bottom el-icon--right"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <!-- <el-dropdown-item class="clearfix">
+                  <router-link tag="span" to="/changePassword">修改密码</router-link>
+              </el-dropdown-item>-->
+              <el-dropdown-item class="clearfix">
+                <span @click="logout">退出</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <!-- <el-avatar
             size="large"
             src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
-          ></el-avatar>
+          ></el-avatar>-->
         </div>
       </el-header>
     </el-row>
-    
   </div>
 </template>
 <script>
@@ -47,7 +47,6 @@ export default {
   data() {
     return {
       drawer: true
-      
     }
   },
   methods: {
@@ -61,10 +60,9 @@ export default {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
     },
     // 向父组件传值打开抽屉
-    add_box(){
-      this.$emit('func',this.drawer)
+    add_box() {
+      this.$emit('func', this.drawer)
     }
-    
   }
 }
 </script>
@@ -98,10 +96,10 @@ export default {
   color: white;
   font-size: 16px;
 }
-.header-right .add_du i{
+.header-right .add_du i {
   font-size: 18px;
 }
-.header-right .el-icon-bell{
+.header-right .el-icon-bell {
   color: white;
   font-size: 24px;
 }
@@ -135,7 +133,6 @@ export default {
   border: 0;
 }
 
-
 .topheader .records_box {
   height: 100%;
 }
@@ -168,5 +165,14 @@ export default {
   width: 90px;
   margin-left: 10px;
   vertical-align: bottom;
+}
+.topheader .portrait {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 50%;
+  background: white;
 }
 </style>

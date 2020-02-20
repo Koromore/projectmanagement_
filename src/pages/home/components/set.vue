@@ -10,6 +10,7 @@
       <el-col :span="24" class="add">
         <el-button size="small" type="primary" @click="drawer_show()">新增</el-button>
       </el-col>
+      <!-- 抽屉 -->
       <el-drawer title="新增框" :visible.sync="drawer" :with-header="false">
         <el-row class="add_box">
           <el-col :span="24" class="new_name">
@@ -17,8 +18,8 @@
             <el-col :span="13">
               <el-input placeholder="请输入内容" v-model="new_name" clearable></el-input>
             </el-col>
-            <el-col :span="6" class="title title2">业务</el-col>
-            <el-col :span="13" :offset="6">
+            <el-col :span="6" class="title title2" v-show="tabs_activity == 2">业务</el-col>
+            <el-col :span="13" :offset="6" class="check_box" v-show="tabs_activity == 2">
               <el-checkbox-group v-model="checkList">
                 <el-checkbox label="官网"></el-checkbox>
                 <el-checkbox label="官微"></el-checkbox>
@@ -28,7 +29,7 @@
               </el-checkbox-group>
             </el-col>
           </el-col>
-          <el-col :span="12" :offset="6" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -155,10 +156,6 @@ export default {
       ],
       tabs_activity: 1,
       table_show: true,
-      // 项目类型1选择
-      tab1_act: 1,
-      // 项目类型2选择
-      tab2_act: 1,
       // 新增
       new_name: '',
       //
@@ -295,6 +292,9 @@ export default {
 .set .add_box .title2 {
   margin-top: 64px;
 }
+.set .add_box .check_box .el-checkbox{
+  width: 64px;
+}
 .set .add_box .new_name {
   height: 40px;
   line-height: 40px;
@@ -306,6 +306,6 @@ export default {
   justify-content: space-between;
 }
 .set .add_box .batton button {
-  width: 128px;
+  width: 36%;
 }
 </style>

@@ -66,13 +66,16 @@
               <el-button type="primary" size="small">&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
-            <el-button type="danger" size="small">&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+              <el-button
+                type="danger"
+                size="small"
+              >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
-            <el-button type="warning" size="small">&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
+              <el-button type="warning" size="small">&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
-            <el-button type="success" size="small">&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
+              <el-button type="success" size="small">&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
             </el-tooltip>
           </el-button-group>
         </el-col>
@@ -122,10 +125,13 @@
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="feedback(scope.row.id)">
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="feedback(scope.row.id,scope.row.name)">
                 <el-button size="small" type="info" slot="reference" v-if="scope.row.state == 1">反馈</el-button>
               </el-popconfirm>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="achieve(scope.row.id)">
+              <el-popconfirm
+                title="确认执行此操作吗？"
+                @onConfirm="achieve(scope.row.id,scope.row.name,scope.row.state)"
+              >
                 <el-button
                   size="small"
                   type="primary"
@@ -133,7 +139,7 @@
                   v-if="scope.row.state == 1"
                 >完成</el-button>
               </el-popconfirm>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="aredact(scope.row.id)">
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="aredact(scope.row.id,scope.row.name)">
                 <el-button
                   size="small"
                   type="info"
@@ -195,6 +201,7 @@
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer1_name}}</el-col>
             <el-col :span="6" class="title">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
@@ -222,7 +229,7 @@
               </el-checkbox-group>
             </el-col>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -246,7 +253,7 @@
           </el-col>
 
           <el-col :span="6" class="title title1">预计时间</el-col>
-          <el-col :span="13">
+          <el-col :span="13" class="presetTime">
             <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
           </el-col>
 
@@ -259,7 +266,7 @@
               v-model="new_task.demand"
             ></el-input>
           </el-col>
-          <el-col :span="18" :offset="3">
+          <el-col :span="18" :offset="6">
             <el-radio v-model="radio2" label="1">项目经理</el-radio>
             <el-radio v-model="radio2" label="2">执行部门</el-radio>
           </el-col>
@@ -303,7 +310,7 @@
           <el-col :span="6" :offset="1">
             <el-button size="small" type="primary" @click="showInput">添加</el-button>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -313,12 +320,13 @@
       <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer3_name}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
             </el-col>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -335,6 +343,8 @@ export default {
       drawer1: false,
       drawer2: false,
       drawer3: false,
+      drawer1_name: '',
+      drawer3_name: '',
       // plain: false,
       autofocus: true,
       loginState: true, // 避免多次点击
@@ -526,23 +536,29 @@ export default {
     // 选项卡
     table_tab(e) {
       if (e == 1) {
-        ;(this.tabs_activity = 1), (this.table_show = true)
+        this.tabs_activity = 1
+        this.table_show = true
       } else if (e == 2) {
-        ;(this.tabs_activity = 2), (this.table_show = false)
+        this.tabs_activity = 2
+        this.table_show = false
       }
     },
     // 项目详情
-    feedback(e) {
+    feedback(e, name) {
       console.log('反馈' + e)
       this.drawer1 = true
+      this.drawer1_name = name
     },
-    redact(e) {
+    aredact(e) {
       console.log('编辑' + e)
       this.drawer2 = true
     },
-    achieve(e) {
+    achieve(e, name, state) {
       console.log('完成' + e)
-      this.drawer3 = true
+      if (state == 4) {
+        this.drawer3 = true
+        this.drawer3_name = name
+      }
     },
     expurgate(e) {
       console.log('删除' + e)
@@ -679,7 +695,7 @@ export default {
   color: white;
   border: 1px solid #409eff;
 }
-.project .top .tab3 >>> .el-button{
+.project .top .tab3 >>> .el-button {
   width: 80px;
 }
 .project .top .tab1 div:nth-of-type(1),
@@ -742,12 +758,15 @@ export default {
 }
 
 .project .feedback .title {
-  margin-top: 72px;
+  margin-top: 49px;
   font-size: 18px;
   margin-bottom: 13px;
 }
 .project .feedback .title:nth-of-type(1) {
   margin-top: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 18px;
 }
 .feedback {
   height: 100%;
@@ -806,13 +825,19 @@ export default {
   align-items: center;
   align-content: space-between;
 }
-.project .add_box .title {
+.project .add_box > .title:nth-of-type(1) {
   text-align: center;
+  font-weight: 600;
+  font-size: 18px;
 }
-/* .topheader .add_box .new_name {
-  height: 40px;
-  line-height: 40px;
-} */
+.project .add_box .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.project .add_box .presetTime > div {
+  width: 100%;
+}
 .project .add_box .batton {
   display: flex;
   flex-wrap: wrap;

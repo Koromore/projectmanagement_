@@ -8,23 +8,29 @@
         </el-col>
       </el-col>
       <el-col :span="3" class="tabs">
-        <el-col
-          :span="12"
-          @click.native="table_tab(1)"
-          :class="[tabs_activity=='1' ? 'act' : '']"
-        >执行情况</el-col>
-        <el-col
-          :span="12"
-          @click.native="table_tab(2)"
-          :class="[tabs_activity=='2' ? 'act' : '']"
-        >项目需求</el-col>
+        <el-button-group>
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="table_tab(1)"
+            :class="[tabs_activity=='1' ? 'act' : '']"
+          >执行情况</el-button>
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="table_tab(2)"
+            :class="[tabs_activity=='2' ? 'act' : '']"
+          >项目需求</el-button>
+        </el-button-group>
       </el-col>
       <el-col :span="4" :offset="16" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <img @click="drawer1 = true" src="static/images/project_detail/add.png" alt srcset />
-          <img @click="gantt(1)" src="static/images/project_detail/gantt.png" alt srcset />
-          <img @click="drawer2 = true" src="static/images/project_detail/history.png" alt srcset />
-          <img @click="sousuoShow" src="static/images/project_detail/sousuo.png" alt srcset />
+          <i @click="drawer1 = true" class="el-icon-circle-plus-outline"></i>
+          <i @click="gantt(1)" class="el-icon-tickets"></i>
+          <i @click="drawer2 = true" class="el-icon-time"></i>
+          <i @click="sousuoShow" class="el-icon-search"></i>
         </el-col>
         <el-col :span="24" class="sousuo" v-show="sousuo_show">
           <el-col :span="20">
@@ -87,6 +93,7 @@
           </el-col>
         </el-row>
       </el-drawer>
+      <!-- 抽屉 -->
       <el-drawer title="历史记录" :visible.sync="drawer2" :with-header="false">
         <el-row class="records">
           <el-col :span="23" :offset="1" class="title">历史记录</el-col>
@@ -145,7 +152,7 @@
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
           <el-table-column prop="result" label="成果">
             <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
-              <img src="static/images/document/pt.png" width="32" alt srcset />
+              <img src="static/images/document/ppt.png" width="24" alt srcset />
               <div>策划方案</div>
             </div>
           </el-table-column>
@@ -158,9 +165,12 @@
                 size="small"
                 v-if="scope.row.state == 1"
                 type="info"
-                @click="feedback(scope.row.id)"
+                @click="feedback(scope.row.id,scope.row.task)"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="achieve(scope.row.id)">
+              <el-popconfirm
+                title="确认执行此操作吗？"
+                @onConfirm="achieve(scope.row.id,scope.row.task,scope.row.state)"
+              >
                 <el-button
                   size="small"
                   v-if="scope.row.state != 3"
@@ -174,15 +184,15 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="table table2" v-if="!table_show">
-        <el-col :span="6" class="title">
+        <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
           <el-col :span="24">皓影赠礼</el-col>
         </el-col>
-        <el-col :span="6" class="title">
+        <el-col :span="7" class="title">
           <el-col :span="24">预计时间</el-col>
           <el-col :span="24">2020.1.1-2020.3.1</el-col>
         </el-col>
-        <el-col :span="6" class="title">
+        <el-col :span="7" class="title">
           <el-col :span="24">项目类别</el-col>
           <el-col :span="24">广汽本田 - 社区 - 专项</el-col>
         </el-col>
@@ -223,12 +233,29 @@
       <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer3_task}}</el-col>
             <el-col :span="6" class="title">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
             </el-col>
           </el-col>
           <el-col :span="14" :offset="5" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
+      <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer4" :with-header="false">
+        <el-row class="feedback">
+          <el-col :span="24">
+            <el-col :span="24" class="title">{{drawer4_task}}</el-col>
+            <el-col :span="6" class="title">延期原因</el-col>
+            <el-col :span="24">
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
+            </el-col>
+          </el-col>
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -247,8 +274,11 @@ export default {
       drawer1: false,
       drawer2: false,
       drawer3: false,
-      sousuo_show: true,
-      sousuo_input: '',// 所搜框内容
+      drawer4: false,
+      drawer3_task: '',
+      drawer4_task: '',
+      sousuo_show: false,
+      sousuo_input: '', // 所搜框内容
       // 1审核中 2执行中 3已完成 4延期
       tableData: [
         {
@@ -402,13 +432,17 @@ export default {
       console.log('忽略' + e)
       // this.pop_up()
     },
-    feedback(e) {
+    feedback(e, task) {
       console.log('反馈' + e)
       this.drawer3 = true
+      this.drawer3_task = task
     },
-    achieve(e) {
+    achieve(e, task, state) {
       console.log('完成' + e)
-      // this.pop_up()
+      if (state == 4) {
+        this.drawer4 = true
+        this.drawer4_task = task
+      }
     },
     gantt(e) {
       this.$router.push({ path: '/gantti', query: { id: 2 } })
@@ -417,7 +451,7 @@ export default {
       this.sousuo_show = !this.sousuo_show
       // console.log(e)
     },
-    sousuo(){
+    sousuo() {
       console.log(this.sousuo_input)
     }
     // 提示框
@@ -495,45 +529,43 @@ export default {
 .project_details .detail_list img {
   width: 24px;
 }
+.project_details .detail_list i {
+  font-size: 24px;
+}
 .project_details .detail_list .sousuo {
   display: flex;
   align-items: center;
 }
-.project_details .detail_list .sousuo i{
+.project_details .detail_list .sousuo i {
   font-size: 21px;
 }
 .el-button + .el-button {
   margin: 0;
 }
 .project_details .tabs {
-  height: 26px;
   margin-bottom: 13px;
-  text-align: center;
-  background-color: rgb(247, 247, 247);
-  border-radius: 5px;
-  border: 1px solid #bbb;
-  overflow: hidden;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
 }
-.project_details .tabs div {
-  height: 26px;
-  line-height: 26px;
-  font-size: 12px;
-  box-sizing: border-box;
-  cursor: pointer;
+.project_details .tabs .el-button--primary.is-plain {
+  border-color: #ddd;
 }
-.project_details .tabs div:nth-of-type(2) {
-  border-left: 1px solid #bbb;
+.project_details .tabs >>> .el-button {
+  background: #fff;
+  color: black;
 }
-.project_details .tabs div:hover {
-  background: rgb(16, 142, 233);
+.project_details .tabs >>> .el-button:hover {
+  background: #409eff;
   color: white;
+  border: 1px solid #409eff;
 }
-.project_details .tabs .act {
-  background: rgb(16, 142, 233);
+.project_details .tabs >>> .el-button.act {
+  background: #409eff;
+  color: white;
+  border: 1px solid #409eff;
+}
+.project_details .tabs div:nth-of-type(1) {
+  border: none;
+}
+.project_details .tabs div.act {
   color: white;
 }
 .project_details .table1 .title,
@@ -572,7 +604,7 @@ export default {
   height: 48px;
   line-height: 48px;
 }
-.project_details .table1 .result{
+.project_details .table1 .result {
   font-size: 13px;
   display: flex;
   flex-wrap: wrap;
@@ -695,6 +727,10 @@ export default {
   align-items: flex-start;
   justify-content: flex-start;
   align-content: space-between;
+}
+.feedback .title:nth-of-type(1) {
+  text-align: center;
+  font-weight: 600;
 }
 .feedback .title {
   font-size: 18px;
