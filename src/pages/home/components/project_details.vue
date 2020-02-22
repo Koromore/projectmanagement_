@@ -7,7 +7,7 @@
           <span class="project_name">皓影赠礼</span>
         </el-col>
       </el-col>
-      <el-col :span="3" class="tabs">
+      <el-col :span="6" class="tabs">
         <el-button-group>
           <el-button
             type="primary"
@@ -25,7 +25,7 @@
           >项目需求</el-button>
         </el-button-group>
       </el-col>
-      <el-col :span="4" :offset="16" class="detail_list">
+      <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
           <i @click="drawer1 = true" class="el-icon-circle-plus-outline"></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
@@ -46,37 +46,44 @@
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer1" :with-header="false">
         <el-row class="add_box">
-          <el-col :span="6" class="title title1">父任务</el-col>
+          <el-col :span="24">
+            <el-col :span="6" class="title title1">创建任务</el-col>
+          </el-col>
+          <el-col :span="6" class="title">父任务</el-col>
           <el-col :span="13">
             <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
           </el-col>
           <el-col :span="24">
             <el-col :span="6" class="title title2">执行部门</el-col>
-            <el-col :span="18" :offset="6">
-              <el-checkbox-group v-model="new_task.department">
-                <el-checkbox label="复选框 A"></el-checkbox>
-                <el-checkbox label="复选框 B"></el-checkbox>
-                <el-checkbox label="复选框 C"></el-checkbox>
-                <el-checkbox label="复选框 D"></el-checkbox>
-                <el-checkbox label="复选框 E"></el-checkbox>
-                <el-checkbox label="复选框 F"></el-checkbox>
-              </el-checkbox-group>
+            <el-col :span="15" :offset="6" class="department">
+              <el-radio v-model="new_task.department" label="1">武汉策划</el-radio>
+              <el-radio v-model="new_task.department" label="2">上海研发</el-radio>
+              <el-radio v-model="new_task.department" label="3">上海项目</el-radio>
+              <el-radio v-model="new_task.department" label="4">武汉内容</el-radio>
+              <el-radio v-model="new_task.department" label="5">北京网络销售</el-radio>
             </el-col>
           </el-col>
 
-          <el-col :span="6" class="title title1">名称</el-col>
+          <el-col :span="6" class="title">名称</el-col>
           <el-col :span="13">
             <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
           </el-col>
-          <el-col :span="6" class="title title1">预计时间</el-col>
-          <el-col :span="13">
+          <el-col :span="6" class="title">预计时间</el-col>
+          <el-col :span="13" class="presetTime">
             <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
           </el-col>
-          <el-col :span="6" class="title title1">任务类型</el-col>
-          <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.task_type" clearable></el-input>
+          <el-col :span="6" class="title">任务类型</el-col>
+          <el-col :span="13" class="task_type">
+            <el-select v-model="task_type_value" placeholder="请选择任务类型">
+              <el-option
+                v-for="item in task_type"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
           </el-col>
-          <el-col :span="6" class="title title1">需求</el-col>
+          <el-col :span="6" class="title">需求</el-col>
           <el-col :span="13">
             <el-input
               type="textarea"
@@ -85,9 +92,43 @@
               v-model="new_task.demand"
             ></el-input>
           </el-col>
-          <!-- </el-col> -->
+          <!-- 上传 -->
+          <el-col :span="13" :offset="6" class="upload">
+            <el-upload action="#" list-type="picture-card" :auto-upload="false">
+              <i slot="default" class="el-icon-plus"></i>
+              <div slot="file" slot-scope="{file}">
+                <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
+                <span class="el-upload-list__item-actions">
+                  <span
+                    class="el-upload-list__item-preview"
+                    @click="handlePictureCardPreview(file)"
+                  >
+                    <i class="el-icon-zoom-in"></i>
+                  </span>
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleDownload(file)"
+                  >
+                    <i class="el-icon-download"></i>
+                  </span>
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleRemove(file)"
+                  >
+                    <i class="el-icon-delete"></i>
+                  </span>
+                </span>
+              </div>
+            </el-upload>
+            <el-dialog :visible.sync="dialogVisible" class="upload_list">
+              <img width="100%" :src="dialogImageUrl" alt />
+            </el-dialog>
+            <div class="text">附件</div>
+          </el-col>
 
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
@@ -107,7 +148,7 @@
                   placement="top"
                 >
                   <el-card class="content">
-                    <p>完成成果：{{item.result}}</p>
+                    <p>变动内容：{{item.result}}</p>
                     <p>更新人：{{item.people}}</p>
                   </el-card>
                 </el-timeline-item>
@@ -125,7 +166,11 @@
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="department" label="部门"></el-table-column>
-          <el-table-column prop="task" label="任务"></el-table-column>
+          <el-table-column prop="task" label="任务">
+            <template slot-scope="scope">
+              <el-link @click="task_detail(scope.row.id)">{{scope.row.task}}</el-link>
+            </template>
+          </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <div
               slot-scope="scope"
@@ -261,6 +306,73 @@
           </el-col>
         </el-row>
       </el-drawer>
+      <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer5" :with-header="false">
+        <el-scrollbar style="height: 100%">
+          <el-row class="task_details">
+            <el-col :span="6" class="title">执行部门：</el-col>
+            <el-col :span="18">设计部</el-col>
+            <el-col :span="6" class="title">任务类型：</el-col>
+            <el-col :span="18">网站设计</el-col>
+            <el-col :span="6" class="title">执行人：</el-col>
+            <el-col :span="18">张三</el-col>
+            <el-col :span="6" class="title">状态：</el-col>
+            <el-col :span="18" class="state_color2">执行中</el-col>
+            <el-col :span="6" class="title">预计时间：</el-col>
+            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="6" class="title">完成时间：</el-col>
+            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="6" class="title">需求：</el-col>
+            <el-col :span="18">PC网站设计，客户需求商务简约风，以皓影为主题，突出产品的价值定位及车型特点。</el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <div class="smname">
+                <img src="static/images/document/ppt.png" width="24" alt srcset />
+                <br />参考资料
+              </div>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">完成结果：</el-col>
+            <el-col :span="18">
+              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
+            </el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <div class="smname">
+                <img src="static/images/document/ppt.png" width="24" alt srcset />
+                <br />最终成果
+              </div>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">反馈意见：</el-col>
+            <el-col :span="18" class="suggest">
+              <el-scrollbar>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-12 12:00</el-col>
+                  <el-col :span="12" class="pop">客户部-黄振宇</el-col>
+                  <el-col :span="24" class="content">请将色调调整为红色。</el-col>
+                </el-col>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
+                  <el-col :span="12" class="pop">内容部-张三</el-col>
+                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                </el-col>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
+                  <el-col :span="12" class="pop">内容部-张三</el-col>
+                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                </el-col>
+              </el-scrollbar>
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+        <el-row class="batton_pa">
+          <el-col :span="12" :offset="7" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary">完成</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
     </el-row>
   </div>
 </template>
@@ -275,6 +387,7 @@ export default {
       drawer2: false,
       drawer3: false,
       drawer4: false,
+      drawer5: false,
       drawer3_task: '',
       drawer4_task: '',
       sousuo_show: false,
@@ -366,40 +479,40 @@ export default {
       },
       records_list: [
         {
-          time: '2018/4/2 20:46',
-          result: '完成',
+          time: '20/04/02 20:46',
+          result: '前端开发时间变动',
           people: '解雨臣',
           file_name: '文档',
           file_format: 'ppt',
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
-          result: '完成',
+          time: '20/04/02 20:46',
+          result: '策划方案预计完成时间改动',
           people: '解雨臣',
           file_name: '文档',
           file_format: 'ppt',
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
-          result: '完成',
+          time: '20/04/02 20:46',
+          result: '策划方案添加预计完成时间',
           people: '解雨臣',
           file_name: '文档',
           file_format: 'ppt',
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
-          result: '完成',
+          time: '20/04/02 20:46',
+          result: '策划方案已审核',
           people: '解雨臣',
           file_name: '文档',
           file_format: 'ppt',
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
-          result: '完成',
+          time: '20/04/02 20:46',
+          result: '策划方案已提交',
           people: '解雨臣',
           file_name: '文档',
           file_format: 'ppt',
@@ -408,7 +521,35 @@ export default {
       ],
       style1: '',
       // 反馈信息
-      result: ''
+      result: '',
+      // 项目类型选择
+      task_type: [
+        {
+          value: '选项1',
+          label: '任务类型2'
+        },
+        {
+          value: '选项2',
+          label: '任务类型3'
+        },
+        {
+          value: '选项3',
+          label: '任务类型4'
+        },
+        {
+          value: '选项4',
+          label: '任务类型5'
+        },
+        {
+          value: '选项5',
+          label: '任务类型6'
+        }
+      ],
+      task_type_value: '',
+      // 上传附件
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false
     }
   },
   // 方法
@@ -453,6 +594,20 @@ export default {
     },
     sousuo() {
       console.log(this.sousuo_input)
+    },
+    task_detail() {
+      this.drawer5 = true
+    },
+    // 上传附件
+    handleRemove(file) {
+      console.log(file)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    handleDownload(file) {
+      console.log(file)
     }
     // 提示框
     // pop_up() {
@@ -659,6 +814,18 @@ export default {
 .state_color4 {
   color: rgb(255, 0, 0);
 }
+.state_color1 >>> input {
+  color: rgb(236, 185, 21);
+}
+.state_color2 >>> input {
+  color: rgb(1, 176, 114);
+}
+.state_color3 >>> input {
+  color: rgb(172, 171, 171);
+}
+.state_color4 >>> input {
+  color: rgb(255, 0, 0);
+}
 .project_details .add_box {
   height: 100%;
   box-sizing: border-box;
@@ -668,8 +835,19 @@ export default {
   align-items: center;
   align-content: space-between;
 }
+.project_details .add_box .title1 {
+  font-weight: 600;
+  font-size: 18px;
+}
 .project_details .add_box .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.project_details .add_box .upload .text {
+  width: 146px;
   text-align: center;
+  color: rgba(0, 0, 0, 0.65);
 }
 /* .project_details .add_box .new_name {
   height: 40px;
@@ -684,14 +862,15 @@ export default {
 .project_details .add_box .batton button {
   width: 36%;
 }
-.project_details >>> .el-drawer__body {
-  height: 100%;
+.project_details .add_box .department .el-radio {
+  width: 108px;
+  margin-bottom: 9px;
 }
-.project_details >>> .el-scrollbar {
-  height: 100%;
+.project_details .add_box .presetTime > div {
+  width: 100%;
 }
-.project_details >>> .el-scrollbar__wrap {
-  overflow-x: hidden;
+.project_details .add_box .task_type > div {
+  width: 100%;
 }
 .project_details .records_box {
   height: 100%;
@@ -719,6 +898,64 @@ export default {
 .project_details .batton button {
   width: 36%;
 }
+.project_details .task_details {
+  height: 100%;
+  padding: 36px 36px 108px 36px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: space-between;
+  align-items: flex-start;
+}
+.project_details .task_details > .el-col {
+  margin-bottom: 18px;
+}
+.project_details .task_details .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.project_details .task_details .smname {
+  width: 72px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+}
+.project_details .task_details .suggest {
+  height: 108px;
+}
+.project_details .task_details .suggest .suggest_list {
+  height: 48px;
+  margin-bottom: 12px;
+}
+.project_details .task_details .suggest .suggest_list .pop,
+.project_details .task_details .suggest .suggest_list .time {
+  height: 24px;
+  line-height: 24px;
+  font-size: 14px;
+  color: rgb(162, 162, 162);
+}
+.project_details .task_details .suggest .suggest_list .pop {
+  text-align: right;
+}
+.project_details .task_details .suggest .suggest_list .content {
+  color: #000;
+  font-size: 16px;
+}
+.project_details .batton_pa {
+  width: 100%;
+  padding: 36px;
+  background: white;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.project_details .task_details >>> .el-select input {
+  width: 81px;
+  border: none;
+  font-size: 16px;
+  padding-left: 0;
+}
 .feedback {
   height: 100%;
   padding: 36px;
@@ -729,8 +966,8 @@ export default {
   align-content: space-between;
 }
 .feedback .title:nth-of-type(1) {
-  text-align: center;
   font-weight: 600;
+  margin-bottom: 36px;
 }
 .feedback .title {
   font-size: 18px;

@@ -106,7 +106,9 @@
             :filters="[{text: '网络营销', value: '网络营销'}, {text: '设计', value: '设计'}, {text: '研发', value: '研发'}, {text: '策划', value: '策划'}, {text: '内容', value: '内容'}]"
             :filter-method="filterDepartment"
           ></el-table-column>
-          <el-table-column prop="task" label="任务"></el-table-column>
+          <el-table-column prop="task" label="任务">
+            <el-link slot-scope="scope" @click="task_detail(scope.row.id)">{{scope.row.task}}</el-link>
+          </el-table-column>
           <el-table-column prop="state_text" label="执行状态">
             <div
               slot-scope="scope"
@@ -132,7 +134,10 @@
                 @click="sponsor_feedback(scope.row.id,scope.row.task)"
                 v-if="scope.row.state != 3"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="sponsor_achieve(scope.row.id,scope.row.task,scope.row.state)">
+              <el-popconfirm
+                title="确认执行此操作吗？"
+                @onConfirm="sponsor_achieve(scope.row.id,scope.row.task,scope.row.state)"
+              >
                 <el-button
                   size="small"
                   type="primary"
@@ -221,7 +226,10 @@
                 slot="reference"
                 @click="join_feedback(scope.row.id,scope.row.task)"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_achieve(scope.row.id,scope.row.task,scope.row.state)">
+              <el-popconfirm
+                title="确认执行此操作吗？"
+                @onConfirm="join_achieve(scope.row.id,scope.row.task,scope.row.state)"
+              >
                 <el-button
                   size="small"
                   v-if="scope.row.state == 2 || scope.row.state == 4"
@@ -235,81 +243,71 @@
       </el-col>
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
-        <el-row class="task_details">
-          <el-col :span="6" class="title">执行部门：</el-col>
-          <el-col :span="18">设计部</el-col>
-          <el-col :span="6" class="title">任务类型：</el-col>
-          <el-col :span="18">网站设计</el-col>
-          <el-col :span="6" class="title">执行人：</el-col>
-          <el-col :span="18">张三</el-col>
-          <el-col :span="6" class="title">状态：</el-col>
-          <el-col :span="18">
-            <el-select
-              v-model="state_value"
-              placeholder="请选择"
-              size="small"
-              :class="{'state_color1': state_value == 1,
-                  'state_color2': state_value == 2,
-                  'state_color3': state_value == 3,
-                  'state_color4': state_value == 4}"
-            >
-              <el-option
-                v-for="item in state_list"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-col>
-          <el-col :span="6" class="title">预计时间：</el-col>
-          <el-col :span="18">20-01-21</el-col>
-          <el-col :span="6" class="title">完成时间：</el-col>
-          <el-col :span="18">20-01-21</el-col>
-          <el-col :span="6" class="title">需求：</el-col>
-          <el-col :span="18">PC网站设计，客户需求商务简约风，以皓影为主题，突出产品的价值定位及车型特点。</el-col>
-          <el-col :span="6" class="title">附件：</el-col>
-          <el-col :span="18">
-            <div class="smname">
-              <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <br />参考资料
-            </div>
-          </el-col>
-          <el-divider content-position="right"></el-divider>
-          <el-col :span="6" class="title">完成结果：</el-col>
-          <el-col :span="18">
-            <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
-          </el-col>
-          <el-col :span="6" class="title">附件：</el-col>
-          <el-col :span="18">
-            <div class="smname">
-              <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <br />最终成果
-            </div>
-          </el-col>
-          <el-divider content-position="right"></el-divider>
-          <el-col :span="6" class="title">反馈意见：</el-col>
-          <el-col :span="18" class="suggest">
-            <el-scrollbar>
-              <el-col :span="24" class="suggest_list">
-                <el-col :span="12" class="time">2020-01-12 12:00</el-col>
-                <el-col :span="12" class="pop">客户部-黄振宇</el-col>
-                <el-col :span="24" class="content">请将色调调整为红色。</el-col>
-              </el-col>
-              <el-col :span="24" class="suggest_list">
-                <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                <el-col :span="12" class="pop">内容部-张三</el-col>
-                <el-col :span="24" class="content">调整意见文本内容。</el-col>
-              </el-col>
-              <el-col :span="24" class="suggest_list">
-                <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                <el-col :span="12" class="pop">内容部-张三</el-col>
-                <el-col :span="24" class="content">调整意见文本内容。</el-col>
-              </el-col>
-            </el-scrollbar>
-          </el-col>
+        <el-scrollbar style="height: 100%">
+          <el-row class="task_details">
+            <el-col :span="6" class="title">执行部门：</el-col>
+            <el-col :span="18">设计部</el-col>
+            <el-col :span="6" class="title">任务类型：</el-col>
+            <el-col :span="18">网站设计</el-col>
+            <el-col :span="6" class="title">执行人：</el-col>
+            <el-col :span="18">张三</el-col>
+            <el-col :span="6" class="title">状态：</el-col>
+            <el-col :span="18" class="state_color2">执行中</el-col>
+            <el-col :span="6" class="title">预计时间：</el-col>
+            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="6" class="title">完成时间：</el-col>
+            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="6" class="title">需求：</el-col>
+            <el-col :span="18">PC网站设计，客户需求商务简约风，以皓影为主题，突出产品的价值定位及车型特点。</el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <div class="smname">
+                <img src="static/images/document/ppt.png" width="24" alt srcset />
+                <br />参考资料
+              </div>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">完成结果：</el-col>
+            <el-col :span="18">
+              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
+            </el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <div class="smname">
+                <img src="static/images/document/ppt.png" width="24" alt srcset />
+                <br />最终成果
+              </div>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">反馈意见：</el-col>
+            <el-col :span="18" class="suggest">
+              <el-scrollbar>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-12 12:00</el-col>
+                  <el-col :span="12" class="pop">客户部-黄振宇</el-col>
+                  <el-col :span="24" class="content">请将色调调整为红色。</el-col>
+                </el-col>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
+                  <el-col :span="12" class="pop">内容部-张三</el-col>
+                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                </el-col>
+                <el-col :span="24" class="suggest_list">
+                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
+                  <el-col :span="12" class="pop">内容部-张三</el-col>
+                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                </el-col>
+              </el-scrollbar>
+            </el-col>
+            <!-- <el-footer> -->
+
+            <!-- </el-footer> -->
+          </el-row>
+        </el-scrollbar>
+        <el-row class="batton_pa">
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
+            <el-button size="small" type="primary">完成</el-button>
           </el-col>
         </el-row>
       </el-drawer>
@@ -515,27 +513,7 @@ export default {
       // 项目类型1选择
       tab1_act: 1,
       // 项目类型2选择
-      tab2_act: 1,
-      // 项目状态选择
-      state_list: [
-        {
-          value: '1',
-          label: '审核中'
-        },
-        {
-          value: '2',
-          label: '执行中'
-        },
-        {
-          value: '3',
-          label: '已完成'
-        },
-        {
-          value: '4',
-          label: '延期'
-        }
-      ],
-      state_value: '1'
+      tab2_act: 1
     }
   },
   // 方法
@@ -575,12 +553,12 @@ export default {
         this.tab2_act = 2
       }
     },
-    sponsor_feedback(e,task) {
+    sponsor_feedback(e, task) {
       console.log('我发起反馈' + e)
       this.drawer2 = true
       this.drawer2_task = task
     },
-    sponsor_achieve(e,task,state) {
+    sponsor_achieve(e, task, state) {
       console.log('我发起完成' + e)
       if (state == 4) {
         this.drawer3 = true
@@ -590,12 +568,12 @@ export default {
     join_redact(e) {
       console.log('我参与忽略' + e)
     },
-    join_feedback(e,task) {
+    join_feedback(e, task) {
       console.log('我参与反馈' + e)
       this.drawer2 = true
       this.drawer2_task = task
     },
-    join_achieve(e,task,state) {
+    join_achieve(e, task, state) {
       console.log('我参与完成' + e)
       if (state == 4) {
         this.drawer3 = true
@@ -790,14 +768,17 @@ export default {
 }
 .task .task_details {
   height: 100%;
-  padding: 36px;
+  padding: 36px 36px 108px 36px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-content: space-between;
   align-items: flex-start;
 }
-.task .task_details .title{
+.task .task_details > .el-col {
+  margin-bottom: 18px;
+}
+.task .task_details .title {
   text-align: right;
   box-sizing: border-box;
   padding-right: 18px;
@@ -829,20 +810,19 @@ export default {
   color: #000;
   font-size: 16px;
 }
+.task .batton_pa {
+  width: 100%;
+  padding: 36px;
+  background: white;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
 .task .task_details >>> .el-select input {
   width: 81px;
   border: none;
   font-size: 16px;
   padding-left: 0;
-}
-.task >>> .el-drawer__body {
-  height: 100%;
-}
-.task >>> .el-scrollbar {
-  height: 100%;
-}
-.task >>> .el-scrollbar__wrap {
-  overflow-x: hidden;
 }
 .task .batton {
   display: flex;
@@ -864,7 +844,7 @@ export default {
 }
 .feedback .title:nth-of-type(1) {
   font-weight: 600;
-  text-align: center;
+  margin-bottom: 36px;
 }
 .feedback .title {
   font-size: 18px;

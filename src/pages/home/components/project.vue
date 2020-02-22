@@ -125,9 +125,13 @@
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="feedback(scope.row.id,scope.row.name)">
-                <el-button size="small" type="info" slot="reference" v-if="scope.row.state == 1">反馈</el-button>
-              </el-popconfirm>
+              <el-button
+                size="small"
+                type="info"
+                slot="reference"
+                v-if="scope.row.state == 1"
+                @click="feedback(scope.row.id,scope.row.name)"
+              >反馈</el-button>
               <el-popconfirm
                 title="确认执行此操作吗？"
                 @onConfirm="achieve(scope.row.id,scope.row.name,scope.row.state)"
@@ -139,14 +143,13 @@
                   v-if="scope.row.state == 1"
                 >完成</el-button>
               </el-popconfirm>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="aredact(scope.row.id,scope.row.name)">
-                <el-button
-                  size="small"
-                  type="info"
-                  slot="reference"
-                  v-if="scope.row.state == 2 || scope.row.state == 4"
-                >编辑</el-button>
-              </el-popconfirm>
+              <el-button
+                size="small"
+                type="info"
+                slot="reference"
+                v-if="scope.row.state == 2 || scope.row.state == 4"
+                @click="aredact(scope.row.id,scope.row.name)"
+              >编辑</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.id)">
                 <el-button
                   size="small"
@@ -237,79 +240,120 @@
       </el-drawer>
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer2" :with-header="false">
-        <el-row class="add_box">
-          <el-col :span="24" class="title">创建项目</el-col>
-          <el-col :span="6" class="title title1">名称</el-col>
-          <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
-          </el-col>
-          <el-col :span="6" class="title title1">分类</el-col>
-          <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
-          </el-col>
-          <el-col :span="18" :offset="6">
-            <el-radio v-model="radio1" label="1">专项</el-radio>
-            <el-radio v-model="radio1" label="2">日常</el-radio>
-          </el-col>
+        <el-scrollbar style="height: 100%">
+          <el-row class="add_box">
+            <el-col :span="24">
+              <el-col :span="6" class="title title1">创建项目</el-col>
+            </el-col>
+            <el-col :span="6" class="title">名称</el-col>
+            <el-col :span="13">
+              <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+            </el-col>
+            <el-col :span="6" class="title">分类</el-col>
+            <el-col :span="13">
+              <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+            </el-col>
+            <el-col :span="18" :offset="6">
+              <el-radio v-model="radio1" label="1">专项</el-radio>
+              <el-radio v-model="radio1" label="2">日常</el-radio>
+            </el-col>
 
-          <el-col :span="6" class="title title1">预计时间</el-col>
-          <el-col :span="13" class="presetTime">
-            <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
-          </el-col>
+            <el-col :span="6" class="title">预计时间</el-col>
+            <el-col :span="13" class="presetTime">
+              <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
+            </el-col>
 
-          <el-col :span="6" class="title title1">需求</el-col>
-          <el-col :span="13">
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 6, maxRows: 8}"
-              placeholder="请输入内容"
-              v-model="new_task.demand"
-            ></el-input>
-          </el-col>
-          <el-col :span="18" :offset="6">
-            <el-radio v-model="radio2" label="1">项目经理</el-radio>
-            <el-radio v-model="radio2" label="2">执行部门</el-radio>
-          </el-col>
-          <el-col :span="16" :offset="3" v-show="radio2 == 1">
-            <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
-          </el-col>
-          <el-col :span="16" :offset="3" v-show="radio2 == 2">
-            <el-checkbox-group v-model="checkList1">
-              <el-checkbox label="武汉策划"></el-checkbox>
-              <el-checkbox label="上海研发"></el-checkbox>
-              <el-checkbox label="北京网络销售"></el-checkbox>
-              <el-checkbox label="武汉内容"></el-checkbox>
-              <el-checkbox label="上海项目"></el-checkbox>
-            </el-checkbox-group>
-          </el-col>
-          <el-col :span="24">
-            <el-col :span="6" class="title title1">知晓人</el-col>
-          </el-col>
-          <el-col :span="18" :offset="3" class="know_pop">
-            <el-tag
-              :key="tag"
-              v-for="tag in dynamicTags"
-              closable
-              :disable-transitions="false"
-              @close="handleClose(tag)"
-            >{{tag}}</el-tag>
-            <el-input
-              class="input-new-tag"
-              v-if="inputVisible"
-              v-model="inputValue"
-              ref="saveTagInput"
-              size="small"
-              @keyup.enter.native="handleInputConfirm"
-              @blur="handleInputConfirm"
-            ></el-input>
-          </el-col>
+            <el-col :span="6" class="title">需求</el-col>
+            <el-col :span="13">
+              <el-input
+                type="textarea"
+                :autosize="{ minRows: 6, maxRows: 8}"
+                placeholder="请输入内容"
+                v-model="new_task.demand"
+              ></el-input>
+            </el-col>
+            <el-col :span="18" :offset="6">
+              <el-radio v-model="radio2" label="1">项目经理</el-radio>
+              <el-radio v-model="radio2" label="2">执行部门</el-radio>
+            </el-col>
+            <el-col :span="13" :offset="6" v-show="radio2 == 1">
+              <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+            </el-col>
+            <el-col :span="13" :offset="6" v-show="radio2 == 2">
+              <el-checkbox-group v-model="checkList1" class="check_box">
+                <el-checkbox label="武汉策划"></el-checkbox>
+                <el-checkbox label="上海研发"></el-checkbox>
+                <el-checkbox label="北京网络销售"></el-checkbox>
+                <el-checkbox label="武汉内容"></el-checkbox>
+                <el-checkbox label="上海项目"></el-checkbox>
+              </el-checkbox-group>
+            </el-col>
+            <el-col :span="24">
+              <el-col :span="6" class="title">知晓人</el-col>
+            </el-col>
+            <el-col :span="18" :offset="6" class="know_pop">
+              <el-tag
+                :key="tag"
+                v-for="tag in dynamicTags"
+                closable
+                :disable-transitions="false"
+                @close="handleClose(tag)"
+              >{{tag}}</el-tag>
+              <el-input
+                class="input-new-tag"
+                v-if="inputVisible"
+                v-model="inputValue"
+                ref="saveTagInput"
+                size="small"
+                @keyup.enter.native="handleInputConfirm"
+                @blur="handleInputConfirm"
+              ></el-input>
+            </el-col>
 
-          <el-col :span="9" :offset="3">
-            <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
-          </el-col>
-          <el-col :span="6" :offset="1">
-            <el-button size="small" type="primary" @click="showInput">添加</el-button>
-          </el-col>
+            <el-col :span="9" :offset="6">
+              <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
+            </el-col>
+            <el-col :span="6" :offset="1">
+              <el-button size="small" type="primary" @click="showInput">添加</el-button>
+            </el-col>
+            <!-- 上传 -->
+            <el-col :span="13" :offset="6" class="upload">
+              <el-upload action="#" list-type="picture-card" :auto-upload="false">
+                <i slot="default" class="el-icon-plus"></i>
+                <div slot="file" slot-scope="{file}">
+                  <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
+                  <span class="el-upload-list__item-actions">
+                    <span
+                      class="el-upload-list__item-preview"
+                      @click="handlePictureCardPreview(file)"
+                    >
+                      <i class="el-icon-zoom-in"></i>
+                    </span>
+                    <span
+                      v-if="!disabled"
+                      class="el-upload-list__item-delete"
+                      @click="handleDownload(file)"
+                    >
+                      <i class="el-icon-download"></i>
+                    </span>
+                    <span
+                      v-if="!disabled"
+                      class="el-upload-list__item-delete"
+                      @click="handleRemove(file)"
+                    >
+                      <i class="el-icon-delete"></i>
+                    </span>
+                  </span>
+                </div>
+              </el-upload>
+              <el-dialog :visible.sync="dialogVisible" class="upload_list">
+                <img width="100%" :src="dialogImageUrl" alt />
+              </el-dialog>
+              <div class="text">附件</div>
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+        <el-row class="batton_pa">
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
@@ -344,7 +388,7 @@ export default {
       drawer2: false,
       drawer3: false,
       drawer1_name: '',
-      drawer3_name: '',
+      drawer3_name: '任务名称',
       // plain: false,
       autofocus: true,
       loginState: true, // 避免多次点击
@@ -495,7 +539,11 @@ export default {
       add_list: '',
       checkList1: [],
       checkList2: [],
-      checkList3: []
+      checkList3: [],
+      // 上传附件
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false
     }
   },
   // 方法
@@ -617,6 +665,17 @@ export default {
       }
       this.inputVisible = false
       this.inputValue = ''
+    },
+    // 上传附件
+    handleRemove(file) {
+      console.log(file)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    handleDownload(file) {
+      console.log(file)
     }
     // 提示框
     // pop_up() {
@@ -758,15 +817,14 @@ export default {
 }
 
 .project .feedback .title {
-  margin-top: 49px;
   font-size: 18px;
   margin-bottom: 13px;
 }
 .project .feedback .title:nth-of-type(1) {
   margin-top: 0;
-  text-align: center;
   font-weight: 600;
   font-size: 18px;
+  margin-bottom: 36px;
 }
 .feedback {
   height: 100%;
@@ -817,16 +875,15 @@ export default {
 }
 
 .project .add_box {
-  height: 100%;
+  height: 985px;
   box-sizing: border-box;
-  padding: 36px 0;
+  padding: 36px 0 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   align-content: space-between;
 }
-.project .add_box > .title:nth-of-type(1) {
-  text-align: center;
+.project .add_box .title1 {
   font-weight: 600;
   font-size: 18px;
 }
@@ -837,6 +894,21 @@ export default {
 }
 .project .add_box .presetTime > div {
   width: 100%;
+}
+.project .add_box .check_box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+.project .add_box .check_box .el-checkbox {
+  width: 32%;
+  margin: 0;
+}
+.project .add_box .upload .text {
+  width: 146px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.65);
 }
 .project .add_box .batton {
   display: flex;
@@ -850,6 +922,15 @@ export default {
 .project .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
+}
+.project .batton_pa {
+  width: 100%;
+  padding: 36px;
+  background: white;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 9;
 }
 .project >>> .el-drawer__body {
   height: 100%;

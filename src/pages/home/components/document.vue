@@ -239,7 +239,7 @@ export default {
       ],
       records_document_list: [
         {
-          time: '2018/4/2 20:46',
+          time: '20/04/02 20:46',
           result: '完成',
           people: '张三',
           file_name: '文档',
@@ -247,7 +247,7 @@ export default {
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
+          time: '20/04/02 20:46',
           result: '完成',
           people: '张三',
           file_name: '文档',
@@ -255,7 +255,7 @@ export default {
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
+          time: '20/04/02 20:46',
           result: '完成',
           people: '张三',
           file_name: '文档',
@@ -263,7 +263,7 @@ export default {
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
+          time: '20/04/02 20:46',
           result: '完成',
           people: '张三',
           file_name: '文档',
@@ -271,7 +271,7 @@ export default {
           file_url: ''
         },
         {
-          time: '2018/4/2 20:46',
+          time: '20/04/02 20:46',
           result: '完成',
           people: '张三',
           file_name: '文档',
