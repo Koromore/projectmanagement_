@@ -5,16 +5,13 @@
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
         <div :span="3" class="header-right">
           <div class="add_du" @click="add_box">
-            <!-- <img src="static/images/hander/add_du.png" width="32" alt srcset /> -->
             <i class="el-icon-folder-add"></i>
             创建
           </div>
           <el-col :span="8">
             <el-badge :value="3" class="item">
-              <!-- <img src="static/images/hander/news.png" alt srcset /> -->
               <i class="el-icon-bell"></i>
             </el-badge>
-            <!-- <div>消息</div> -->
           </el-col>
           <!-- 头像 -->
           <div class="portrait">张三</div>
@@ -24,18 +21,11 @@
               <i class="el-icon-caret-bottom el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
-              <!-- <el-dropdown-item class="clearfix">
-                  <router-link tag="span" to="/changePassword">修改密码</router-link>
-              </el-dropdown-item>-->
               <el-dropdown-item class="clearfix">
                 <span @click="logout">退出</span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <!-- <el-avatar
-            size="large"
-            src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png"
-          ></el-avatar>-->
         </div>
       </el-header>
     </el-row>

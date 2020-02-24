@@ -346,7 +346,7 @@
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
-              <el-scrollbar>
+              <el-scrollbar style="height: 100%;">
                 <el-col :span="24" class="suggest_list">
                   <el-col :span="12" class="time">2020-01-12 12:00</el-col>
                   <el-col :span="12" class="pop">客户部-黄振宇</el-col>
@@ -972,5 +972,8 @@ export default {
 .feedback .title {
   font-size: 18px;
   margin-bottom: 13px;
+}
+.project_details >>> .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
 </style>

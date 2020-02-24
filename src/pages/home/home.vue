@@ -2,8 +2,8 @@
   <div class="home">
     <Header @func="getMsgFormSon"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
+      <!-- 左菜单栏 start -->
       <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-        <!-- 左菜单栏 -->
         <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')">
           <i class="el-icon-pie-chart"></i>
           统计
@@ -28,15 +28,16 @@
           设置
         </div>
       </el-aside>
-
+      <!-- 左菜单栏 end -->
       <el-container>
-        <!-- 内容 -->
+        <!-- 内容 start -->
         <el-main>
           <router-view></router-view>
         </el-main>
+        <!-- 内容 end -->
       </el-container>
     </el-container>
-    <!-- 抽屉 -->
+    <!-- 抽屉添加任务 start -->
     <el-drawer title="添加任务" :visible.sync="drawer" :with-header="false">
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
@@ -45,22 +46,25 @@
           </el-col>
           <el-col :span="6" class="title">名称</el-col>
           <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
           </el-col>
           <el-col :span="6" class="title">分类</el-col>
           <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+            <el-cascader
+              v-model="new_task.business_type"
+              :options="business_type_list"
+              @change="handleChange"
+              style="width: 100%;"
+            ></el-cascader>
           </el-col>
           <el-col :span="18" :offset="6">
-            <el-radio v-model="radio1" label="1">专项</el-radio>
-            <el-radio v-model="radio1" label="2">日常</el-radio>
+            <el-radio v-model="new_task.radio1" label="1">专项</el-radio>
+            <el-radio v-model="new_task.radio1" label="2">日常</el-radio>
           </el-col>
-
           <el-col :span="6" class="title">预计时间</el-col>
           <el-col :span="13" class="presetTime">
             <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
           </el-col>
-
           <el-col :span="6" class="title">需求</el-col>
           <el-col :span="13">
             <el-input
@@ -71,14 +75,14 @@
             ></el-input>
           </el-col>
           <el-col :span="18" :offset="6">
-            <el-radio v-model="radio2" label="1">项目经理</el-radio>
-            <el-radio v-model="radio2" label="2">执行部门</el-radio>
+            <el-radio v-model="new_task.radio2" label="1">项目经理</el-radio>
+            <el-radio v-model="new_task.radio2" label="2">执行部门</el-radio>
           </el-col>
-          <el-col :span="13" :offset="6" v-show="radio2 == 1">
-            <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+          <el-col :span="13" :offset="6" v-show="new_task.radio2 == 1">
+            <el-input placeholder="请输入内容" v-model="new_task.manager" clearable></el-input>
           </el-col>
-          <el-col :span="13" :offset="6" v-show="radio2 == 2">
-            <el-checkbox-group v-model="checkList" class="check_box">
+          <el-col :span="17" :offset="6" v-show="new_task.radio2 == 2">
+            <el-checkbox-group v-model="new_task.checkList" class="check_box">
               <el-checkbox label="武汉策划"></el-checkbox>
               <el-checkbox label="上海研发"></el-checkbox>
               <el-checkbox label="北京网络销售"></el-checkbox>
@@ -92,22 +96,13 @@
           <el-col :span="18" :offset="6" class="know_pop">
             <el-tag
               :key="tag"
-              v-for="tag in dynamicTags"
+              v-for="tag in new_task.dynamicTags"
               closable
               :disable-transitions="false"
               @close="handleClose(tag)"
+              class="know_pop_list"
             >{{tag}}</el-tag>
-            <el-input
-              class="input-new-tag"
-              v-if="inputVisible"
-              v-model="inputValue"
-              ref="saveTagInput"
-              size="small"
-              @keyup.enter.native="handleInputConfirm"
-              @blur="handleInputConfirm"
-            ></el-input>
           </el-col>
-
           <el-col :span="9" :offset="6">
             <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
           </el-col>
@@ -116,10 +111,18 @@
           </el-col>
           <!-- 上传 -->
           <el-col :span="13" :offset="6" class="upload">
-            <el-upload action="#" list-type="picture-card" :auto-upload="false">
+            <el-upload
+              action="http://218.106.254.122:8083/pmbs/file/upload"
+              list-type="picture-card"
+              :auto-upload="false"
+              :on-success="handleSuccess"
+              :file-list="fileList"
+              :on-change="test"
+            >
               <i slot="default" class="el-icon-plus"></i>
               <div slot="file" slot-scope="{file}">
                 <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
+                <!-- {{file.raw.type}} -->
                 <span class="el-upload-list__item-actions">
                   <span
                     class="el-upload-list__item-preview"
@@ -158,6 +161,7 @@
         </el-col>
       </el-row>
     </el-drawer>
+    <!-- 抽屉添加任务 end -->
   </div>
 </template>
 <script>
@@ -175,28 +179,88 @@ export default {
       drawer: false,
       // 新增
       new_task: {
-        parent_task: '',
-        new_name: '',
-        department: [],
-        presetTime: '',
-        task_type: '',
-        demand: ''
+        new_name: '', // 任务名称
+        business_type: [], // 分类
+        radio1: '1', // 专项，日常
+        presetTime: '', // 预计时间
+        demand: '', // 需求
+        radio2: '2', // 项目经理,执行部门 选择
+        manager: '', // 项目经理
+        checkList: [], // 执行部门
+        dynamicTags: [
+          '标签一',
+          '标签二',
+          '标签三',
+          '标签四',
+          '标签五',
+          '标签六',
+          '标签七'
+        ] // 知晓人
       },
-      radio1: '1',
-      radio2: '2',
+      // 知晓人
       dynamicTags: ['标签一', '标签二', '标签三', '标签四'],
-      inputVisible: false,
-      inputValue: '',
       add_list: '',
       checkList: [],
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
-      disabled: false
+      disabled: false,
+      // 业务类型列表
+      business_type_list: [
+        {
+          value: '业务类型1',
+          label: '业务类型1',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户1',
+              label: '客户1'
+            }
+          ]
+        },
+        {
+          value: '业务类型2',
+          label: '业务类型2',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户2',
+              label: '客户2'
+            }
+          ]
+        },
+        {
+          value: '业务类型3',
+          label: '业务类型3',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户2',
+              label: '客户2'
+            }
+          ]
+        }
+      ],
+      fileList: []
     }
+    
   },
   // 方法
   methods: {
+    // 分类二级联动
+    handleChange(value) {
+      console.log(value)
+      console.log(this.value)
+    },
     // 获取浏览器宽高
     widthheight() {
       let winWidth = window.innerWidth
@@ -214,14 +278,9 @@ export default {
         this.$router.push({ path: '/home/components/' + url })
       }
     },
-    // 项目详情页面显示
-    beClose(e) {
-      console.log(e)
-      this.show_acti = 6
-    },
-    // 添加标签
+    // 添加知晓人标签
     showInput() {
-      let list = this.dynamicTags
+      let list = this.new_task.dynamicTags
       let add_list = this.add_list
       let cf = true
       if (add_list) {
@@ -238,18 +297,18 @@ export default {
         }
       }
     },
-
-    handleInputConfirm() {
-      let inputValue = this.inputValue
-      if (inputValue) {
-        this.dynamicTags.push(inputValue)
-      }
-      this.inputVisible = false
-      this.inputValue = ''
+    // 删除知晓人标签
+    handleClose(tag) {
+      this.new_task.dynamicTags.splice(
+        this.new_task.dynamicTags.indexOf(tag),
+        1
+      )
     },
+    // 接受子组件数据
     getMsgFormSon(data) {
       this.drawer = data
     },
+    // 获取判断路由地址
     router_url() {
       let url = this.$route.path
       let url1 = '/home/components/statistics'
@@ -277,11 +336,24 @@ export default {
       console.log(file)
     },
     handlePictureCardPreview(file) {
+      console.log(file)
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    handleDownload(file) {
+    handleDownload(file,fileList) {
       console.log(file)
+      console.log(fileList)
+    },
+    // 上传回调
+    handleSuccess(res, file, fileList) {
+      console.log(res)
+      console.log(file)
+      console.log(fileList)
+      console.log("123")
+    },
+    test(file, fileList){
+      console.log(file)
+      console.log(fileList)
     }
   },
   // 钩子函数
@@ -331,13 +403,16 @@ export default {
   min-width: 1200px;
 }
 .home .add_box {
-  height: 985px;
+  /* height: 985px; */
   box-sizing: border-box;
   padding: 36px 0 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   align-content: space-between;
+}
+.home .add_box > .el-col {
+  margin-bottom: 16px;
 }
 .home .add_box .title1 {
   font-weight: 600;
@@ -358,7 +433,7 @@ export default {
   align-items: center;
 }
 .home .add_box .check_box .el-checkbox {
-  width: 32%;
+  width: 108px;
   margin: 0;
 }
 .home .add_box .upload .text {
@@ -366,18 +441,13 @@ export default {
   text-align: center;
   color: rgba(0, 0, 0, 0.65);
 }
-.home .add_box .batton {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.home .add_box .batton button {
-  width: 36%;
-}
+
 .home .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
+}
+.home .add_box .know_pop .know_pop_list {
+  margin-bottom: 13px;
 }
 .home .batton_pa {
   width: 100%;
@@ -388,14 +458,17 @@ export default {
   left: 0;
   z-index: 9;
 }
+.home .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.home .batton button {
+  width: 36%;
+}
 .home >>> .el-drawer__body {
   height: 100%;
-}
-.home >>> .el-scrollbar {
-  height: 100%;
-}
-.home >>> .el-scrollbar__wrap {
-  overflow-x: hidden;
 }
 .home >>> .el-main .cell {
   text-align: left;

@@ -281,18 +281,18 @@
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
-              <el-scrollbar>
-                <el-col :span="24" class="suggest_list">
+              <el-scrollbar style="height: 100%;">
+                <el-col :span="23" class="suggest_list">
                   <el-col :span="12" class="time">2020-01-12 12:00</el-col>
                   <el-col :span="12" class="pop">客户部-黄振宇</el-col>
                   <el-col :span="24" class="content">请将色调调整为红色。</el-col>
                 </el-col>
-                <el-col :span="24" class="suggest_list">
+                <el-col :span="23" class="suggest_list">
                   <el-col :span="12" class="time">2020-01-10 10:00</el-col>
                   <el-col :span="12" class="pop">内容部-张三</el-col>
                   <el-col :span="24" class="content">调整意见文本内容。</el-col>
                 </el-col>
-                <el-col :span="24" class="suggest_list">
+                <el-col :span="23" class="suggest_list">
                   <el-col :span="12" class="time">2020-01-10 10:00</el-col>
                   <el-col :span="12" class="pop">内容部-张三</el-col>
                   <el-col :span="24" class="content">调整意见文本内容。</el-col>
@@ -792,6 +792,10 @@ export default {
 .task .task_details .suggest {
   height: 108px;
 }
+/* .task .task_details .suggest .el-scrollbar{
+  height: 100%;
+  overflow-x: scroll;
+} */
 .task .task_details .suggest .suggest_list {
   height: 48px;
   margin-bottom: 12px;
@@ -849,5 +853,11 @@ export default {
 .feedback .title {
   font-size: 18px;
   margin-bottom: 13px;
+}
+/* .task >>> .el-drawer__body {
+  height: 100%;
+} */
+.task >>> .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
 </style>

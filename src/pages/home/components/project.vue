@@ -93,10 +93,8 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
-          @cell-click="project_details"
         >
           <el-table-column prop="name" label="名称">
-            <!-- <div slot-scope="scope" class="pointer">{{scope.row.name}     }</div> -->
             <el-link slot-scope="scope">{{scope.row.name}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
@@ -170,7 +168,6 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
-          @cell-click="project_details"
         >
           <el-table-column prop="name" label="名称">
             <el-link slot-scope="scope">{{scope.row.name}}</el-link>
@@ -209,8 +206,6 @@
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
             </el-col>
-            <!-- </el-col>
-            <el-col :span="24">-->
             <br />
             <el-col :span="6" class="title">接受</el-col>
             <el-col :span="19">
@@ -222,8 +217,6 @@
                 <el-checkbox label="上海项目"></el-checkbox>
               </el-checkbox-group>
             </el-col>
-            <!-- </el-col>
-            <el-col :span="24">-->
             <el-col :span="6" class="title">任务</el-col>
             <el-col :span="19">
               <el-checkbox-group v-model="checkList3">
@@ -247,22 +240,25 @@
             </el-col>
             <el-col :span="6" class="title">名称</el-col>
             <el-col :span="13">
-              <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+              <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
             </el-col>
             <el-col :span="6" class="title">分类</el-col>
             <el-col :span="13">
-              <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+              <el-cascader
+                v-model="new_task.business_type"
+                :options="business_type_list"
+                @change="handleChange"
+                style="width: 100%;"
+              ></el-cascader>
             </el-col>
             <el-col :span="18" :offset="6">
-              <el-radio v-model="radio1" label="1">专项</el-radio>
-              <el-radio v-model="radio1" label="2">日常</el-radio>
+              <el-radio v-model="new_task.radio1" label="1">专项</el-radio>
+              <el-radio v-model="new_task.radio1" label="2">日常</el-radio>
             </el-col>
-
             <el-col :span="6" class="title">预计时间</el-col>
             <el-col :span="13" class="presetTime">
               <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
             </el-col>
-
             <el-col :span="6" class="title">需求</el-col>
             <el-col :span="13">
               <el-input
@@ -273,14 +269,14 @@
               ></el-input>
             </el-col>
             <el-col :span="18" :offset="6">
-              <el-radio v-model="radio2" label="1">项目经理</el-radio>
-              <el-radio v-model="radio2" label="2">执行部门</el-radio>
+              <el-radio v-model="new_task.radio2" label="1">项目经理</el-radio>
+              <el-radio v-model="new_task.radio2" label="2">执行部门</el-radio>
             </el-col>
-            <el-col :span="13" :offset="6" v-show="radio2 == 1">
-              <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
+            <el-col :span="13" :offset="6" v-show="new_task.radio2 == 1">
+              <el-input placeholder="请输入内容" v-model="new_task.manager" clearable></el-input>
             </el-col>
-            <el-col :span="13" :offset="6" v-show="radio2 == 2">
-              <el-checkbox-group v-model="checkList1" class="check_box">
+            <el-col :span="17" :offset="6" v-show="new_task.radio2 == 2">
+              <el-checkbox-group v-model="new_task.checkList" class="check_box">
                 <el-checkbox label="武汉策划"></el-checkbox>
                 <el-checkbox label="上海研发"></el-checkbox>
                 <el-checkbox label="北京网络销售"></el-checkbox>
@@ -294,22 +290,13 @@
             <el-col :span="18" :offset="6" class="know_pop">
               <el-tag
                 :key="tag"
-                v-for="tag in dynamicTags"
+                v-for="tag in new_task.dynamicTags"
                 closable
                 :disable-transitions="false"
                 @close="handleClose(tag)"
+                class="know_pop_list"
               >{{tag}}</el-tag>
-              <el-input
-                class="input-new-tag"
-                v-if="inputVisible"
-                v-model="inputValue"
-                ref="saveTagInput"
-                size="small"
-                @keyup.enter.native="handleInputConfirm"
-                @blur="handleInputConfirm"
-              ></el-input>
             </el-col>
-
             <el-col :span="9" :offset="6">
               <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
             </el-col>
@@ -318,7 +305,12 @@
             </el-col>
             <!-- 上传 -->
             <el-col :span="13" :offset="6" class="upload">
-              <el-upload action="#" list-type="picture-card" :auto-upload="false">
+              <el-upload
+                action="https://jsonplaceholder.typicode.com/posts/"
+                list-type="picture-card"
+                :auto-upload="false"
+                :on-success="testtest"
+              >
                 <i slot="default" class="el-icon-plus"></i>
                 <div slot="file" slot-scope="{file}">
                   <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
@@ -393,6 +385,69 @@ export default {
       autofocus: true,
       loginState: true, // 避免多次点击
       project_style: '',
+      // 新增
+      new_task: {
+        new_name: '', // 任务名称
+        business_type: [], // 分类
+        radio1: '1', // 专项，日常
+        presetTime: '', // 预计时间
+        demand: '', // 需求
+        radio2: '2', // 项目经理,执行部门 选择
+        manager: '', // 项目经理
+        checkList: [], // 执行部门
+        dynamicTags: ['标签一', '标签二', '标签三', '标签四'] // 知晓人
+      },
+      add_list: '',
+      checkList: [],
+      // 上传附件
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false,
+      // 业务类型列表
+      business_type_list: [
+        {
+          value: '业务类型1',
+          label: '业务类型1',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户1',
+              label: '客户1'
+            }
+          ]
+        },
+        {
+          value: '业务类型2',
+          label: '业务类型2',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户2',
+              label: '客户2'
+            }
+          ]
+        },
+        {
+          value: '业务类型3',
+          label: '业务类型3',
+          children: [
+            {
+              value: '客户1',
+              label: '客户1'
+            },
+            {
+              value: '客户2',
+              label: '客户2'
+            }
+          ]
+        }
+      ],
       // 客户列表
       client_list: [
         {
@@ -523,19 +578,6 @@ export default {
       tab2_act: 1,
       // 反馈内容
       result: '',
-      new_task: {
-        parent_task: '',
-        new_name: '',
-        department: [],
-        presetTime: '',
-        task_type: '',
-        demand: ''
-      },
-      radio1: '1',
-      radio2: '2',
-      dynamicTags: ['标签一', '标签二', '标签三', '标签四'],
-      inputVisible: false,
-      inputValue: '',
       add_list: '',
       checkList1: [],
       checkList2: [],
@@ -551,8 +593,53 @@ export default {
     // del(){
     //   this.$delete(this.data,"plain", val)
     // },
-    test() {
-      console.log('test')
+    // 分类二级联动
+    handleChange(value) {
+      console.log(value)
+      console.log(this.value)
+    },
+    // 添加知晓人标签
+    showInput() {
+      let list = this.new_task.dynamicTags
+      let add_list = this.add_list
+      let cf = true
+      if (add_list) {
+        for (let i = 0; i < list.length; i++) {
+          const element = list[i]
+          if (element == add_list) {
+            console.log('请勿重复添加')
+            cf = false
+          }
+        }
+        if (cf) {
+          list.push(add_list)
+          this.add_list = ''
+        }
+      }
+    },
+    // 删除知晓人标签
+    handleClose(tag) {
+      this.new_task.dynamicTags.splice(
+        this.new_task.dynamicTags.indexOf(tag),
+        1
+      )
+    },
+    // 上传附件
+    handleRemove(file) {
+      console.log(file)
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
+    handleDownload(file) {
+      console.log(file)
+    },
+    // 上传回调
+    testtest(res, file, fileList){
+      console.log(res)
+      console.log(file)
+      console.log(fileList)
     },
     // 获取浏览器宽高
     widthheight() {
@@ -610,103 +697,7 @@ export default {
     },
     expurgate(e) {
       console.log('删除' + e)
-    },
-    resetDateFilter() {
-      this.$refs.filterTable.clearFilter('date')
-    },
-    clearFilter() {
-      this.$refs.filterTable.clearFilter()
-    },
-    formatter(row, column) {
-      return row.address
-    },
-    filterHandler(value, row, column) {
-      const property = column['property']
-      return row[property] === value
-    },
-    // 表格点击事件项目详情
-    project_details(row, column, event, cell) {
-      // console.log(row)
-      // console.log(column)
-      // console.log(event)
-      // console.log(cell)
-      if (column.property == 'name') {
-        // console.log("123")
-        this.$router.push({
-          path: '/home/components/project_details',
-          query: { id: row.id }
-        })
-      }
-    },
-    // 添加标签
-    showInput() {
-      let list = this.dynamicTags
-      let add_list = this.add_list
-      let cf = true
-      if (add_list) {
-        for (let i = 0; i < list.length; i++) {
-          const element = list[i]
-          if (element == add_list) {
-            console.log('请勿重复添加')
-            cf = false
-          }
-        }
-        if (cf) {
-          list.push(add_list)
-          this.add_list = ''
-        }
-      }
-    },
-
-    handleInputConfirm() {
-      let inputValue = this.inputValue
-      if (inputValue) {
-        this.dynamicTags.push(inputValue)
-      }
-      this.inputVisible = false
-      this.inputValue = ''
-    },
-    // 上传附件
-    handleRemove(file) {
-      console.log(file)
-    },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url
-      this.dialogVisible = true
-    },
-    handleDownload(file) {
-      console.log(file)
     }
-    // 提示框
-    // pop_up() {
-    //   const h = this.$createElement
-    //   this.$msgbox({
-    //     title: '操作提示',
-    //     message: '确认执行此操作吗？',
-    //     showCancelButton: true,
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     beforeClose: (action, instance, done) => {
-    //       if (action === 'confirm') {
-    //         instance.confirmButtonLoading = true
-    //         instance.confirmButtonText = '执行中...'
-    //         setTimeout(() => {
-    //           done()
-    //           setTimeout(() => {
-    //             instance.confirmButtonLoading = false
-    //           }, 300)
-    //         }, 1500)
-    //       } else {
-    //         done()
-    //       }
-    //     }
-    //   }).then(action => {
-    //     this.$message({
-    //       type: 'info',
-    //       message: '操作成功'
-    //     })
-    //   })
-    // }
   },
   // 钩子函数
   mounted() {
@@ -864,24 +855,19 @@ export default {
 .state_color4 {
   color: rgb(255, 0, 0);
 }
-.project .batton {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.project .batton button {
-  width: 36%;
-}
+
 
 .project .add_box {
-  height: 985px;
+  /* height: 985px; */
   box-sizing: border-box;
   padding: 36px 0 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   align-content: space-between;
+}
+.project .add_box > .el-col {
+  margin-bottom: 16px;
 }
 .project .add_box .title1 {
   font-weight: 600;
@@ -902,7 +888,7 @@ export default {
   align-items: center;
 }
 .project .add_box .check_box .el-checkbox {
-  width: 32%;
+  width: 108px;
   margin: 0;
 }
 .project .add_box .upload .text {
@@ -910,18 +896,12 @@ export default {
   text-align: center;
   color: rgba(0, 0, 0, 0.65);
 }
-.project .add_box .batton {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.project .add_box .batton button {
-  width: 36%;
-}
 .project .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
+}
+.project .add_box .know_pop .know_pop_list {
+  margin-bottom: 13px;
 }
 .project .batton_pa {
   width: 100%;
@@ -932,14 +912,14 @@ export default {
   left: 0;
   z-index: 9;
 }
-.project >>> .el-drawer__body {
-  height: 100%;
+.project .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
-.project >>> .el-scrollbar {
-  height: 100%;
-}
-.project >>> .el-scrollbar__wrap {
-  overflow-x: hidden;
+.project .batton button {
+  width: 36%;
 }
 .pointer {
   cursor: pointer;
