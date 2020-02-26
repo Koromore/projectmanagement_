@@ -354,6 +354,21 @@ export default {
     test(file, fileList){
       console.log(file)
       console.log(fileList)
+    },
+    // 新增项目
+    addProject(){
+      let data = {
+        initUserId: '001'
+      }
+      this.$axios
+        .post(
+          '/api/project/save',data
+        )
+        .then(this.addProjectSuss)
+    },
+    // 新增项目回调
+    addProjectSuss(res){
+      console.log(res)
     }
   },
   // 钩子函数

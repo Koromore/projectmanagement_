@@ -282,20 +282,10 @@
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
               <el-scrollbar style="height: 100%;">
-                <el-col :span="23" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-12 12:00</el-col>
-                  <el-col :span="12" class="pop">客户部-黄振宇</el-col>
-                  <el-col :span="24" class="content">请将色调调整为红色。</el-col>
-                </el-col>
-                <el-col :span="23" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                  <el-col :span="12" class="pop">内容部-张三</el-col>
-                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
-                </el-col>
-                <el-col :span="23" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                  <el-col :span="12" class="pop">内容部-张三</el-col>
-                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                <el-col :span="23" class="suggest_list" v-for="item in suggest_list" :key="item.index">
+                  <el-col :span="12" class="time">{{item.time}}</el-col>
+                  <el-col :span="12" class="pop">{{item.pop}}</el-col>
+                  <el-col :span="24" class="content">{{item.content}}</el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
@@ -513,7 +503,29 @@ export default {
       // 项目类型1选择
       tab1_act: 1,
       // 项目类型2选择
-      tab2_act: 1
+      tab2_act: 1,
+      suggest_list:[
+        {
+          time: '2020-01-12 12:00',
+          pop: '客户部-黄振宇',
+          content: '请将色调调整为红色。'
+        },
+        {
+          time: '2020-01-10 10:00',
+          pop: '内容部-张三',
+          content: '调整意见文本内容。'
+        },
+        {
+          time: '2020-01-12 12:00',
+          pop: '客户部-黄振宇',
+          content: '请将色调调整为红色。'
+        },
+        {
+          time: '2020-01-10 10:00',
+          pop: '内容部-张三',
+          content: '调整意见文本内容。'
+        }
+      ]
     }
   },
   // 方法

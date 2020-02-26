@@ -259,8 +259,7 @@ export default {
   },
   // 钩子函数 实例挂载之后
   mounted() {
-    let seif = this
-    seif.getParams()
+    this.getParams()
     this.gantt()
     this.refresh()
     // console.log(this.$store.state.refresh)

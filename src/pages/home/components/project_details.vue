@@ -347,20 +347,10 @@
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
               <el-scrollbar style="height: 100%;">
-                <el-col :span="24" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-12 12:00</el-col>
-                  <el-col :span="12" class="pop">客户部-黄振宇</el-col>
-                  <el-col :span="24" class="content">请将色调调整为红色。</el-col>
-                </el-col>
-                <el-col :span="24" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                  <el-col :span="12" class="pop">内容部-张三</el-col>
-                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
-                </el-col>
-                <el-col :span="24" class="suggest_list">
-                  <el-col :span="12" class="time">2020-01-10 10:00</el-col>
-                  <el-col :span="12" class="pop">内容部-张三</el-col>
-                  <el-col :span="24" class="content">调整意见文本内容。</el-col>
+                <el-col :span="23" class="suggest_list" v-for="item in suggest_list" :key="item.index">
+                  <el-col :span="12" class="time">{{item.time}}</el-col>
+                  <el-col :span="12" class="pop">{{item.pop}}</el-col>
+                  <el-col :span="24" class="content">{{item.content}}</el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
@@ -549,7 +539,29 @@ export default {
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
-      disabled: false
+      disabled: false,
+      suggest_list:[
+        {
+          time: '2020-01-12 12:00',
+          pop: '客户部-黄振宇',
+          content: '请将色调调整为红色。'
+        },
+        {
+          time: '2020-01-10 10:00',
+          pop: '内容部-张三',
+          content: '调整意见文本内容。'
+        },
+        {
+          time: '2020-01-12 12:00',
+          pop: '客户部-黄振宇',
+          content: '请将色调调整为红色。'
+        },
+        {
+          time: '2020-01-10 10:00',
+          pop: '内容部-张三',
+          content: '调整意见文本内容。'
+        }
+      ]
     }
   },
   // 方法
@@ -608,7 +620,12 @@ export default {
     },
     handleDownload(file) {
       console.log(file)
-    }
+    },
+    // 获取页面传参
+    getParams() {
+      let id = this.$route.query.id
+      console.log(id)
+    },
     // 提示框
     // pop_up() {
     //   const h = this.$createElement
@@ -643,6 +660,7 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
+    this.getParams()
   }
 }
 </script>
@@ -922,7 +940,7 @@ export default {
   color: rgb(162, 162, 162);
 }
 .project_details .task_details .suggest {
-  height: 108px;
+  height: 172px;
 }
 .project_details .task_details .suggest .suggest_list {
   height: 48px;

@@ -62,21 +62,15 @@ export default {
           orient: 'horizontal',
           bottom: 10,
           data: [
-            '客户1',
-            '客户2',
-            '客户3',
-            '客户4',
-            '客户5',
-            '客户6',
-            '客户7',
-            '客户8',
-            '客户9',
-            '客户10'
+            '口碑',
+            '网站',
+            '数字营销',
+            'APP'
           ]
         },
         series: [
           {
-            name: '访问来源',
+            name: '业务类型',
             type: 'pie',
             radius: ['50%', '70%'],
             avoidLabelOverlap: false,
@@ -99,16 +93,10 @@ export default {
               }
             },
             data: [
-              { value: 335, name: '客户1' },
-              { value: 310, name: '客户2' },
-              { value: 234, name: '客户3' },
-              { value: 135, name: '客户4' },
-              { value: 1548, name: '客户5' },
-              { value: 335, name: '客户6' },
-              { value: 310, name: '客户7' },
-              { value: 234, name: '客户8' },
-              { value: 135, name: '客户9' },
-              { value: 1548, name: '客户10' }
+              { value: 335, name: '口碑' },
+              { value: 310, name: '网站' },
+              { value: 234, name: '数字营销' },
+              { value: 135, name: 'APP' }
             ]
           }
         ]
@@ -121,7 +109,7 @@ export default {
       // 绘制图表
       myChart.setOption({
         title: { text: '项目状态',padding: 16 },
-        color: ['#C9C9C9', '#FF0000', '#23D7BB'],
+        color: ['#23D7BB', '#f5b96a', '#FF0000', '#C9C9C9' ],
         tooltip: {
           trigger: 'item',
           formatter: '{a} <br/>{b}: {c} ({d}%)'
@@ -133,11 +121,11 @@ export default {
           // left: 40,
           bottom: 10,
           align: 'auto',
-          data: ['直接访问', '邮件营销', '联盟广告']
+          data: ['执行中', '审核中', '延期', '已完成']
         },
         series: [
           {
-            name: '访问来源',
+            name: '项目状态',
             type: 'pie',
             radius: ['50%', '70%'],
             avoidLabelOverlap: false,
@@ -160,9 +148,10 @@ export default {
               }
             },
             data: [
-              { value: 335, name: '直接访问' },
-              { value: 310, name: '邮件营销' },
-              { value: 234, name: '联盟广告' }
+              { value: 335, name: '执行中' },
+              { value: 310, name: '审核中' },
+              { value: 234, name: '延期' },
+              { value: 234, name: '已完成' }
             ]
           }
         ]
@@ -195,7 +184,7 @@ export default {
           }
         },
         legend: {
-          data: ['邮件营销', '联盟广告', '视频广告'],
+          data: ['延期', '审核中', '执行中'],
           top: 16
         },
         grid: {
@@ -229,20 +218,20 @@ export default {
         ],
         series: [
           {
-            name: '邮件营销',
+            name: '延期',
             type: 'bar',
             stack: '广告',
             data: [120, 132, 101, 134, 90, 230, 210, 210, 210, 210],
             nodeClick: 'link'
           },
           {
-            name: '联盟广告',
+            name: '审核中',
             type: 'bar',
             stack: '广告',
             data: [220, 182, 191, 234, 290, 330, 310, 210, 210, 210]
           },
           {
-            name: '视频广告',
+            name: '执行中',
             type: 'bar',
             stack: '广告',
             data: [150, 232, 201, 154, 190, 330, 410, 210, 210, 210]
@@ -252,6 +241,21 @@ export default {
         myChart.on('click', function(params) {
           console.log(params)
         })
+    },
+    getStatisticsData(){
+      // console.log("123")
+      let data = {}
+      this.$axios
+        .post(
+          '/api/statistic/listAjax',data
+        )
+        .then(this.getStatisticsDataSuss)
+    },
+    getStatisticsDataSuss(res){
+      if (res.status == 200) {
+        
+      }
+      console.log(res)
     }
   },
   // 钩子函数
@@ -260,6 +264,7 @@ export default {
     this.business_gantt()
     this.project_state_gantt()
     this.client_state_gantt()
+    this.getStatisticsData()
   }
 }
 </script>

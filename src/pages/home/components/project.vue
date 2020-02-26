@@ -95,7 +95,10 @@
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称">
-            <el-link slot-scope="scope">{{scope.row.name}}</el-link>
+            <el-link
+              slot-scope="scope"
+              @click.native="pathPrpjectDetails(scope.row.id)"
+            >{{scope.row.name}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <div
@@ -170,7 +173,7 @@
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称">
-            <el-link slot-scope="scope">{{scope.row.name}}</el-link>
+            <el-link slot-scope="scope" @click.native="pathPrpjectDetails()">{{scope.row.name}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <div
@@ -465,6 +468,9 @@ export default {
       ],
       // 客户列表选择结果
       client: '广汽本田',
+      // 1-进行中，2-审核中，3-完成，4-延期，5-延期完成
+      projectListOriginate: [], // 项目列表我发起
+      projectListJoin: [], // 项目列表我参与
       // 1审核中 2执行中 3已完成 4延期
       tableData1: [
         {
@@ -482,7 +488,7 @@ export default {
           id: 2,
           name: '皓影赠礼',
           state: 1,
-          state_text: '审核中',
+          state_text: '执行中',
           color: 'color:red;',
           num: '10/4',
           presetTime: '20-01-21',
@@ -493,7 +499,7 @@ export default {
           id: 3,
           name: '皓影赠礼',
           state: 2,
-          state_text: '执行中',
+          state_text: '审核中',
           num: '10/4',
           presetTime: '20-01-21',
           finishTime: '',
@@ -535,7 +541,7 @@ export default {
           id: 2,
           name: '皓影赠礼',
           state: 1,
-          state_text: '审核中',
+          state_text: '执行中',
           color: 'color:red;',
           presetTime: '20-01-21',
           finishTime: '',
@@ -545,7 +551,7 @@ export default {
           id: 3,
           name: '皓影赠礼',
           state: 2,
-          state_text: '执行中',
+          state_text: '审核中',
           presetTime: '20-01-21',
           finishTime: '',
           assignPeople: '张三'
@@ -636,7 +642,7 @@ export default {
       console.log(file)
     },
     // 上传回调
-    testtest(res, file, fileList){
+    testtest(res, file, fileList) {
       console.log(res)
       console.log(file)
       console.log(fileList)
@@ -697,12 +703,72 @@ export default {
     },
     expurgate(e) {
       console.log('删除' + e)
+    },
+    // 跳转项目详情页面
+    pathPrpjectDetails(id) {
+      console.log(id)
+      this.$router.push({
+        path: '/home/components/project_details',
+        query: { id: id }
+      })
+    },
+
+    // 项目管理-我发起
+    getProjectListAjax() {
+      let data = {
+        project: {
+          initUserId: 128
+        }
+      }
+      this.$axios
+        .post('/api/project/listAjax', data)
+        .then(this.getProjectListAjaxSuss)
+    },
+    // 项目管理-我发起回调
+    getProjectListAjaxSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        this.projectListOriginate = res.data.data
+        console.log(this.projectListOriginate)
+      }
+    },
+    // 项目管理-我参与
+    getUserJoinProjectAjax() {
+      let data = {
+        project: {
+          initUserId: 128
+        }
+      }
+      this.$axios
+        .post('/api/project/userjoinproject', data)
+        .then(this.getUserJoinProjectAjaxSuss)
+    },
+    // 项目管理-我参与回调
+    getUserJoinProjectAjaxSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        this.projectListJoin = res.data.data
+      }
+    },
+    // 任务反馈
+    putTaskFeedback() {
+      let data = {
+        initUserId: '001'
+      }
+      this.$axios
+        .post('/api/project/taskfeedback', data)
+        .then(this.putTaskFeedbackSuss)
+    },
+    putTaskFeedbackSuss(res) {
+      console.log(res)
     }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
     // this.getlocalStorage()
+    this.getProjectListAjax()
+    this.getUserJoinProjectAjax()
   }
 }
 </script>
@@ -844,10 +910,10 @@ export default {
   line-height: 48px;
 }
 .state_color1 {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2 {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3 {
   color: rgb(172, 171, 171);
@@ -855,7 +921,6 @@ export default {
 .state_color4 {
   color: rgb(255, 0, 0);
 }
-
 
 .project .add_box {
   /* height: 985px; */
