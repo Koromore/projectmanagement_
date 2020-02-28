@@ -12,7 +12,7 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
       // http://3m4igwpda0.53http.tech/pmbs/api/statistic/listAjax
-      '/pmb1s': {
+      '/pmbs': {
         target: 'http://218.106.254.122:8083/', // 接口的域名
         'secure': false,  // 如果是https接口，需要配置这个参数
         'changeOrigin': true, // 如果接口跨域，需要进行这个参数配置
