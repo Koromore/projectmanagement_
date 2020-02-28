@@ -17,7 +17,19 @@
 export default {
   name: 'statistics',
   data() {
-    return {}
+    return {
+      // 统计数据
+      statisticsData: {},
+      // 业务占比数据
+      businessNameData: [],
+      businessListData: [],
+      // 项目状态数据
+      statusNameData: [],
+      statusListData: [],
+      // listProjectStatusData: [],
+      // 客户状态数据
+      listClientData: []
+    }
   },
   // 方法
   methods: {
@@ -27,6 +39,69 @@ export default {
       let winHeight = window.innerHeight
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
+    },
+    // 获取统计数据
+    getStatisticsData() {
+      // console.log("123")
+      let data = {}
+      this.$axios
+        .post('/pmbs/api/statistic/listAjax', data)
+        .then(this.getStatisticsDataSuss)
+    },
+    // 获取统计数据回调
+    getStatisticsDataSuss(res) {
+      if (res.status == 200) {
+        this.statisticsData = res.data.data
+        let statisticsData = res.data.data
+        // console.log(statisticsData)
+        // 业务占比
+        let listBusiness = statisticsData.listBusiness
+        let businessNameData = []
+        let businessListData = []
+        // console.log(listBusiness)
+        for (let i = 0; i < listBusiness.length; i++) {
+          let element = listBusiness[i]
+          businessNameData.push(element.businessName)
+          let clientList = []
+          let listProject = element.listProject
+          for (let i = 0; i < listProject.length; i++) {
+            let element_ = listProject[i];
+            clientList.push(element_.clientId)
+          }
+          let data = {
+            value: element.listProject.length,
+            name: element.businessName,
+            clientList: clientList
+          }
+          businessListData.push(data)
+          // console.log(data)
+        }
+        this.businessNameData = businessNameData // 业务名称
+        this.businessListData = businessListData // 业务数量和业务包含的客户
+        // console.log(this.businessNameData)
+        // console.log(this.businessListData)
+
+        // 项目状态
+        let listProjectStatus = statisticsData.listProjectStatus
+        let statusNameData = []
+        let statusListData = []
+        // console.log(listProjectStatus)
+        for (let i = 0; i < listProjectStatus.length; i++) {
+          let element = listProjectStatus[i]
+          let data = {}
+          data.value = element.ratio
+          data.name = element.status
+          statusNameData.push(element.status)
+          statusListData.push(data)
+        }
+        this.statusNameData = statusNameData // 状态名称
+        this.statusListData = statusListData // 状态下的任务数量
+        // console.log(this.statusNameData)
+        // console.log(this.statusListData)
+
+        // 客户状态
+        let listClient = statisticsData.listClient
+      }
     },
     // 业务占比甘特图
     business_gantt() {
@@ -53,7 +128,20 @@ export default {
 
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
+          formatter: function(params, ticket, callback) {
+            let clientList = ''
+            for (let i = 0; i < params.data.clientList.length; i++) {
+              let element = params.data.clientList[i]
+              clientList += `${element}<br/>`
+            }
+            let htmlStr = ''
+            htmlStr = `
+            ${params.name}
+            (${params.percent}%)<br/>
+            ${clientList}
+            `
+            return htmlStr
+          }
         },
         // 图例
         legend: {
@@ -61,12 +149,7 @@ export default {
           icon: 'circle',
           orient: 'horizontal',
           bottom: 10,
-          data: [
-            '口碑',
-            '网站',
-            '数字营销',
-            'APP'
-          ]
+          data: ['口碑', '网站', '数字营销', 'APP']
         },
         series: [
           {
@@ -93,10 +176,26 @@ export default {
               }
             },
             data: [
-              { value: 335, name: '口碑' },
-              { value: 310, name: '网站' },
-              { value: 234, name: '数字营销' },
-              { value: 135, name: 'APP' }
+              {
+                value: 335,
+                name: '口碑',
+                clientList: ['吉利', '沃尔沃', '长城']
+              },
+              {
+                value: 310,
+                name: '网站',
+                clientList: ['吉利', '沃尔沃', '长城']
+              },
+              {
+                value: 234,
+                name: '数字营销',
+                clientList: ['吉利', '沃尔沃', '长城']
+              },
+              {
+                value: 135,
+                name: 'APP',
+                clientList: ['吉利', '沃尔沃', '长城']
+              }
             ]
           }
         ]
@@ -108,11 +207,11 @@ export default {
       let myChart = this.$echarts.init(document.getElementById('project_state'))
       // 绘制图表
       myChart.setOption({
-        title: { text: '项目状态',padding: 16 },
-        color: ['#23D7BB', '#f5b96a', '#FF0000', '#C9C9C9' ],
+        title: { text: '项目状态', padding: 16 },
+        color: ['#23D7BB', '#f5b96a', '#FF0000', '#C9C9C9'],
         tooltip: {
           trigger: 'item',
-          formatter: '{a} <br/>{b}: {c} ({d}%)'
+          formatter: '{b}({d}%)'
         },
         legend: {
           // type: 'scroll',
@@ -241,21 +340,6 @@ export default {
         myChart.on('click', function(params) {
           console.log(params)
         })
-    },
-    getStatisticsData(){
-      // console.log("123")
-      let data = {}
-      this.$axios
-        .post(
-          '/api/statistic/listAjax',data
-        )
-        .then(this.getStatisticsDataSuss)
-    },
-    getStatisticsDataSuss(res){
-      if (res.status == 200) {
-        
-      }
-      console.log(res)
     }
   },
   // 钩子函数

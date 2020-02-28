@@ -156,8 +156,8 @@
       </el-scrollbar>
       <el-row class="batton_pa">
         <el-col :span="12" :offset="7" class="batton">
-          <el-button size="small" type="info">取消</el-button>
-          <el-button size="small" type="primary">提交</el-button>
+          <el-button size="small" type="info" @click="drawer = false">取消</el-button>
+          <el-button size="small" type="primary" @click="addProject">提交</el-button>
         </el-col>
       </el-row>
     </el-drawer>

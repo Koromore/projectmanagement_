@@ -86,69 +86,90 @@
         <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
+      <!-- CREATE TABLE `project` (
+  `proId`    '项目ID',
+  `proName`   '项目名',
+  `clientId`    '所属客户ID，与client表对应',
+  `serviceId`   '所属业务ID ，与bussiness表对应',
+  `isUsual`    '专项日常（0-日常，1-专项）',
+  `initUserId`    '项目发起人，对应user表ID',
+  `manager`  '项目经理，对应user表ID',
+  `department`    '参与部门ID，用逗号隔开',
+  `knowUser`    '知情人ID，用逗号隔开',
+  `createTime`   '创建时间',
+  `updateTime`   '更新时间',
+  `status`    '项目状态（1-进行中，2-审核中，3-完成，4-延期，5-延期完成）',
+  `delayReason`    '项目延期原因',
+  `overTime`    '项目完成时间',
+  `expertTime`    '预计完成时间',
+  `remark`    '需求',
+  `deleteFlag`   '删除标记',
+)  -->
       <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
           ref="filterTable"
-          :data="tableData1"
+          :data="projectListOriginate"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
         >
-          <el-table-column prop="name" label="名称">
+          <el-table-column prop="proName" label="名称">
             <el-link
               slot-scope="scope"
-              @click.native="pathPrpjectDetails(scope.row.id)"
-            >{{scope.row.name}}</el-link>
+              @click.native="pathPrpjectDetails(scope.row.proId)"
+            >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="state_text" label="状态">
-            <div
-              slot-scope="scope"
-              class="cell"
-              :class="{'state_color1': scope.row.state == 1,
-                  'state_color2': scope.row.state == 2,
-                  'state_color3': scope.row.state == 3,
-                  'state_color4': scope.row.state == 4}"
-            >{{scope.row.state_text}}</div>
+          <el-table-column prop="status" label="状态">
+            <template slot-scope="scope">
+              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="num" label="总任务数/待完成"></el-table-column>
-          <el-table-column prop="presetTime" label="预计时间">
+          <el-table-column prop="num" label="总任务数/待完成">
+             <template slot-scope="scope">
+              {{scope.row.listTask.length}}/
+            </template>
+          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间">
             <template slot="header">
               预计时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="finishTime" label="完成时间">
+          <el-table-column prop="overTime" label="完成时间">
             <template slot="header">
               完成时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="assignPeople" label="下达人"></el-table-column>
+          <el-table-column prop="realName" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
                 type="info"
                 slot="reference"
-                v-if="scope.row.state == 1"
+                v-if="scope.row.status == 2"
                 @click="feedback(scope.row.id,scope.row.name)"
               >反馈</el-button>
               <el-popconfirm
                 title="确认执行此操作吗？"
-                @onConfirm="achieve(scope.row.id,scope.row.name,scope.row.state)"
+                @onConfirm="achieve(scope.row.id,scope.row.name,scope.row.status)"
               >
                 <el-button
                   size="small"
                   type="primary"
                   slot="reference"
-                  v-if="scope.row.state == 1"
+                  v-if="scope.row.status == 2"
                 >完成</el-button>
               </el-popconfirm>
               <el-button
                 size="small"
                 type="info"
                 slot="reference"
-                v-if="scope.row.state == 2 || scope.row.state == 4"
+                v-if="scope.row.status == 1 || scope.row.status == 4"
                 @click="aredact(scope.row.id,scope.row.name)"
               >编辑</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.id)">
@@ -156,7 +177,7 @@
                   size="small"
                   type="info"
                   slot="reference"
-                  v-if="scope.row.state == 2|| scope.row.state == 4"
+                  v-if="scope.row.status == 1|| scope.row.status == 4"
                 >删除</el-button>
               </el-popconfirm>
             </template>
@@ -167,37 +188,35 @@
       <el-col :span="24" class="table table2" v-show="!table_show">
         <el-table
           ref="filterTable"
-          :data="tableData2"
+          :data="projectListJoin"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称">
-            <el-link slot-scope="scope" @click.native="pathPrpjectDetails()">{{scope.row.name}}</el-link>
+            <el-link slot-scope="scope" @click.native="pathPrpjectDetails()">{{scope.row.proName}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
-            <div
-              slot-scope="scope"
-              class="cell"
-              :class="{'state_color1': scope.row.state == 1,
-                  'state_color2': scope.row.state == 2,
-                  'state_color3': scope.row.state == 3,
-                  'state_color4': scope.row.state == 4}"
-            >{{scope.row.state_text}}</div>
+            <template slot-scope="scope">
+              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="presetTime" label="预计时间">
+          <el-table-column prop="expertTime" label="预计时间">
             <template slot="header">
               预计时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="finishTime" label="完成时间">
+          <el-table-column prop="overTime" label="完成时间">
             <template slot="header">
               完成时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="assignPeople" label="下达人" filter-placement="bottom-end"></el-table-column>
+          <el-table-column prop="realName" label="下达人" filter-placement="bottom-end"></el-table-column>
         </el-table>
       </el-col>
       <!-- 抽屉 -->
@@ -583,6 +602,19 @@ export default {
       // 项目类型2选择
       tab2_act: 1,
       // 反馈内容
+//        TABLE `feedback` (
+//   `feedbackId`   '反馈ID',
+//   `taskId`    '所属客户ID，与task表对应',
+//   `initUserId`    '任务发起人，对应user表ID',
+//   `feedback`    '反馈详情',
+//   `updateTime`   '更新时间',
+//   `deleteFlag`   '删除标识',
+// ) 
+      feedbackObj: {
+        feedbackId: '',
+        taskId: '',
+        initUserId: ''
+      },
       result: '',
       add_list: '',
       checkList1: [],
@@ -712,42 +744,35 @@ export default {
         query: { id: id }
       })
     },
-
-    // 项目管理-我发起
+    // 项目管理-我发起获取
     getProjectListAjax() {
-      let data = {
-        project: {
-          initUserId: 128
-        }
-      }
+      let data = 128
       this.$axios
-        .post('/api/project/listAjax', data)
+        .post('/pmbs/api/project/listAjax' + '?inituserid=' + data)
         .then(this.getProjectListAjaxSuss)
     },
-    // 项目管理-我发起回调
+    // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         this.projectListOriginate = res.data.data
-        console.log(this.projectListOriginate)
+        // console.log(this.projectListOriginate)
       }
     },
-    // 项目管理-我参与
+    // 项目管理-我参与获取
     getUserJoinProjectAjax() {
-      let data = {
-        project: {
-          initUserId: 128
-        }
-      }
+      let data = 40
       this.$axios
-        .post('/api/project/userjoinproject', data)
+        .post('/pmbs/api/project/userjoinproject' + '?inituserid=' + data)
         .then(this.getUserJoinProjectAjaxSuss)
     },
-    // 项目管理-我参与回调
+    // 项目管理-我参与获取回调
     getUserJoinProjectAjaxSuss(res) {
       console.log(res)
       if (res.status == 200) {
         this.projectListJoin = res.data.data
+        console.log(this.projectListJoin)
+        
       }
     },
     // 任务反馈
@@ -756,7 +781,7 @@ export default {
         initUserId: '001'
       }
       this.$axios
-        .post('/api/project/taskfeedback', data)
+        .post('/pmbs/api/project/taskfeedback', data)
         .then(this.putTaskFeedbackSuss)
     },
     putTaskFeedbackSuss(res) {

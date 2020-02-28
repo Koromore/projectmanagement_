@@ -604,6 +604,23 @@ export default {
     },
     change_carryPeople(e) {
       this.change_carryPeople_show = e
+    },
+    // 获取任务列表
+    getTasklistAjax(){
+      // console.log("123")
+      let data = {}
+      this.$axios
+        .post(
+          '/pmbs/api/task/listAjax',data
+        )
+        .then(this.getTasklistAjaxSuss)
+    },
+    // 获取任务列表回调
+    getStatisticsgetTasklistAjaxSussDataSuss(res){
+      if (res.status == 200) {
+        
+      }
+      console.log(res)
     }
     // 点击单元格
     // task_details(row, column, cell, event) {

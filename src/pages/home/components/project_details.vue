@@ -45,6 +45,7 @@
       </el-col>
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer1" :with-header="false">
+        <el-scrollbar style="height: 100%">
         <el-row class="add_box">
           <el-col :span="24">
             <el-col :span="6" class="title title1">创建任务</el-col>
@@ -133,6 +134,7 @@
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
         </el-row>
+        </el-scrollbar>
       </el-drawer>
       <!-- 抽屉 -->
       <el-drawer title="历史记录" :visible.sync="drawer2" :with-header="false">
@@ -848,10 +850,13 @@ export default {
   height: 100%;
   box-sizing: border-box;
   padding: 36px 0;
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
   align-items: center;
-  align-content: space-between;
+  align-content: space-between; */
+}
+.project_details .add_box > .el-col {
+  margin-bottom: 16px;
 }
 .project_details .add_box .title1 {
   font-weight: 600;
