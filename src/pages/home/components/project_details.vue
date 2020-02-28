@@ -159,6 +159,7 @@
           </el-col>
         </el-row>
       </el-drawer>
+      <!-- 项目需求 -->
       <el-col :span="24" class="table table1" v-if="table_show">
         <el-table
           ref="filterTable"
@@ -628,41 +629,79 @@ export default {
       let id = this.$route.query.id
       console.log(id)
     },
-    // 提示框
-    // pop_up() {
-    //   const h = this.$createElement
-    //   this.$msgbox({
-    //     title: '操作提示',
-    //     message: '确认执行此操作吗？',
-    //     showCancelButton: true,
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     beforeClose: (action, instance, done) => {
-    //       if (action === 'confirm') {
-    //         instance.confirmButtonLoading = true
-    //         instance.confirmButtonText = '执行中...'
-    //         setTimeout(() => {
-    //           done()
-    //           setTimeout(() => {
-    //             instance.confirmButtonLoading = false
-    //           }, 300)
-    //         }, 1500)
-    //       } else {
-    //         done()
-    //       }
-    //     }
-    //   }).then(action => {
-    //     this.$message({
-    //       type: 'info',
-    //       message: '操作成功'
-    //     })
-    //   })
-    // }
+    // 获取项目详情-我发起
+    getProjectOfTask() {
+      let data = `?proId=1`
+      this.$axios
+        .post('/pmbs/api/project/projectOfTask' + data)
+        .then(this.getProjectOfTaskSuss)
+    },
+    // 获取项目详情-我发起回调/api/project/projectOfUserTask
+    getProjectOfTaskSuss(res) {
+      console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+        
+      // }
+    },
+    // 获取项目详情-我参与
+    getProjectOfUserTask() {
+      let data = `?proId=1`
+      this.$axios
+        .post('/pmbs/api/project/projectOfUserTask' + data)
+        .then(this.getProjectOfUserTaskSuss)
+    },
+    // 获取项目详情-我参与回调/api/project/projectOfUserTask
+    getProjectOfUserTaskSuss(res) {
+      console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+        
+      // }
+    },
+    // 获取项目需求
+    getProjectShowDetail() {
+      let data = `?proId=1`
+      this.$axios
+        .post('/pmbs/api/project/showDetail' + data)
+        .then(this.getProjectShowDetailSuss)
+    },
+    // 获取项目需求回调/api/project/projectOfUserTask
+    getProjectShowDetailSuss(res) {
+      console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+        
+      // }
+    },
+    // 获取项目反馈-项目详情
+    getProjectFeedbackDetail() {
+      let data = `?proId=1`
+      this.$axios
+        .post('/pmbs/api/project/feedbackDetail' + data)
+        .then(this.getProjectFeedbackDetailSuss)
+    },
+    // 获取项目需求回调/api/project/projectOfUserTask
+    getProjectFeedbackDetailSuss(res) {
+      console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+        
+      // }/api/project/feedbackDetail
+    }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
     this.getParams()
+    this.getProjectOfTask()
+    this.getProjectOfUserTask()
+    this.getProjectShowDetail()
+    this.getProjectFeedbackDetail()
   }
 }
 </script>

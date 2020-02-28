@@ -88,39 +88,37 @@
       <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
           ref="filterTable"
-          :data="tableData1"
+          :data="tasklist"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{'height': '57px','text_aling':'left'}"
         >
           <el-table-column
-            prop="name"
+            prop="proName"
             label="所属项目"
             column-key="name"
             :filters="[{text: '皓影赠礼', value: '皓影赠礼'}, {text: '广本网站优化', value: '广本网站优化'}]"
             :filter-method="filterName"
           ></el-table-column>
           <el-table-column
-            prop="department"
+            prop="deptName"
             label="部门"
             :filters="[{text: '网络营销', value: '网络营销'}, {text: '设计', value: '设计'}, {text: '研发', value: '研发'}, {text: '策划', value: '策划'}, {text: '内容', value: '内容'}]"
             :filter-method="filterDepartment"
           ></el-table-column>
-          <el-table-column prop="task" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row.id)">{{scope.row.task}}</el-link>
+          <el-table-column prop="taskName" label="任务">
+            <el-link slot-scope="scope" @click="task_detail(scope.row.id)">{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="state_text" label="执行状态">
-            <div
-              slot-scope="scope"
-              class="cell"
-              :class="{'state_color1': scope.row.state == 1,
-                  'state_color2': scope.row.state == 2,
-                  'state_color3': scope.row.state == 3,
-                  'state_color4': scope.row.state == 4}"
-            >{{scope.row.state_text}}</div>
+          <el-table-column prop="status" label="执行状态">
+            <template slot-scope="scope">
+              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+            </template>
           </el-table-column>
-          <el-table-column prop="last_task" label="父任务"></el-table-column>
-          <el-table-column prop="presetTime" label="预计时间">
+          <el-table-column prop="faTaskName" label="父任务"></el-table-column>
+          <el-table-column prop="createTime" label="预计时间">
             <template slot="header">
               预计时间
               <i class="el-icon-sort"></i>
@@ -132,7 +130,7 @@
                 size="small"
                 type="info"
                 @click="sponsor_feedback(scope.row.id,scope.row.task)"
-                v-if="scope.row.state != 3"
+                v-if="scope.row.status != 3"
               >反馈</el-button>
               <el-popconfirm
                 title="确认执行此操作吗？"
@@ -142,7 +140,7 @@
                   size="small"
                   type="primary"
                   slot="reference"
-                  v-if="scope.row.state == 1"
+                  v-if="scope.row.status == 2"
                 >完成</el-button>
               </el-popconfirm>
             </template>
@@ -282,7 +280,12 @@
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
               <el-scrollbar style="height: 100%;">
-                <el-col :span="23" class="suggest_list" v-for="item in suggest_list" :key="item.index">
+                <el-col
+                  :span="23"
+                  class="suggest_list"
+                  v-for="item in suggest_list"
+                  :key="item.index"
+                >
                   <el-col :span="12" class="time">{{item.time}}</el-col>
                   <el-col :span="12" class="pop">{{item.pop}}</el-col>
                   <el-col :span="24" class="content">{{item.content}}</el-col>
@@ -367,6 +370,7 @@ export default {
       ],
       // 客户列表选择结果
       client: '广汽本田',
+      tasklist: [],
       // 1审核中 2执行中 3已完成 4延期
       tableData1: [
         {
@@ -504,7 +508,7 @@ export default {
       tab1_act: 1,
       // 项目类型2选择
       tab2_act: 1,
-      suggest_list:[
+      suggest_list: [
         {
           time: '2020-01-12 12:00',
           pop: '客户部-黄振宇',
@@ -605,68 +609,35 @@ export default {
     change_carryPeople(e) {
       this.change_carryPeople_show = e
     },
-    // 获取任务列表
-    getTasklistAjax(){
+    // 获取我发起任务列表
+    getTasklistAjax(type) {
       // console.log("123")
-      let data = {}
+      let data = {
+        type: type,
+        task: {
+          initUserId: 548
+        }
+      }
       this.$axios
-        .post(
-          '/pmbs/api/task/listAjax',data
-        )
+        .post('/pmbs/api/task/listAjax', data)
         .then(this.getTasklistAjaxSuss)
     },
-    // 获取任务列表回调
-    getStatisticsgetTasklistAjaxSussDataSuss(res){
+    // 获取我发起任务列表回调
+    getTasklistAjaxSuss(res) {
       if (res.status == 200) {
-        
+        let data = res.data.items
+        this.tasklist = data
       }
-      console.log(res)
+      console.log(this.tasklist)
     }
-    // 点击单元格
-    // task_details(row, column, cell, event) {
-    //   // console.log(row)
-    //   console.log(column)
-    //   // console.log(cell)
-    //   // console.log(event)
-    //   if (column.property == 'task') {
-    //     this.drawer1 = true
-    //   }
-    // },
-    // 提示框
-    // pop_up() {
-    //   const h = this.$createElement
-    //   this.$msgbox({
-    //     title: '操作提示',
-    //     message: '确认执行此操作吗？',
-    //     showCancelButton: true,
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     beforeClose: (action, instance, done) => {
-    //       if (action === 'confirm') {
-    //         instance.confirmButtonLoading = true
-    //         instance.confirmButtonText = '执行中...'
-    //         setTimeout(() => {
-    //           done()
-    //           setTimeout(() => {
-    //             instance.confirmButtonLoading = false
-    //           }, 300)
-    //         }, 1500)
-    //       } else {
-    //         done()
-    //       }
-    //     }
-    //   }).then(action => {
-    //     this.$message({
-    //       type: 'info',
-    //       message: '操作成功'
-    //     })
-    //   })
-    // }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
+    this.getTasklistAjax(0)
+    // this.getTasklistAjax(1)
     // this.getlocalStorage()
+    // this.test()
   }
 }
 </script>
@@ -772,10 +743,10 @@ export default {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
 .state_color1 {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2 {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3 {
   color: rgb(172, 171, 171);
@@ -784,10 +755,10 @@ export default {
   color: rgb(255, 0, 0);
 }
 .state_color1 >>> input {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2 >>> input {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3 >>> input {
   color: rgb(172, 171, 171);

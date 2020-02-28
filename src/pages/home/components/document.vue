@@ -70,51 +70,54 @@
         </el-col>
       </el-col>
       <!--  -->
-      <!-- 我发起 -->
+      <!-- 文档列表 -->
       <el-col :span="24" class="table table1">
         <el-table
           ref="filterTable"
-          :data="tableData"
+          :data="fileLst"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
         >
-          <el-table-column prop="file_name" label="文档">
+          <el-table-column prop="fileName" label="文档">
             <template slot-scope="scope">
               <span>
-              <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <span>{{scope.row.file_name}}</span>
+                <img src="static/images/document/ppt.png" width="24" alt srcset />
+                <span>{{scope.row.fileName}}</span>
               </span>
-              <span class="operation"><i class="el-icon-edit"></i></span>
+              <span class="operation">
+                <i class="el-icon-edit"></i>
+              </span>
             </template>
           </el-table-column>
-          <el-table-column prop="client" label="客户"></el-table-column>
+          <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column
-            prop="project"
+            prop="proName"
             label="项目"
             :filters="[{text: '皓影赠礼1', value: '皓影赠礼1'}, {text: '皓影赠礼2', value: '皓影赠礼2'}, {text: '皓影赠礼3', value: '皓影赠礼3'}, {text: '皓影赠礼4', value: '皓影赠礼4'}, {text: '皓影赠礼5', value: '皓影赠礼5'}, {text: '皓影赠礼6', value: '皓影赠礼6'}]"
             :filter-method="filterProject"
           ></el-table-column>
-          <el-table-column prop="task" label="任务"></el-table-column>
-          <el-table-column prop="update_time" label="更新时间">
+          <el-table-column prop="taskName" label="任务"></el-table-column>
+          <el-table-column prop="updateTime" label="更新时间">
             <template slot="header">
               更新时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="update_people" label="更新人">
+          <el-table-column prop="realName" label="更新人">
             <template slot-scope="scope">
-              {{scope.row.update_people}}
+              {{scope.row.realName}}
               <span class="operation">
                 <i class="el-icon-upload2"></i>
                 <i class="el-icon-download"></i>
                 <i class="el-icon-share"></i>
-                <i class="el-icon-time" @click="drawer_show(scope.row.id)"></i>
+                <i class="el-icon-time" @click="drawer_show(scope.row.fileId)"></i>
               </span>
             </template>
           </el-table-column>
         </el-table>
       </el-col>
+      <!-- 历史文档 -->
       <el-drawer title="历史文档" :visible.sync="drawer" :with-header="false">
         <el-row class="records_document">
           <el-col :span="23" :offset="1" class="title">历史</el-col>
@@ -128,13 +131,13 @@
                   placement="top"
                 >
                   <el-card class="content">
-                    <p>完成成果：{{item.result}}</p>
-                    <p>更新人：{{item.people}}</p>
+                    <!-- <p>完成成果：{{item.result}}</p> -->
+                    <p>更新人：{{item.realName}}</p>
                     <br />
                     <br />
                     <div>
                       <img src="static/images/document/ppt.png" width="24" alt srcset />
-                      <span>{{item.file_name}}</span>
+                      <span>{{item.fileName}}</span>
                       <!-- <img class="down" src="static/images/document/down.png" width="21" alt srcset /> -->
                       <i class="el-icon-download down"></i>
                     </div>
@@ -174,69 +177,7 @@ export default {
       ],
       // 客户列表选择结果
       client: '广汽本田',
-      // 1审核中 2执行中 3已完成 4延期
-      tableData: [
-        {
-          id: 1,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼1',
-          task: '产品原型',
-          update_time: '20-01-21',
-          update_people: '张三'
-        },
-        {
-          id: 2,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼2',
-          task: '后台开发',
-          update_time: '20-01-21',
-          update_people: '张三'
-        },
-        {
-          id: 3,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '广汽本田',
-          project: '皓影赠礼3',
-          task: '策划方案',
-          update_time: '20-01-21',
-          update_people: '张三'
-        },
-        {
-          id: 4,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '丰田',
-          project: '皓影赠礼4',
-          task: '内容撰写',
-          update_time: '20-01-21',
-          update_people: '张三'
-        },
-        {
-          id: 5,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '丰田',
-          project: '皓影赠礼5',
-          task: '内容撰写',
-          update_time: '20-01-21',
-          update_people: '张三'
-        },
-        {
-          id: 6,
-          file_name: '文档',
-          file_format: 'ppt',
-          client: '丰田',
-          project: '皓影赠礼6',
-          task: '内容撰写',
-          update_time: '20-01-21',
-          update_people: '张三'
-        }
-      ],
+      fileLst: [], // 文档列表
       records_document_list: [
         {
           time: '20/04/02 20:46',
@@ -297,8 +238,9 @@ export default {
       let height1 = winHeight - 100
       this.style1 = 'height:' + height1 + 'px;'
     },
-    drawer_show(e){
+    drawer_show(id) {
       this.drawer = true
+      this.getTaskfileById(id)
     },
     //
     tab1_change(e) {
@@ -323,11 +265,48 @@ export default {
     // 筛选所属项目
     filterProject(value, row) {
       return row.project === value
+    },
+    // 获取文档列表
+    getTaskfilePageList() {
+      let data = {
+        userid: 128,
+        pageNum: 1,
+        pageSize: 9,
+        name: ''
+      }
+      this.$axios
+        .post('/pmbs/api/taskfile/getTaskfilePageList', data)
+        .then(this.getTaskfilePageListSuss)
+    },
+    // 获取文档列表回调
+    getTaskfilePageListSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        this.fileLst = res.data
+        // console.log(this.fileLst)
+      }
+    },
+    // 获取文档历史记录
+    getTaskfileById(id) {
+      let data = { proId: 1 }
+      this.$axios
+        .post('/pmbs/api/taskfile/getTaskfileById', data)
+        .then(this.getTaskfileByIdSuss)
+    },
+    // 获取文档历史记录回调
+    getTaskfileByIdSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        this.records_document_list = res.data
+        // console.log(this.fileLst)
+      }
     }
   },
   // 钩子函数
   mounted() {
     this.widthheight()
+    // 获取文档列表
+    this.getTaskfilePageList()
     // this.getlocalStorage()
   }
 }
@@ -385,16 +364,16 @@ export default {
 .el-button + .el-button {
   margin: 0;
 }
-.document .table{
+.document .table {
   margin-top: 24px;
 }
-.document .table .operation i{
+.document .table .operation i {
   font-size: 18px;
 }
-.document .table .el-table__row .operation{
+.document .table .el-table__row .operation {
   display: none;
 }
-.document .table .el-table__row:hover .operation{
+.document .table .el-table__row:hover .operation {
   display: inline;
 }
 .document >>> .el-drawer__body {

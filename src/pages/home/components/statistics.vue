@@ -28,7 +28,9 @@ export default {
       statusListData: [],
       // listProjectStatusData: [],
       // 客户状态数据
-      listClientData: []
+      // listClientData: [],
+      clientNameData: [],
+      clientStatusData: []
     }
   },
   // 方法
@@ -101,6 +103,15 @@ export default {
 
         // 客户状态
         let listClient = statisticsData.listClient
+        let clientNameData = []
+        let clientStatusData = []
+        for (let i = 0; i < listClient.length; i++) {
+          let element = listClient[i];
+          clientNameData.push(element.clientName)
+        }
+        // console.log(listClient)
+        // console.log(clientNameData)
+        this.clientNameData = clientNameData // 客户名称
       }
     },
     // 业务占比甘特图

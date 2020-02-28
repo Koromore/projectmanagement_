@@ -283,9 +283,9 @@ export default {
         let message = '请信息填写完整！'
         this.messageError(message)
       } else {
-        // this.$axios
-        //   .post('/pmbs/client/save', data)
-        //   .then(this.clientSaveSuss)
+        this.$axios
+          .post('/pmbs/client/save', data)
+          .then(this.clientSaveSuss)
       }
     },
     // 客户新增/修改回调

@@ -112,9 +112,9 @@
           <!-- 上传 -->
           <el-col :span="13" :offset="6" class="upload">
             <el-upload
-              action="http://218.106.254.122:8083/pmbs/file/upload"
+              :action="uploadUrl"
               list-type="picture-card"
-              :auto-upload="false"
+              :auto-upload="true"
               :on-success="handleSuccess"
               :file-list="fileList"
               :on-change="test"
@@ -250,7 +250,8 @@ export default {
           ]
         }
       ],
-      fileList: []
+      fileList: [],
+      uploadUrl: ''
     }
     
   },
@@ -332,6 +333,14 @@ export default {
       }
     },
     // 上传附件
+    upload(){
+      let upType = 0
+      let demandType = 0
+      let uploadUrl = `
+      /pmbs/file/upload?upType=${upType}&demandType=${demandType}
+      `
+      this.uploadUrl = uploadUrl
+    },
     handleRemove(file) {
       console.log(file)
     },
@@ -352,8 +361,8 @@ export default {
       console.log("123")
     },
     test(file, fileList){
-      console.log(file)
-      console.log(fileList)
+      // console.log(file)
+      // console.log(fileList)
     },
     // 新增项目
     addProject(){
@@ -362,7 +371,7 @@ export default {
       }
       this.$axios
         .post(
-          '/api/project/save',data
+          '/pmbs/project/save',data
         )
         .then(this.addProjectSuss)
     },
@@ -376,6 +385,7 @@ export default {
     this.widthheight()
     sessionStorage.setItem('refresh', 0)
     this.router_url()
+    this.upload()
   }
 }
 </script>
