@@ -66,12 +66,12 @@ export default {
           businessNameData.push(element.businessName)
           let clientList = []
           let listProject = element.listProject
-          for (let i = 0; i < listProject.length; i++) {
-            let element_ = listProject[i];
-            clientList.push(element_.clientId)
-          }
+          // for (let i = 0; i < listProject.length; i++) {
+          //   let element_ = listProject[i];
+          //   clientList.push(element_.clientId)
+          // }
           let data = {
-            value: element.listProject.length,
+            value: element.listProject, //.length,
             name: element.businessName,
             clientList: clientList
           }
@@ -80,8 +80,8 @@ export default {
         }
         this.businessNameData = businessNameData // 业务名称
         this.businessListData = businessListData // 业务数量和业务包含的客户
-        // console.log(this.businessNameData)
-        // console.log(this.businessListData)
+        console.log(this.businessNameData)
+        console.log(this.businessListData)
 
         // 项目状态
         let listProjectStatus = statisticsData.listProjectStatus
@@ -106,16 +106,21 @@ export default {
         let clientNameData = []
         let clientStatusData = []
         for (let i = 0; i < listClient.length; i++) {
-          let element = listClient[i];
+          let element = listClient[i]
           clientNameData.push(element.clientName)
         }
         // console.log(listClient)
         // console.log(clientNameData)
         this.clientNameData = clientNameData // 客户名称
+
+        // 甘特图
+        this.business_gantt(businessNameData,businessListData)
+        this.project_state_gantt()
+        this.client_state_gantt()
       }
     },
     // 业务占比甘特图
-    business_gantt() {
+    business_gantt(name,list) {
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById('business'))
       // 绘制图表
@@ -136,7 +141,6 @@ export default {
           '#90CFF2',
           '#8BBFE8'
         ],
-
         tooltip: {
           trigger: 'item',
           formatter: function(params, ticket, callback) {
@@ -161,6 +165,7 @@ export default {
           orient: 'horizontal',
           bottom: 10,
           data: ['口碑', '网站', '数字营销', 'APP']
+          // data: name
         },
         series: [
           {
@@ -208,6 +213,7 @@ export default {
                 clientList: ['吉利', '沃尔沃', '长城']
               }
             ]
+            // data: list
           }
         ]
       })
@@ -356,9 +362,7 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    this.business_gantt()
-    this.project_state_gantt()
-    this.client_state_gantt()
+
     this.getStatisticsData()
   }
 }

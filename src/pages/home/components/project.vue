@@ -86,25 +86,6 @@
         <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
-      <!-- CREATE TABLE `project` (
-  `proId`    '项目ID',
-  `proName`   '项目名',
-  `clientId`    '所属客户ID，与client表对应',
-  `serviceId`   '所属业务ID ，与bussiness表对应',
-  `isUsual`    '专项日常（0-日常，1-专项）',
-  `initUserId`    '项目发起人，对应user表ID',
-  `manager`  '项目经理，对应user表ID',
-  `department`    '参与部门ID，用逗号隔开',
-  `knowUser`    '知情人ID，用逗号隔开',
-  `createTime`   '创建时间',
-  `updateTime`   '更新时间',
-  `status`    '项目状态（1-进行中，2-审核中，3-完成，4-延期，5-延期完成）',
-  `delayReason`    '项目延期原因',
-  `overTime`    '项目完成时间',
-  `expertTime`    '预计完成时间',
-  `remark`    '需求',
-  `deleteFlag`   '删除标记',
-)  -->
       <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
           ref="filterTable"
@@ -129,7 +110,7 @@
           </el-table-column>
           <el-table-column prop="num" label="总任务数/待完成">
              <template slot-scope="scope">
-              {{scope.row.listTask.length}}/
+              {{scope.row.listTask.length}}/{{scope.row.unfintask}}
             </template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间">
@@ -398,6 +379,7 @@ export default {
   name: 'project',
   data() {
     return {
+      
       drawer1: false,
       drawer2: false,
       drawer3: false,
@@ -738,7 +720,7 @@ export default {
     },
     // 跳转项目详情页面
     pathPrpjectDetails(id) {
-      console.log(id)
+      // console.log(id)
       this.$router.push({
         path: '/home/components/project_details',
         query: { id: id }
@@ -755,8 +737,21 @@ export default {
     getProjectListAjaxSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        this.projectListOriginate = res.data.data
-        // console.log(this.projectListOriginate)
+        let projectListOriginate = res.data.data
+        
+        for (let i = 0; i < projectListOriginate.length; i++) {
+          const element = projectListOriginate[i]
+          element.unfintask = 0
+          // console.log(element.listTask)
+          for (let j = 0; j < element.listTask.length; j++) {
+            const element_ = element.listTask[j];
+            if (element_.status != 3) {
+              element.unfintask ++
+            }
+          }
+        }
+        console.log(projectListOriginate)
+        this.projectListOriginate = projectListOriginate
       }
     },
     // 项目管理-我参与获取
@@ -768,10 +763,13 @@ export default {
     },
     // 项目管理-我参与获取回调
     getUserJoinProjectAjaxSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
-        this.projectListJoin = res.data.data
-        console.log(this.projectListJoin)
+        let projectListJoin = res.data.data
+        
+        // console.log(projectListJoin)
+        this.projectListJoin = projectListJoin
+        // console.log(this.projectListJoin)
         
       }
     },

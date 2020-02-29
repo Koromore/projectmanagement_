@@ -90,7 +90,7 @@
               type="textarea"
               :autosize="{ minRows: 6, maxRows: 8}"
               placeholder="请输入内容"
-              v-model="new_task.demand"
+              v-model="new_task.remark"
             ></el-input>
           </el-col>
           <!-- 上传 -->
@@ -175,14 +175,20 @@
             </template>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
-            <div
+            <!-- <div
               slot-scope="scope"
               class="cell"
               :class="{'state_color1': scope.row.state == 1,
                   'state_color2': scope.row.state == 2,
                   'state_color3': scope.row.state == 3,
                   'state_color4': scope.row.state == 4}"
-            >{{scope.row.state_text}}</div>
+            >{{scope.row.state_text}}</div> -->
+            <template slot-scope="scope">
+              <span v-if="scope.row.state == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.state == 2" class="state_color2">审核中</span>
+              <span v-if="scope.row.state == 3" class="state_color3">完成</span>
+              <span v-if="scope.row.state == 4" class="state_color4">延期</span>
+            </template>
           </el-table-column>
           <el-table-column prop="carryPeople" label="执行人"></el-table-column>
           <el-table-column prop="presetTime" label="预计时间">
@@ -211,7 +217,7 @@
               </el-popconfirm>
               <el-button
                 size="small"
-                v-if="scope.row.state == 1"
+                v-if="scope.row.state == 2"
                 type="info"
                 @click="feedback(scope.row.id,scope.row.task)"
               >反馈</el-button>
@@ -374,6 +380,7 @@ export default {
   name: 'project_details',
   data() {
     return {
+      proId: '',
       loginState: true, // 避免多次点击
       project_style: '',
       drawer1: false,
@@ -385,7 +392,7 @@ export default {
       drawer4_task: '',
       sousuo_show: false,
       sousuo_input: '', // 所搜框内容
-      // 1审核中 2执行中 3已完成 4延期
+      // 1执行中 2审核中 3已完成 4延期
       tableData: [
         {
           id: 1,
@@ -406,7 +413,7 @@ export default {
           department: '设计',
           task: '网站设计稿',
           state: 1,
-          state_text: '审核中',
+          state_text: '执行中',
           color: 'color:red;',
           carryPeople: '解雨臣',
           presetTime: '20-01-21',
@@ -468,7 +475,7 @@ export default {
         department: [],
         presetTime: '',
         task_type: '',
-        demand: ''
+        remark: ''
       },
       records_list: [
         {
@@ -516,28 +523,7 @@ export default {
       // 反馈信息
       result: '',
       // 项目类型选择
-      task_type: [
-        {
-          value: '选项1',
-          label: '任务类型2'
-        },
-        {
-          value: '选项2',
-          label: '任务类型3'
-        },
-        {
-          value: '选项3',
-          label: '任务类型4'
-        },
-        {
-          value: '选项4',
-          label: '任务类型5'
-        },
-        {
-          value: '选项5',
-          label: '任务类型6'
-        }
-      ],
+      task_type: [],
       task_type_value: '',
       // 上传附件
       dialogImageUrl: '',
@@ -626,8 +612,9 @@ export default {
     },
     // 获取页面传参
     getParams() {
-      let id = this.$route.query.id
-      console.log(id)
+      let proId = this.$route.query.id
+      this.proId = proId
+      // console.log(id)
     },
     // 获取项目详情-我发起
     getProjectOfTask() {
@@ -652,9 +639,9 @@ export default {
         .post('/pmbs/api/project/projectOfUserTask' + data)
         .then(this.getProjectOfUserTaskSuss)
     },
-    // 获取项目详情-我参与回调/api/project/projectOfUserTask
+    // 获取项目详情-我参与回调
     getProjectOfUserTaskSuss(res) {
-      console.log(res)
+      // console.log(res)
       // if (res.status == 200) {
       //   this.projectListJoin = res.data.data
       //   console.log(this.projectListJoin)
@@ -668,8 +655,41 @@ export default {
         .post('/pmbs/api/project/showDetail' + data)
         .then(this.getProjectShowDetailSuss)
     },
-    // 获取项目需求回调/api/project/projectOfUserTask
+    // 获取项目需求回调
     getProjectShowDetailSuss(res) {
+      // console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+      // }
+    },
+    // 任务新增
+    taskSave() {
+      let data = {
+        deptId: '所属部门id',
+        doUserId: '参与人id',
+        expertTime: '预计时间',
+        faTask: '父任务id',
+        initUserId: '发起人id',
+        proFileList: [
+          {
+            fileName: '附件名',
+            isPro: '项目任务需求（0-项目需求，1-任务需求）',
+            localPath: '本地路径',
+            suffix: '文档后缀'
+          }
+        ],
+        proId: this.proId, // '所属项目id',
+        remark: this.new_task.remark, // '需求',
+        taskName: this.new_task.new_name,//'任务名',
+        typeId: this.task_type_value //'任务类型id'
+      }
+      this.$axios
+        .post('/pmbs/api/task/save', data)
+        .then(this.taskSaveSuss)
+    },
+    // 任务新增回调
+    taskSaveSuss(res) {
       console.log(res)
       // if (res.status == 200) {
       //   this.projectListJoin = res.data.data
@@ -677,31 +697,49 @@ export default {
         
       // }
     },
-    // 获取项目反馈-项目详情
-    getProjectFeedbackDetail() {
-      let data = `?proId=1`
+    // 任务类型获取
+    getDepTypeList() {
+      let data = {}
       this.$axios
-        .post('/pmbs/api/project/feedbackDetail' + data)
-        .then(this.getProjectFeedbackDetailSuss)
+        .post('/pmbs/api/depType/listAjax', data)
+        .then(this.getDepTypeListSuss)
     },
-    // 获取项目需求回调/api/project/projectOfUserTask
-    getProjectFeedbackDetailSuss(res) {
-      console.log(res)
-      // if (res.status == 200) {
-      //   this.projectListJoin = res.data.data
-      //   console.log(this.projectListJoin)
+    // 任务类型获取回调
+    getDepTypeListSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        // this.projectListJoin = res.data.data
+        let data = res.data.items
+        let task_type = []
+        let task_type_data = {}
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i];
+          task_type_data = {
+            value: element.typeId,
+            label: element.typeName
+          }
+          task_type.push(task_type_data)
+        }
+        this.task_type = task_type
+        console.log(this.task_type)
+        // console.log(data)
         
-      // }/api/project/feedbackDetail
+      }
     }
   },
   // 钩子函数
   mounted() {
-    this.widthheight()
+    // this.widthheight()
+    // 获取页面传参
     this.getParams()
-    this.getProjectOfTask()
-    this.getProjectOfUserTask()
-    this.getProjectShowDetail()
-    this.getProjectFeedbackDetail()
+    // 获取项目详情-我发起
+    // this.getProjectOfTask()
+    // 获取项目详情-我参与
+    // this.getProjectOfUserTask()
+    // 获取项目需求
+    // this.getProjectShowDetail()
+    // 任务类型获取
+    this.getDepTypeList()
   }
 }
 </script>
@@ -862,10 +900,10 @@ export default {
   color: rgb(16, 16, 16);
 }
 .state_color1 {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2 {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3 {
   color: rgb(172, 171, 171);
@@ -874,10 +912,10 @@ export default {
   color: rgb(255, 0, 0);
 }
 .state_color1 >>> input {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2 >>> input {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3 >>> input {
   color: rgb(172, 171, 171);
