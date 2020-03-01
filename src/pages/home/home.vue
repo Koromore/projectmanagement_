@@ -76,31 +76,34 @@
             ></el-input>
           </el-col>
           <el-col :span="18" :offset="6">
-            <el-radio v-model="new_project.radio2" label="1">项目经理</el-radio>
-            <el-radio v-model="new_project.radio2" label="2">执行部门</el-radio>
+            <el-radio v-model="radio2" label="1">项目经理</el-radio>
+            <el-radio v-model="radio2" label="2">执行部门</el-radio>
           </el-col>
-          <el-col :span="13" :offset="6" v-show="new_project.radio2 == 1">
-            <el-autocomplete
-              placeholder="请输入内容"
-              v-model="new_project.manager"
-              clearable
-              :fetch-suggestions="querySearch"
-              @select="handleSelect"
-            ></el-autocomplete>
-            {{new_project.manager}}
+          <el-col :span="13" :offset="6" v-show="radio2 == 1">
+            <el-select v-model="new_project.managerId" filterable placeholder="请选择" class="userList">
+              <el-option
+                v-for="item in userList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <!-- {{new_project.managerId}} -->
           </el-col>
-          <el-col :span="17" :offset="6" v-show="new_project.radio2 == 2">
+          <el-col :span="17" :offset="6" v-show="radio2 == 2">
             <el-checkbox-group v-model="new_project.checkList" class="check_box">
-              <el-checkbox label="武汉策划"></el-checkbox>
-              <el-checkbox label="上海研发"></el-checkbox>
-              <el-checkbox label="北京网络销售"></el-checkbox>
-              <el-checkbox label="武汉内容"></el-checkbox>
-              <el-checkbox label="上海项目"></el-checkbox>
+              <el-checkbox
+                :label="items.id"
+                v-for="items in deptList"
+                :key="items.index"
+              >{{items.name}}</el-checkbox>
             </el-checkbox-group>
+            <!-- {{new_project.checkList}} -->
           </el-col>
           <el-col :span="24">
             <el-col :span="6" class="title">知晓人</el-col>
           </el-col>
+          <!-- 知晓人编辑 -->
           <el-col :span="18" :offset="6" class="know_pop">
             <el-tag
               :key="tag"
@@ -112,53 +115,42 @@
             >{{tag}}</el-tag>
           </el-col>
           <el-col :span="9" :offset="6">
-            <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
+            <!-- @select="handleSelect" -->
+            <!-- <el-autocomplete
+              placeholder="请输入内容"
+              v-model="add_list"
+              clearable
+              :fetch-suggestions="querySearch"
+            ></el-autocomplete>-->
+            <el-select v-model="add_list" filterable placeholder="请选择">
+              <el-option
+                v-for="item in userList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            {{add_list}}
           </el-col>
           <el-col :span="6" :offset="1">
             <el-button size="small" type="primary" @click="showInput">添加</el-button>
           </el-col>
+
           <!-- 上传 -->
           <el-col :span="13" :offset="6" class="upload">
             <el-upload
               :action="uploadUrl"
               list-type="picture-card"
-              :auto-upload="true"
+              :on-preview="handlePictureCardPreview"
+              :on-remove="handleRemove"
               :on-success="handleSuccess"
-              :file-list="fileList"
-              :on-change="test"
             >
-              <i slot="default" class="el-icon-plus"></i>
-              <div slot="file" slot-scope="{file}">
-                <img class="el-upload-list__item-thumbnail" :src="type" alt />
-                <!-- {{file.raw.type}} -->
-                <span class="el-upload-list__item-actions">
-                  <span
-                    class="el-upload-list__item-preview"
-                    @click="handlePictureCardPreview(file)"
-                  >
-                    <i class="el-icon-zoom-in"></i>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleDownload(file)"
-                  >
-                    <i class="el-icon-download"></i>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleRemove(file)"
-                  >
-                    <i class="el-icon-delete"></i>
-                  </span>
-                </span>
-              </div>
+              <i class="el-icon-plus"></i>
             </el-upload>
             <el-dialog :visible.sync="dialogVisible" class="upload_list">
               <img width="100%" :src="dialogImageUrl" alt />
             </el-dialog>
-            <div class="text">附件{{dialogImageUrl}}</div>
+            <div class="text">附件</div>
           </el-col>
         </el-row>
       </el-scrollbar>
@@ -186,18 +178,31 @@ export default {
       home_style: '',
       show_acti: 1,
       drawer: false,
-      restaurants: [],
+      restaurants: [
+        { value: '测试1', deptId: 'id1' },
+        {
+          value: '测试2',
+          deptId: 'id2'
+        },
+        {
+          value: '测试3',
+          deptId: 'id3'
+        }
+      ],
+      deptList: [], // 部门列表
+      userList: [], // 用户列表
+      radio2: '1', // 项目经理,执行部门 选择
       // 新增
       new_project: {
         new_name: '', // 任务名称
-        business_type: [], // 分类
+        business_type: [], // 分类 客户-类型
         radio1: '0', // 专项，日常
         presetTime: '', // 预计时间
         remark: '', // 需求
-        radio2: '2', // 项目经理,执行部门 选择
         manager: '', // 项目经理
+        managerId: '', // 项目经理ID
         checkList: [], // 执行部门
-        dynamicTags: ['知晓人'] // 知晓人
+        dynamicTags: [] // 知晓人
       },
       // 知晓人
       add_list: '',
@@ -205,67 +210,27 @@ export default {
       dialogImageUrl: '123',
       dialogVisible: false,
       disabled: false,
+      listProFile: [], // 上传文件信息列表
       type: '',
       clientList: [],
+      uploadUrl: '',
       // 业务类型列表
-      business_type_list: [
-        {
-          value: 'ID1',
-          label: '客户1',
-          children: [
-            {
-              value: 'ID1',
-              label: '业务类型1'
-            },
-            {
-              value: 'ID2',
-              label: '业务类型2'
-            },
-            {
-              value: 'ID3',
-              label: '业务类型3'
-            }
-          ]
-        },
-        {
-          value: 'ID2',
-          label: '客户2',
-          children: [
-            {
-              value: 'ID1',
-              label: '业务类型1'
-            },
-            {
-              value: 'ID2',
-              label: '业务类型2'
-            },
-            {
-              value: 'ID3',
-              label: '业务类型3'
-            }
-          ]
-        },
-        {
-          value: 'ID3',
-          label: '客户3',
-          children: [
-            {
-              value: 'ID1',
-              label: '业务类型1'
-            },
-            {
-              value: 'ID2',
-              label: '业务类型2'
-            },
-            {
-              value: 'ID3',
-              label: '业务类型3'
-            }
-          ]
-        }
-      ],
-      fileList: [],
-      uploadUrl: ''
+      business_type_list: [],
+      fileList: []
+    }
+  },
+  // 侦听器
+  watch: {
+    // 如果 `question` 发生改变，这个函数就会运行
+    radio2: function(newQuestion, oldQuestion) {
+      if (this.radio2 == 1) {
+        // console.log(this.radio2)
+        this.new_project.checkList = []
+      } else if (this.radio2 == 2) {
+        // console.log(this.radio2)
+        this.new_project.manager = ''
+        this.new_project.managerId = ''
+      }
     }
   },
   // 方法
@@ -273,7 +238,7 @@ export default {
     matchType, // 文件格式判断
     // 分类二级联动
     handleChange(value) {
-      console.log(value)
+      // console.log(value)
       // console.log(this.value)
     },
     // 获取浏览器宽高
@@ -286,7 +251,6 @@ export default {
     // 页面切换
     change_show(e, url) {
       this.show_acti = e
-      // this.$router.push({ path: '/home/components/' + url })
       if (this.$route.path == '/home/components/' + url) {
         return ''
       } else {
@@ -297,19 +261,29 @@ export default {
     showInput() {
       let list = this.new_project.dynamicTags
       let add_list = this.add_list
+      let userList = this.userList
       let cf = true
-      if (add_list) {
+      if (add_list != '') {
+        let add_list_data = ''
+        for (let i = 0; i < userList.length; i++) {
+          const element = userList[i]
+          if (element.value == add_list) {
+            add_list_data = element.label
+          }
+        }
         for (let i = 0; i < list.length; i++) {
           const element = list[i]
-          if (element == add_list) {
-            console.log('请勿重复添加')
+          if (element == add_list_data) {
+            this.messageWarning('请勿重复添加')
             cf = false
           }
         }
         if (cf) {
-          list.push(add_list)
+          list.push(add_list_data)
           this.add_list = ''
         }
+      } else if (add_list == '') {
+        this.messageWarning('信息为空')
       }
     },
     // 删除知晓人标签
@@ -327,7 +301,7 @@ export default {
       // 获取部门列表
       this.getDeptList()
       // 获取用户列表
-      // this.getListAjax()
+      this.getListAjax()
       // 获取新建项目分类
       this.getAllClientAndBusiness()
     },
@@ -363,114 +337,96 @@ export default {
       `
       this.uploadUrl = uploadUrl
     },
+    // 删除
     handleRemove(file) {
       console.log(file)
+      let data = file.response.data
+      let listProFile = this.listProFile
+      for (let i = 0; i < listProFile.length; i++) {
+        let element = listProFile[i]
+        if (element.localPath == data.path) {
+          listProFile.splice(i, 1)
+          console.log('删除')
+        }
+      }
+      this.listProFile = listProFile
+      console.log(this.listProFile)
     },
+    // 预览
     handlePictureCardPreview(file) {
       console.log(file)
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    handleDownload(file, fileList) {
-      console.log(file)
-      console.log(fileList)
-    },
     // 上传回调
     handleSuccess(res, file, fileList) {
-      console.log('上传附件成功')
-      console.log(res)
-      console.log(file)
-      console.log(fileList)
-      let type = this.matchType(file.name)
-      this.type = type
-      console.log(type)
-    },
-    test(file, fileList) {
-      // console.log(file)
-      // console.log(fileList)
-    },
-    // 新增项目
-    addProject() {
-      let data = {
-        initUserId: 128, //'发起人id',
-        status: 1,
-        proName: this.new_project.new_name, //'项目名称',
-        clientId: this.new_project.business_type[0],//'所属客户ID',
-        serviceId: this.new_project.business_type[1],//'所属业务ID'
-        isUsual: this.new_project.radio1, //'专项日常（0-日常，1-专项）',
-        expertTime: this.new_project.presetTime, //'预计完成时间',
-        remark: this.new_project.remark, //'需求',
-
-        manager: '', //'项目经理id',
-        department: '', //'参与部门ID',
-
-        knowUser: '', //'知晓人id，多个用逗号隔开',
-        listProFile: [
-          {
-            fileName: '', //'附件名称',
-            localPath: '', //'本地路径',
-            suffix: '' //'文档后缀'
-          }
-        ],
-        realName: '' //'string',
+      // console.log('上传附件成功')
+      if (res.errcode == 0) {
+        let resData = res.data
+        let listProFile = this.listProFile
+        // console.log(listProFile)
+        let listProFileData = {
+          fileName: resData.fileName, //'附件名称',
+          localPath: resData.path, //'本地路径',
+          suffix: resData.fileType //'文档后缀'
+        }
+        listProFile.push(listProFileData)
+        this.listProFile = listProFile
+        // console.log(this.listProFile)
       }
-      console.log(data)
-      this.$axios.post('/pmbs/api/project/save', data).then(this.addProjectSuss)
-    },
-    // 新增项目回调
-    addProjectSuss(res) {
-      console.log(res)
-      if (res.status == 200) {
-        this.messageWin('项目添加成功')
-      }
-    },
-    // 获取项目反馈-项目详情
-    getProjectFeedbackDetail() {
-      let data = `?proId=1`
-      this.$axios
-        .post('/pmbs/api/project/feedbackDetail' + data)
-        .then(this.getProjectFeedbackDetailSuss)
-    },
-    // 获取项目需求回调/api/project/projectOfUserTask
-    getProjectFeedbackDetailSuss(res) {
-      // console.log(res)
-      // if (res.status == 200) {
-      //   this.projectListJoin = res.data.data
-      //   console.log(this.projectListJoin)
-      // }/api/project/feedbackDetail
     },
     // 部门列表获取
     getDeptList(res) {
-      let data = { pageNum: 1 }
-      this.$axios
-        .post('/pmbs/api/userapi/deptList', data)
-        .then(this.getDeptListSuss)
+      let list = this.deptList
+      if (list.length == 0) {
+        let data = { pageNum: 1 }
+        this.$axios
+          .post('/pmbs/department/deptList', data)
+          .then(this.getDeptListSuss)
+      }
     },
     // 部门列表获取回调
     getDeptListSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        let deptList = res.data.data
-        // this.deptList = clientList
-        // this.business_type_list
-        // console.log(this.deptList)
+        let data = res.data.data
+        let deptList = []
+        for (let i = 0; i < data.length; i++) {
+          let deptListData = {}
+          const element = data[i]
+          deptListData.id = element.deptId
+          deptListData.name = element.deptName
+          deptList.push(deptListData)
+        }
+        this.deptList = deptList
+        // console.log(deptList)
       }
     },
     // 用户列表获取
     getListAjax(res) {
-      let data = { pageNum: 1 }
-      this.$axios
-        .post('/pmbs/api/userapi/listAjax', data)
-        .then(this.getListAjaxSuss)
+      let list = this.userList
+      if (list.length == 0) {
+        let data = { pageNum: 1 }
+        this.$axios.post('/pmbs/api/user/list', data).then(this.getListAjaxSuss)
+      }
     },
     // 用户列表获取回调
     getListAjaxSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        let userList = res.data.data
-        // this.deptList = clientList
-        // this.business_type_list
-        // console.log(this.userList)
+        let data = res.data.data
+        let userList = []
+        for (let i = 0; i < data.length; i++) {
+          let userListData = {}
+          let element = data[i]
+
+          userListData.value = element.deptId
+          userListData.label = `${element.deptName}-${element.realName}`
+          userList.push(userListData)
+        }
+        this.userList = userList
+        this.restaurants = userList
+        // console.log(restaurants)
       }
     },
     // 获取新建项目分类
@@ -509,46 +465,89 @@ export default {
       }
       // console.log(res)
     },
-    ///////////////////////////////////////
-    querySearch(queryString, cb) {
-      var restaurants = this.restaurants
-      var results = queryString
-        ? restaurants.filter(this.createFilter(queryString))
-        : restaurants
-      // 调用 callback 返回建议列表的数据
-      cb(results)
+    // 新增项目
+    addProject() {
+      // 用户列表
+      let userList = this.userList
+      // 执行部门ID数组转为字符串
+      let checkList = this.new_project.checkList
+      let department = checkList.join(',')
+      // 知晓人名称列表
+      let dynamicTags = this.new_project.dynamicTags
+      let knowUserList = []
+      for (let i = 0; i < dynamicTags.length; i++) {
+        let element = dynamicTags[i]
+        let knowUserListData = ''
+        for (let j = 0; j < userList.length; j++) {
+          let element_ = userList[j]
+
+          if (element == element_.value) {
+            knowUserListData = element_.deptId
+          }
+        }
+        knowUserList.push(knowUserListData)
+      }
+
+      let knowUser = knowUserList.join(',')
+      let radio2 = this.radio2
+      // console.log(knowUser)
+      let data = {
+        initUserId: 128, //'发起人id',
+        status: 1,
+        proName: this.new_project.new_name, // '项目名称',
+        clientId: this.new_project.business_type[0], // '所属客户ID',
+        serviceId: this.new_project.business_type[1], // '所属业务ID'
+        isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
+        expertTime: this.new_project.presetTime, // '预计完成时间',
+        remark: this.new_project.remark, // '需求',
+        knowUser: knowUser, // '知晓人id，多个用逗号隔开',
+        listProFile: this.listProFile
+      }
+      if (radio2 == 1) {
+        data.manager = this.new_project.managerId // '项目经理id',
+      } else if (radio2 == 2) {
+        data.department = this.department // '参与部门ID',
+      }
+      // console.log(data)
+      this.$axios.post('/pmbs/api/project/save', data).then(this.addProjectSuss)
     },
-    createFilter(queryString) {
-      return restaurant => {
-        return (
-          restaurant.value.toLowerCase().indexOf(queryString.toLowerCase()) ===
-          0
-        )
+    // 新增项目回调
+    addProjectSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        this.messageWin('项目添加成功')
+        this.drawer = false
       }
     },
-    loadAll() {
-      return [
-        { value: '测试1',
-          address: '测试1' },
-        {
-          value: '测试2',
-          address: '测试2'
-        },
-        {
-          value: '测试3',
-          address: '测试3'
-        }
-      ]
+    // 获取项目反馈-项目详情
+    getProjectFeedbackDetail() {
+      let data = `?proId=1`
+      this.$axios
+        .post('/pmbs/api/project/feedbackDetail' + data)
+        .then(this.getProjectFeedbackDetailSuss)
     },
-    handleSelect(item) {
-      console.log(item)
+    // 获取项目需求回调/api/project/projectOfUserTask
+    getProjectFeedbackDetailSuss(res) {
+      // console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+      // }/api/project/feedbackDetail
     },
+
     // 消息提示
     messageWin(message) {
       // 成功提示
       this.$message({
         message: message,
         type: 'success'
+      })
+    },
+    messageWarning(message) {
+      // 警告提示
+      this.$message({
+        message: message,
+        type: 'warning'
       })
     },
     messageError(message) {
@@ -562,9 +561,9 @@ export default {
     sessionStorage.setItem('refresh', 0)
     this.router_url()
     this.upload()
-    this.getProjectFeedbackDetail()
+    // this.getProjectFeedbackDetail()
 
-    this.restaurants = this.loadAll()
+    // this.restaurants = this.loadAll()
   }
 }
 </script>
@@ -637,7 +636,7 @@ export default {
   align-items: center;
 }
 .home .add_box .check_box .el-checkbox {
-  width: 108px;
+  width: 50%;
   margin: 0;
 }
 .home .add_box .upload .text {
@@ -645,13 +644,18 @@ export default {
   text-align: center;
   color: rgba(0, 0, 0, 0.65);
 }
-
+.home .add_box .manager {
+  width: 100%;
+}
 .home .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
 }
 .home .add_box .know_pop .know_pop_list {
   margin-bottom: 13px;
+}
+.home .add_box .userList{
+  width: 100%;
 }
 .home .batton_pa {
   width: 100%;

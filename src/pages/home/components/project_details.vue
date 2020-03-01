@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i @click="drawer1 = true" class="el-icon-circle-plus-outline"></i>
+          <i @click="addtask" class="el-icon-circle-plus-outline"></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
           <i @click="drawer2 = true" class="el-icon-time"></i>
           <i @click="sousuoShow" class="el-icon-search"></i>
@@ -43,97 +43,95 @@
           </el-col>
         </el-col>
       </el-col>
-      <!-- 抽屉 -->
-      <el-drawer title="添加任务" :visible.sync="drawer1" :with-header="false">
+      <!-- 抽屉创建任务 -->
+      <el-drawer title="创建任务" :visible.sync="drawer1" :with-header="false">
         <el-scrollbar style="height: 100%">
-        <el-row class="add_box">
-          <el-col :span="24">
-            <el-col :span="6" class="title title1">创建任务</el-col>
-          </el-col>
-          <el-col :span="6" class="title">父任务</el-col>
-          <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input>
-          </el-col>
-          <el-col :span="24">
-            <el-col :span="6" class="title title2">执行部门</el-col>
-            <el-col :span="15" :offset="6" class="department">
-              <el-radio v-model="new_task.department" label="1">武汉策划</el-radio>
-              <el-radio v-model="new_task.department" label="2">上海研发</el-radio>
-              <el-radio v-model="new_task.department" label="3">上海项目</el-radio>
-              <el-radio v-model="new_task.department" label="4">武汉内容</el-radio>
-              <el-radio v-model="new_task.department" label="5">北京网络销售</el-radio>
+          <el-row class="add_box">
+            <el-col :span="24">
+              <el-col :span="6" class="title title1">创建任务</el-col>
             </el-col>
-          </el-col>
+            <el-col :span="6" class="title">父任务</el-col>
+            <el-col :span="13">
+              <!-- <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input> -->
+              <el-select
+                v-model="new_task.faTask"
+                filterable
+                placeholder="请选择"
+                class="parent_task"
+                clearable
+              >
+                <el-option
+                  v-for="item in faTaskList"
+                  :key="item.index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+          {{new_task.faTask}}
+            </el-col>
+            <el-col :span="24">
+              <el-col :span="6" class="title title2">执行部门</el-col>
+              <el-col :span="15" :offset="6" class="department">
+                <el-radio
+                  v-model="new_task.department"
+                  :label="items.id"
+                  v-for="items in deptList"
+                  :key="items.index"
+                >{{items.name}}</el-radio>
+              </el-col>
+            </el-col>
 
-          <el-col :span="6" class="title">名称</el-col>
-          <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
-          </el-col>
-          <el-col :span="6" class="title">预计时间</el-col>
-          <el-col :span="13" class="presetTime">
-            <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
-          </el-col>
-          <el-col :span="6" class="title">任务类型</el-col>
-          <el-col :span="13" class="task_type">
-            <el-select v-model="task_type_value" placeholder="请选择任务类型">
-              <el-option
-                v-for="item in task_type"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-col>
-          <el-col :span="6" class="title">需求</el-col>
-          <el-col :span="13">
-            <el-input
-              type="textarea"
-              :autosize="{ minRows: 6, maxRows: 8}"
-              placeholder="请输入内容"
-              v-model="new_task.remark"
-            ></el-input>
-          </el-col>
-          <!-- 上传 -->
-          <el-col :span="13" :offset="6" class="upload">
-            <el-upload action="#" list-type="picture-card" :auto-upload="false">
-              <i slot="default" class="el-icon-plus"></i>
-              <div slot="file" slot-scope="{file}">
-                <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
-                <span class="el-upload-list__item-actions">
-                  <span
-                    class="el-upload-list__item-preview"
-                    @click="handlePictureCardPreview(file)"
-                  >
-                    <i class="el-icon-zoom-in"></i>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleDownload(file)"
-                  >
-                    <i class="el-icon-download"></i>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleRemove(file)"
-                  >
-                    <i class="el-icon-delete"></i>
-                  </span>
-                </span>
-              </div>
-            </el-upload>
-            <el-dialog :visible.sync="dialogVisible" class="upload_list">
-              <img width="100%" :src="dialogImageUrl" alt />
-            </el-dialog>
-            <div class="text">附件</div>
-          </el-col>
+            <el-col :span="6" class="title">名称</el-col>
+            <el-col :span="13">
+              <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+            </el-col>
+            <el-col :span="6" class="title">预计时间</el-col>
+            <el-col :span="13" class="presetTime">
+              <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
+            </el-col>
+            <el-col :span="6" class="title">任务类型</el-col>
+            <el-col :span="13" class="task_type">
+              <el-select v-model="task_type_value" placeholder="请选择任务类型">
+                <el-option
+                  v-for="item in task_type"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="6" class="title">需求</el-col>
+            <el-col :span="13">
+              <el-input
+                type="textarea"
+                :autosize="{ minRows: 6, maxRows: 8}"
+                placeholder="请输入内容"
+                v-model="new_task.remark"
+              ></el-input>
+            </el-col>
+            <!-- 上传 -->
+            <el-col :span="13" :offset="6" class="upload">
+              <el-upload
+                :action="uploadUrl"
+                list-type="picture-card"
+                :on-preview="handlePictureCardPreview"
+                :on-remove="handleRemove"
+                :on-success="handleSuccess"
+              >
+                <i class="el-icon-plus"></i>
+              </el-upload>
 
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
-          </el-col>
-        </el-row>
+              <el-dialog :visible.sync="dialogVisible" class="upload_list">
+                <img width="100%" :src="dialogImageUrl" alt />
+              </el-dialog>
+              <div class="text">附件</div>
+            </el-col>
+
+            <el-col :span="12" :offset="7" class="batton">
+              <el-button size="small" type="info">取消</el-button>
+              <el-button size="small" type="primary" @click="taskSave">提交</el-button>
+            </el-col>
+          </el-row>
         </el-scrollbar>
       </el-drawer>
       <!-- 抽屉 -->
@@ -163,51 +161,43 @@
       <el-col :span="24" class="table table1" v-if="table_show">
         <el-table
           ref="filterTable"
-          :data="tableData"
+          :data="taskList"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
         >
-          <el-table-column prop="department" label="部门"></el-table-column>
-          <el-table-column prop="task" label="任务">
+          <el-table-column prop="deptName" label="部门"></el-table-column>
+          <el-table-column prop="taskName" label="任务">
             <template slot-scope="scope">
-              <el-link @click="task_detail(scope.row.id)">{{scope.row.task}}</el-link>
+              <el-link @click="task_detail(scope.row.taskId)">{{scope.row.taskName}}</el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="state_text" label="状态">
-            <!-- <div
-              slot-scope="scope"
-              class="cell"
-              :class="{'state_color1': scope.row.state == 1,
-                  'state_color2': scope.row.state == 2,
-                  'state_color3': scope.row.state == 3,
-                  'state_color4': scope.row.state == 4}"
-            >{{scope.row.state_text}}</div> -->
+          <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.state == 1" class="state_color1">进行中</span>
-              <span v-if="scope.row.state == 2" class="state_color2">审核中</span>
-              <span v-if="scope.row.state == 3" class="state_color3">完成</span>
-              <span v-if="scope.row.state == 4" class="state_color4">延期</span>
+              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
             </template>
           </el-table-column>
-          <el-table-column prop="carryPeople" label="执行人"></el-table-column>
-          <el-table-column prop="presetTime" label="预计时间">
+          <el-table-column prop="overUserId" label="执行人"></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间">
             <template slot="header">
               预计时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
-          <el-table-column prop="finishTime" label="完成时间">
+          <el-table-column prop="overTime" label="完成时间">
             <template slot="header">
               完成时间
               <i class="el-icon-sort"></i>
             </template>
           </el-table-column>
           <el-table-column prop="assignPeople" label="下达人"></el-table-column>
-          <el-table-column prop="result" label="成果">
+          <el-table-column prop="overDesc" label="成果">
             <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
               <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <div>策划方案</div>
+              <div>{{scope.row.overDesc}}</div>
             </div>
           </el-table-column>
           <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
@@ -356,7 +346,12 @@
             <el-col :span="6" class="title">反馈意见：</el-col>
             <el-col :span="18" class="suggest">
               <el-scrollbar style="height: 100%;">
-                <el-col :span="23" class="suggest_list" v-for="item in suggest_list" :key="item.index">
+                <el-col
+                  :span="23"
+                  class="suggest_list"
+                  v-for="item in suggest_list"
+                  :key="item.index"
+                >
                   <el-col :span="12" class="time">{{item.time}}</el-col>
                   <el-col :span="12" class="pop">{{item.pop}}</el-col>
                   <el-col :span="24" class="content">{{item.content}}</el-col>
@@ -380,7 +375,8 @@ export default {
   name: 'project_details',
   data() {
     return {
-      proId: '',
+      proId: '', // 项目ID
+      type: '', // 项目类型 0我发起 1我参与
       loginState: true, // 避免多次点击
       project_style: '',
       drawer1: false,
@@ -392,87 +388,19 @@ export default {
       drawer4_task: '',
       sousuo_show: false,
       sousuo_input: '', // 所搜框内容
+      taskList: [], // 任务列表
+      deptList: [], // 部门列表
       // 1执行中 2审核中 3已完成 4延期
-      tableData: [
-        {
-          id: 1,
-          department: '内容',
-          task: '赠礼活动',
-          state: 4,
-          state_text: '延期',
-          color: 'color:red;',
-          carryPeople: '解雨臣',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '解雨臣',
-          result: '成果',
-          operation: '操作'
-        },
-        {
-          id: 2,
-          department: '设计',
-          task: '网站设计稿',
-          state: 1,
-          state_text: '执行中',
-          color: 'color:red;',
-          carryPeople: '解雨臣',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '解雨臣',
-          result: '成果',
-          operation: '操作'
-        },
-        {
-          id: 3,
-          department: '研发',
-          task: '后台开发',
-          state: 4,
-          state_text: '延期',
-          color: 'color:red;',
-          carryPeople: '解雨臣',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '解雨臣',
-          result: '成果',
-          operation: '操作'
-        },
-        {
-          id: 4,
-          department: '策划',
-          task: '策划方案',
-          state: 3,
-          state_text: '已完成',
-          color: 'color:red;',
-          carryPeople: '解雨臣',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '解雨臣',
-          result: '成果',
-          operation: '操作'
-        },
-        {
-          id: 5,
-          department: '网络营销',
-          task: '产品原型',
-          state: 3,
-          state_text: '已完成',
-          color: 'color:red;',
-          carryPeople: '解雨臣',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '解雨臣',
-          result: '成果',
-          operation: '操作'
-        }
-      ],
       // 我参与 我发起选项卡
       tabs_activity: 1,
       table_show: true,
+      // 父任务列表
+      faTaskList: [],
       // 新增
       new_task: {
-        parent_task: '',
+        faTask: '',
         new_name: '',
-        department: [],
+        department: '',
         presetTime: '',
         task_type: '',
         remark: ''
@@ -529,7 +457,9 @@ export default {
       dialogImageUrl: '',
       dialogVisible: false,
       disabled: false,
-      suggest_list:[
+      uploadUrl: '',
+      listProFile: [], // 上传文件信息列表
+      suggest_list: [
         {
           time: '2020-01-12 12:00',
           pop: '客户部-黄振宇',
@@ -555,6 +485,19 @@ export default {
   },
   // 方法
   methods: {
+    formatData(date) {
+      // var date = new Date();
+      let year = date.getFullYear()
+      let month = date.getMonth() + 1
+      let strDate = date.getDate()
+      if (month >= 1 && month <= 9) {
+        month = '0' + month
+      }
+      if (strDate >= 0 && strDate <= 9) {
+        strDate = '0' + strDate
+      }
+      return year + '-' + month + '-' + strDate
+    },
     // 获取浏览器宽高
     widthheight() {
       let winWidth = window.innerWidth
@@ -562,12 +505,21 @@ export default {
       let height1 = winHeight - 100
       this.style1 = 'height:' + height1 + 'px;'
     },
+    addtask() {
+      this.drawer1 = true
+      // 任务类型获取
+      this.getDepTypeList()
+      // 部门列表获取
+      this.getDeptList()
+    },
     // 选项卡
     table_tab(e) {
       if (e == 1) {
-        ;(this.tabs_activity = 1), (this.table_show = true)
+        this.tabs_activity = 1
+        this.table_show = true
       } else if (e == 2) {
-        ;(this.tabs_activity = 2), (this.table_show = false)
+        this.tabs_activity = 2
+        this.table_show = false
       }
     },
     redact(e) {
@@ -600,53 +552,121 @@ export default {
       this.drawer5 = true
     },
     // 上传附件
+    upload() {
+      let upType = 1
+      let demandType = 0
+      let uploadUrl = `
+      /pmbs/file/upload?upType=${upType}&demandType=${demandType} 
+      `
+      this.uploadUrl = uploadUrl
+    },
+    // 删除
     handleRemove(file) {
       console.log(file)
+      let data = file.response.data
+      let listProFile = this.listProFile
+      for (let i = 0; i < listProFile.length; i++) {
+        let element = listProFile[i]
+        if (element.localPath == data.path) {
+          listProFile.splice(i, 1)
+          console.log('删除')
+        }
+      }
+      this.listProFile = listProFile
+      console.log(this.listProFile)
     },
+    // 预览
     handlePictureCardPreview(file) {
+      console.log(file)
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
-    handleDownload(file) {
-      console.log(file)
+    // 上传回调
+    handleSuccess(res, file, fileList) {
+      // console.log('上传附件成功')
+      if (res.errcode == 0) {
+        let resData = res.data
+        let listProFile = this.listProFile
+        // console.log(listProFile)
+        let listProFileData = {
+          fileName: resData.fileName, //'附件名称',
+          localPath: resData.path, //'本地路径',
+          suffix: resData.fileType //'文档后缀'
+        }
+        listProFile.push(listProFileData)
+        this.listProFile = listProFile
+        console.log(this.listProFile)
+      }
     },
     // 获取页面传参
     getParams() {
       let proId = this.$route.query.id
+      let type = this.$route.query.type
       this.proId = proId
+      this.type = type
       // console.log(id)
+      if (type == 0) {
+        this.getProjectOfTask(proId)
+      } else if (type == 1) {
+        this.getProjectOfUserTask()
+      }
+      this.getProjectFeedbackDetail(proId)
+    },
+    // 获取项目反馈-项目详情
+    getProjectFeedbackDetail(proId) {
+      let data = `?proId=${proId}`
+      this.$axios
+        .post('/pmbs/api/project/feedbackDetail' + data)
+        .then(this.getProjectFeedbackDetailSuss)
+    },
+    // 获取项目需求回调/api/project/projectOfUserTask
+    getProjectFeedbackDetailSuss(res) {
+      // console.log(res)
+      // if (res.status == 200) {
+      //   this.projectListJoin = res.data.data
+      //   console.log(this.projectListJoin)
+      // }/api/project/feedbackDetail
     },
     // 获取项目详情-我发起
-    getProjectOfTask() {
-      let data = `?proId=1`
+    getProjectOfTask(proId) {
+      let data = `?proId=${proId}`
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
         .then(this.getProjectOfTaskSuss)
     },
-    // 获取项目详情-我发起回调/api/project/projectOfUserTask
+    // 获取项目详情-我发起回调
     getProjectOfTaskSuss(res) {
       console.log(res)
-      // if (res.status == 200) {
-      //   this.projectListJoin = res.data.data
-      //   console.log(this.projectListJoin)
-        
-      // }
+      if (res.status == 200) {
+        let taskList = res.data.data
+        this.taskList = taskList
+        let faTaskList = []
+        // console.log(taskList)
+        for (let i = 0; i < taskList.length; i++) {
+          let element = taskList[i]
+          let faTaskListData = {}
+          faTaskListData.value = element.taskId
+          faTaskListData.label = element.taskName
+          faTaskList.push(faTaskListData)
+        }
+        this.faTaskList = faTaskList
+      }
     },
     // 获取项目详情-我参与
-    getProjectOfUserTask() {
-      let data = `?proId=1`
+    getProjectOfUserTask(proId) {
+      let data = `?proId=${proId}`
       this.$axios
         .post('/pmbs/api/project/projectOfUserTask' + data)
         .then(this.getProjectOfUserTaskSuss)
     },
     // 获取项目详情-我参与回调
     getProjectOfUserTaskSuss(res) {
-      // console.log(res)
-      // if (res.status == 200) {
-      //   this.projectListJoin = res.data.data
-      //   console.log(this.projectListJoin)
-        
-      // }
+      console.log(res)
+      if (res.status == 200) {
+        let taskList = res.data.data
+        this.taskList = taskList
+        // console.log(taskList)
+      }
     },
     // 获取项目需求
     getProjectShowDetail() {
@@ -663,39 +683,70 @@ export default {
       //   console.log(this.projectListJoin)
       // }
     },
+    // 部门列表获取
+    getDeptList(res) {
+      let list = this.deptList
+      if (list.length == 0) {
+        let data = { pageNum: 1 }
+        this.$axios
+          .post('/pmbs/department/deptList', data)
+          .then(this.getDeptListSuss)
+      }
+    },
+    // 部门列表获取回调
+    getDeptListSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        let data = res.data.data
+        let deptList = []
+        for (let i = 0; i < data.length; i++) {
+          let deptListData = {}
+          const element = data[i]
+          deptListData.id = element.deptId
+          deptListData.name = element.deptName
+          deptList.push(deptListData)
+        }
+        this.deptList = deptList
+        // console.log(deptList)
+      }
+    },
     // 任务新增
     taskSave() {
+      let expertTime = this.formatData(this.new_task.presetTime)
       let data = {
-        deptId: '所属部门id',
-        doUserId: '参与人id',
-        expertTime: '预计时间',
-        faTask: '父任务id',
-        initUserId: '发起人id',
-        proFileList: [
-          {
-            fileName: '附件名',
-            isPro: '项目任务需求（0-项目需求，1-任务需求）',
-            localPath: '本地路径',
-            suffix: '文档后缀'
-          }
-        ],
+        deptId: this.new_task.department, // '所属部门id',
+        doUserId: 128, // '参与人id',
+        expertTime: expertTime, // '预计时间',
+        faTask: this.faTask, // '父任务id',
+        initUserId: 128, //'发起人id',
+        proFileList: this.proFileList, // 上传文档列表
+        // [
+        //   {
+        //     fileName: '', // '附件名',
+        //     isPro: '', // '项目任务需求（0-项目需求，1-任务需求）',
+        //     localPath: '', // '本地路径',
+        //     suffix: '' // '文档后缀'
+        //   }
+        // ],
         proId: this.proId, // '所属项目id',
         remark: this.new_task.remark, // '需求',
-        taskName: this.new_task.new_name,//'任务名',
+        taskName: this.new_task.new_name, //'任务名',
         typeId: this.task_type_value //'任务类型id'
       }
-      this.$axios
-        .post('/pmbs/api/task/save', data)
-        .then(this.taskSaveSuss)
+      // console.log(this.new_task.presetTime)
+      // console.log(expertTime)
+      this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
     },
     // 任务新增回调
     taskSaveSuss(res) {
-      console.log(res)
-      // if (res.status == 200) {
-      //   this.projectListJoin = res.data.data
-      //   console.log(this.projectListJoin)
-        
-      // }
+      // console.log(res)
+      if (res.status == 200) {
+        // this.projectListJoin = res.data.data
+        this.messageWin(res.data.msg)
+        this.drawer1 = false
+        this.getProjectOfTask(this.proId)
+        // console.log(this.projectListJoin)
+      }
     },
     // 任务类型获取
     getDepTypeList() {
@@ -713,7 +764,7 @@ export default {
         let task_type = []
         let task_type_data = {}
         for (let i = 0; i < data.length; i++) {
-          let element = data[i];
+          let element = data[i]
           task_type_data = {
             value: element.typeId,
             label: element.typeName
@@ -721,10 +772,28 @@ export default {
           task_type.push(task_type_data)
         }
         this.task_type = task_type
-        console.log(this.task_type)
+        // console.log(this.task_type)
         // console.log(data)
-        
       }
+    },
+    // 消息提示
+    messageWin(message) {
+      // 成功提示
+      this.$message({
+        message: message,
+        type: 'success'
+      })
+    },
+    messageWarning(message) {
+      // 警告提示
+      this.$message({
+        message: message,
+        type: 'warning'
+      })
+    },
+    messageError(message) {
+      // 错误提示
+      this.$message.error(message)
     }
   },
   // 钩子函数
@@ -732,14 +801,9 @@ export default {
     // this.widthheight()
     // 获取页面传参
     this.getParams()
-    // 获取项目详情-我发起
-    // this.getProjectOfTask()
-    // 获取项目详情-我参与
-    // this.getProjectOfUserTask()
     // 获取项目需求
     // this.getProjectShowDetail()
-    // 任务类型获取
-    this.getDepTypeList()
+    this.upload()
   }
 }
 </script>
@@ -963,8 +1027,9 @@ export default {
   width: 36%;
 }
 .project_details .add_box .department .el-radio {
-  width: 108px;
+  width: 50%;
   margin-bottom: 9px;
+  margin-right: 0;
 }
 .project_details .add_box .presetTime > div {
   width: 100%;

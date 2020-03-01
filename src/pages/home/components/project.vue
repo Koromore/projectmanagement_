@@ -97,7 +97,7 @@
           <el-table-column prop="proName" label="名称">
             <el-link
               slot-scope="scope"
-              @click.native="pathPrpjectDetails(scope.row.proId)"
+              @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="状态">
@@ -175,7 +175,7 @@
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称">
-            <el-link slot-scope="scope" @click.native="pathPrpjectDetails()">{{scope.row.proName}}</el-link>
+            <el-link slot-scope="scope" @click.native="pathPrpjectDetails(scope.row.proId,1)">{{scope.row.proName}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <template slot-scope="scope">
@@ -396,7 +396,7 @@ export default {
         radio1: '1', // 专项，日常
         presetTime: '', // 预计时间
         demand: '', // 需求
-        radio2: '2', // 项目经理,执行部门 选择
+        radio2: '1', // 项目经理,执行部门 选择
         manager: '', // 项目经理
         checkList: [], // 执行部门
         dynamicTags: ['标签一', '标签二', '标签三', '标签四'] // 知晓人
@@ -473,109 +473,6 @@ export default {
       projectListOriginate: [], // 项目列表我发起
       projectListJoin: [], // 项目列表我参与
       // 1审核中 2执行中 3已完成 4延期
-      tableData1: [
-        {
-          id: 1,
-          name: '皓影赠礼',
-          state: 4,
-          state_text: '延期',
-          color: 'color:red;',
-          num: '10/4',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 2,
-          name: '皓影赠礼',
-          state: 1,
-          state_text: '执行中',
-          color: 'color:red;',
-          num: '10/4',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 3,
-          name: '皓影赠礼',
-          state: 2,
-          state_text: '审核中',
-          num: '10/4',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 4,
-          name: '皓影赠礼',
-          state: 3,
-          state_text: '已完成',
-          num: '10/4',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '张三'
-        },
-        {
-          id: 5,
-          name: '皓影赠礼',
-          state: 3,
-          state_text: '已完成',
-          num: '10/4',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '张三'
-        }
-      ],
-      tableData2: [
-        {
-          id: 1,
-          name: '皓影赠礼',
-          state: 4,
-          state_text: '延期',
-          color: 'color:red;',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 2,
-          name: '皓影赠礼',
-          state: 1,
-          state_text: '执行中',
-          color: 'color:red;',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 3,
-          name: '皓影赠礼',
-          state: 2,
-          state_text: '审核中',
-          presetTime: '20-01-21',
-          finishTime: '',
-          assignPeople: '张三'
-        },
-        {
-          id: 4,
-          name: '皓影赠礼',
-          state: 3,
-          state_text: '已完成',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '张三'
-        },
-        {
-          id: 5,
-          name: '皓影赠礼',
-          state: 3,
-          state_text: '已完成',
-          presetTime: '20-01-21',
-          finishTime: '20-02-22',
-          assignPeople: '张三'
-        }
-      ],
       // 我参与 我发起选项卡
       tabs_activity: 1,
       table_show: true,
@@ -719,11 +616,11 @@ export default {
       console.log('删除' + e)
     },
     // 跳转项目详情页面
-    pathPrpjectDetails(id) {
+    pathPrpjectDetails(id,type) {
       // console.log(id)
       this.$router.push({
         path: '/home/components/project_details',
-        query: { id: id }
+        query: { id: id,type: type }
       })
     },
     // 项目管理-我发起获取
@@ -738,7 +635,6 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let projectListOriginate = res.data.data
-        
         for (let i = 0; i < projectListOriginate.length; i++) {
           const element = projectListOriginate[i]
           element.unfintask = 0
@@ -766,11 +662,9 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let projectListJoin = res.data.data
-        
         // console.log(projectListJoin)
         this.projectListJoin = projectListJoin
         // console.log(this.projectListJoin)
-        
       }
     },
     // 任务反馈

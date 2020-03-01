@@ -107,7 +107,7 @@
             :filter-method="filterDepartment"
           ></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row.id)">{{scope.row.taskName}}</el-link>
+            <el-link slot-scope="scope" @click="task_detail(scope.row.taskId)">{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="执行状态">
             <template slot-scope="scope">
@@ -372,63 +372,6 @@ export default {
       client: '广汽本田',
       tasklist: [],
       // 1审核中 2执行中 3已完成 4延期
-      tableData1: [
-        {
-          id: 1,
-          name: '皓影赠礼',
-          department: '网络营销',
-          task: '产品原型',
-          state: 1,
-          state_text: '审核中',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
-        },
-        {
-          id: 2,
-          name: '广本网站优化',
-          department: '设计',
-          task: '产品原型',
-          state: 2,
-          state_text: '执行中',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
-        },
-        {
-          id: 3,
-          name: '皓影赠礼',
-          department: '研发',
-          task: '产品原型',
-          state: 4,
-          state_text: '延期',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
-        },
-        {
-          id: 4,
-          name: '广本网站优化',
-          department: '策划',
-          task: '产品原型',
-          state: 4,
-          state_text: '延期',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
-        },
-        {
-          id: 5,
-          name: '皓影赠礼',
-          department: '内容',
-          task: '产品原型',
-          state: 3,
-          state_text: '已完成',
-          last_task: '策划方案',
-          presetTime: '20-01-21',
-          operation: '操作'
-        }
-      ],
       tableData2: [
         {
           id: 1,
@@ -603,8 +546,9 @@ export default {
     filterDepartment(value, row) {
       return row.department === value
     },
-    task_detail() {
+    task_detail(id) {
       this.drawer1 = true
+      this.getTaskShow(id)
     },
     change_carryPeople(e) {
       this.change_carryPeople_show = e
@@ -615,7 +559,7 @@ export default {
       let data = {
         type: type,
         task: {
-          initUserId: 548
+          initUserId: 128
         }
       }
       this.$axios
@@ -629,6 +573,23 @@ export default {
         this.tasklist = data
       }
       console.log(this.tasklist)
+    },
+    // 获取任务详情
+    getTaskShow(id) {
+      // console.log("123")
+      let data = `?id=${id}`
+      this.$axios
+        .post('/pmbs/api/task/show' + data)
+        .then(this.getTaskShowSuss)
+    },
+    // 获取任务详情回调
+    getTaskShowSuss(res) {
+      console.log(res)
+      // if (res.status == 200) {
+      //   let data = res.data.items
+      //   this.tasklist = data
+      // }
+      // console.log(this.tasklist)
     }
   },
   // 钩子函数
