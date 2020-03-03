@@ -56,7 +56,6 @@
               @change="handleChange"
               style="width: 100%;"
             ></el-cascader>
-            <!-- {{new_project.business_type}} -->
           </el-col>
           <el-col :span="18" :offset="6">
             <el-radio v-model="new_project.radio1" label="0">专项</el-radio>
@@ -80,7 +79,12 @@
             <el-radio v-model="radio2" label="2">执行部门</el-radio>
           </el-col>
           <el-col :span="13" :offset="6" v-show="radio2 == 1">
-            <el-select v-model="new_project.managerId" filterable placeholder="请选择" class="userList">
+            <el-select
+              v-model="new_project.managerId"
+              filterable
+              placeholder="请选择"
+              class="userList"
+            >
               <el-option
                 v-for="item in userList"
                 :key="item.index"
@@ -88,7 +92,6 @@
                 :value="item.value"
               ></el-option>
             </el-select>
-            <!-- {{new_project.managerId}} -->
           </el-col>
           <el-col :span="17" :offset="6" v-show="radio2 == 2">
             <el-checkbox-group v-model="new_project.checkList" class="check_box">
@@ -98,7 +101,6 @@
                 :key="items.index"
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
-            <!-- {{new_project.checkList}} -->
           </el-col>
           <el-col :span="24">
             <el-col :span="6" class="title">知晓人</el-col>
@@ -115,13 +117,6 @@
             >{{tag}}</el-tag>
           </el-col>
           <el-col :span="9" :offset="6">
-            <!-- @select="handleSelect" -->
-            <!-- <el-autocomplete
-              placeholder="请输入内容"
-              v-model="add_list"
-              clearable
-              :fetch-suggestions="querySearch"
-            ></el-autocomplete>-->
             <el-select v-model="add_list" filterable placeholder="请选择">
               <el-option
                 v-for="item in userList"
@@ -130,7 +125,7 @@
                 :value="item.value"
               ></el-option>
             </el-select>
-            {{add_list}}
+            <!-- {{add_list}} -->
           </el-col>
           <el-col :span="6" :offset="1">
             <el-button size="small" type="primary" @click="showInput">添加</el-button>
@@ -144,6 +139,7 @@
               :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
               :on-success="handleSuccess"
+              :file-list="file_list"
             >
               <i class="el-icon-plus"></i>
             </el-upload>
@@ -151,6 +147,7 @@
               <img width="100%" :src="dialogImageUrl" alt />
             </el-dialog>
             <div class="text">附件</div>
+            <!-- {{file_list}} -->
           </el-col>
         </el-row>
       </el-scrollbar>
@@ -214,6 +211,7 @@ export default {
       type: '',
       clientList: [],
       uploadUrl: '',
+      file_list: [],
       // 业务类型列表
       business_type_list: [],
       fileList: []
@@ -420,7 +418,7 @@ export default {
           let userListData = {}
           let element = data[i]
 
-          userListData.value = element.deptId
+          userListData.value = element.userId
           userListData.label = `${element.deptName}-${element.realName}`
           userList.push(userListData)
         }
@@ -467,6 +465,8 @@ export default {
     },
     // 新增项目
     addProject() {
+      // 创建时间
+      let createTime = new Date()
       // 用户列表
       let userList = this.userList
       // 执行部门ID数组转为字符串
@@ -474,26 +474,26 @@ export default {
       let department = checkList.join(',')
       // 知晓人名称列表
       let dynamicTags = this.new_project.dynamicTags
+      // console.log(dynamicTags)
       let knowUserList = []
       for (let i = 0; i < dynamicTags.length; i++) {
         let element = dynamicTags[i]
         let knowUserListData = ''
         for (let j = 0; j < userList.length; j++) {
           let element_ = userList[j]
-
-          if (element == element_.value) {
-            knowUserListData = element_.deptId
+          if (element == element_.label) {
+            knowUserListData = element_.value
           }
         }
         knowUserList.push(knowUserListData)
       }
-
       let knowUser = knowUserList.join(',')
       let radio2 = this.radio2
       // console.log(knowUser)
       let data = {
+        createTime: createTime, // 创建时间
         initUserId: 128, //'发起人id',
-        status: 1,
+        status: 1, // 状态
         proName: this.new_project.new_name, // '项目名称',
         clientId: this.new_project.business_type[0], // '所属客户ID',
         serviceId: this.new_project.business_type[1], // '所属业务ID'
@@ -501,15 +501,30 @@ export default {
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
         knowUser: knowUser, // '知晓人id，多个用逗号隔开',
-        listProFile: this.listProFile
+        listProFile: this.listProFile // 需求文档列表
       }
       if (radio2 == 1) {
         data.manager = this.new_project.managerId // '项目经理id',
       } else if (radio2 == 2) {
-        data.department = this.department // '参与部门ID',
+        data.department = department // '参与部门ID',
       }
-      // console.log(data)
-      this.$axios.post('/pmbs/api/project/save', data).then(this.addProjectSuss)
+      console.log(data)
+      if (
+        data.proName == '' ||
+        this.new_project.business_type == [] ||
+        data.expertTime == '' ||
+        data.remark == '' ||
+        data.knowUser == '' ||
+        data.listProFile.length == 0
+      ) {
+        this.messageError('信息不能为空')
+      } else if (data.manager == '' && data.department == '') {
+        this.messageError('信息不能为空')
+      } else {
+        this.$axios
+          .post('/pmbs/api/project/save', data)
+          .then(this.addProjectSuss)
+      }
     },
     // 新增项目回调
     addProjectSuss(res) {
@@ -517,6 +532,16 @@ export default {
       if (res.status == 200) {
         this.messageWin('项目添加成功')
         this.drawer = false
+        this.radio2 = 1
+        // 重置信息
+        this.new_project.new_name = ''
+        this.new_project.business_type = []
+        this.new_project.radio1 = '0'
+        this.new_project.presetTime = ''
+        this.new_project.remark = ''
+        this.listProFile = []
+        this.file_list = []
+        this.new_project.dynamicTags = []
       }
     },
     // 获取项目反馈-项目详情
@@ -654,7 +679,7 @@ export default {
 .home .add_box .know_pop .know_pop_list {
   margin-bottom: 13px;
 }
-.home .add_box .userList{
+.home .add_box .userList {
   width: 100%;
 }
 .home .batton_pa {

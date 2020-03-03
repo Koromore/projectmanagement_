@@ -31,8 +31,8 @@
       @change="chooseDate"
       :top="calendar_top"
     ></calendar>
-    <!-- <div class="change-mode" @click="to_big">+ 放大</div>
-    <div class="change-mode" @click="to_small">- 缩小</div> -->
+    <div class="change-mode" @click="to_big">+ 放大</div>
+    <div class="change-mode" @click="to_small">- 缩小</div>
   </div>
 </template>
 <script>
@@ -77,20 +77,20 @@ export default {
     })
   },
   methods: {
-    // //      放大
-    // to_big() {
-    //   if (this.time_mode <= 4) {
-    //     this.time_mode++
-    //     this.init({ time_mode: this.time_mode }, false)
-    //   }
-    // },
-    // //     缩小
-    // to_small() {
-    //   if (this.time_mode >= 2) {
-    //     this.time_mode--
-    //     this.init({ time_mode: this.time_mode }, false)
-    //   }
-    // },
+    //      放大
+    to_big() {
+      if (this.time_mode <= 4) {
+        this.time_mode++
+        this.init({ time_mode: this.time_mode }, false)
+      }
+    },
+    //     缩小
+    to_small() {
+      if (this.time_mode >= 2) {
+        this.time_mode--
+        this.init({ time_mode: this.time_mode }, false)
+      }
+    },
     //      选择日期
     chooseDate(date) {
       if (date) {

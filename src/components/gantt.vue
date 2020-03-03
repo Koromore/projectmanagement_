@@ -62,7 +62,7 @@
             <template slot-scope="scope">
               <div :class="dayGanttType(scope.row, day.full_date)"></div>
             </template>
-        </el-table-column>-->
+        </el-table-column> -->
       </el-table-column>
     </el-table-column>
   </el-table>

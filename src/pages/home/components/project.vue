@@ -109,9 +109,7 @@
             </template>
           </el-table-column>
           <el-table-column prop="num" label="总任务数/待完成">
-             <template slot-scope="scope">
-              {{scope.row.listTask.length}}/{{scope.row.unfintask}}
-            </template>
+            <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间">
             <template slot="header">
@@ -133,11 +131,11 @@
                 type="info"
                 slot="reference"
                 v-if="scope.row.status == 2"
-                @click="feedback(scope.row.id,scope.row.name)"
+                @click="feedback(scope.row.proId,scope.row.proName)"
               >反馈</el-button>
               <el-popconfirm
                 title="确认执行此操作吗？"
-                @onConfirm="achieve(scope.row.id,scope.row.name,scope.row.status)"
+                @onConfirm="achieve(scope.row.proId,scope.row.proName,scope.row.status)"
               >
                 <el-button
                   size="small"
@@ -151,9 +149,9 @@
                 type="info"
                 slot="reference"
                 v-if="scope.row.status == 1 || scope.row.status == 4"
-                @click="aredact(scope.row.id,scope.row.name)"
+                @click="aredact(scope.row.proId,scope.row.proName)"
               >编辑</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.id)">
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.proId)">
                 <el-button
                   size="small"
                   type="info"
@@ -164,6 +162,13 @@
             </template>
           </el-table-column>
         </el-table>
+        <!-- 分页 -->
+        <!-- <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="initiateProjectListTota"
+          @current-change="initiateProjectList"
+        ></el-pagination>-->
       </el-col>
       <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
@@ -175,7 +180,10 @@
           :row-style="{height: '57px'}"
         >
           <el-table-column prop="name" label="名称">
-            <el-link slot-scope="scope" @click.native="pathPrpjectDetails(scope.row.proId,1)">{{scope.row.proName}}</el-link>
+            <el-link
+              slot-scope="scope"
+              @click.native="pathPrpjectDetails(scope.row.proId,1)"
+            >{{scope.row.proName}}</el-link>
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <template slot-scope="scope">
@@ -199,41 +207,15 @@
           </el-table-column>
           <el-table-column prop="realName" label="下达人" filter-placement="bottom-end"></el-table-column>
         </el-table>
+        <!-- 分页 -->
+        <!-- <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="participateProjectListTota"
+          @current-change="participateProjectList"
+        ></el-pagination>-->
       </el-col>
-      <!-- 抽屉 -->
-      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
-        <el-row class="feedback">
-          <el-col :span="24">
-            <el-col :span="24" class="title">{{drawer1_name}}</el-col>
-            <el-col :span="6" class="title">反馈</el-col>
-            <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
-            </el-col>
-            <br />
-            <el-col :span="6" class="title">接受</el-col>
-            <el-col :span="19">
-              <el-checkbox-group v-model="checkList2">
-                <el-checkbox label="武汉策划"></el-checkbox>
-                <el-checkbox label="上海研发"></el-checkbox>
-                <el-checkbox label="北京网络销售"></el-checkbox>
-                <el-checkbox label="武汉内容"></el-checkbox>
-                <el-checkbox label="上海项目"></el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-            <el-col :span="6" class="title">任务</el-col>
-            <el-col :span="19">
-              <el-checkbox-group v-model="checkList3">
-                <el-checkbox label="H5网页开发"></el-checkbox>
-                <el-checkbox label="网页交互"></el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-          </el-col>
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
-          </el-col>
-        </el-row>
-      </el-drawer>
+      
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer2" :with-header="false">
         <el-scrollbar style="height: 100%">
@@ -356,6 +338,45 @@
         </el-row>
       </el-drawer>
       <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
+        <el-row class="feedback">
+          <el-col :span="24" class="content">
+            <el-col :span="24" class="title">{{drawer1_name}}</el-col>
+            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="24">
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+            </el-col>
+            <br />
+            <el-col :span="6" class="title">接受</el-col>
+            <el-col :span="19">
+              <el-checkbox-group v-model="checkListDept">
+                <el-checkbox
+                  :label="item.deptId"
+                  v-for="item in deptNameList"
+                  :key="item.deptId"
+                >{{item.deptName}}</el-checkbox>
+              </el-checkbox-group>
+              <!-- {{checkListdept}} -->
+            </el-col>
+            <el-col :span="6" class="title">任务</el-col>
+            <el-col :span="19">
+              <el-checkbox-group v-model="checkListTask">
+                <el-checkbox
+                  :label="item.taskId"
+                  v-for="item in taskNameListShow"
+                  :key="item.index"
+                >{{item.taskName}}</el-checkbox>
+                <!-- <el-checkbox label="网页交互"></el-checkbox> -->
+              </el-checkbox-group>
+            </el-col>
+          </el-col>
+          <el-col :span="12" :offset="7" class="batton">
+            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="primary" @click="projectFeedback">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
+      <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
@@ -379,7 +400,7 @@ export default {
   name: 'project',
   data() {
     return {
-      
+      proId: '', // 项目ID
       drawer1: false,
       drawer2: false,
       drawer3: false,
@@ -471,7 +492,9 @@ export default {
       client: '广汽本田',
       // 1-进行中，2-审核中，3-完成，4-延期，5-延期完成
       projectListOriginate: [], // 项目列表我发起
+      initiateProjectListTota: [], // 项目列表我发起总页数
       projectListJoin: [], // 项目列表我参与
+      participateProjectListTota: [], // 项目列表我参与总页数
       // 1审核中 2执行中 3已完成 4延期
       // 我参与 我发起选项卡
       tabs_activity: 1,
@@ -481,28 +504,61 @@ export default {
       // 项目类型2选择
       tab2_act: 1,
       // 反馈内容
-//        TABLE `feedback` (
-//   `feedbackId`   '反馈ID',
-//   `taskId`    '所属客户ID，与task表对应',
-//   `initUserId`    '任务发起人，对应user表ID',
-//   `feedback`    '反馈详情',
-//   `updateTime`   '更新时间',
-//   `deleteFlag`   '删除标识',
-// ) 
+      //        TABLE `feedback` (
+      //   `feedbackId`   '反馈ID',
+      //   `taskId`    '所属客户ID，与task表对应',
+      //   `initUserId`    '任务发起人，对应user表ID',
+      //   `feedback`    '反馈详情',
+      //   `updateTime`   '更新时间',
+      //   `deleteFlag`   '删除标识',
+      // )
       feedbackObj: {
         feedbackId: '',
         taskId: '',
         initUserId: ''
       },
-      result: '',
+      feedbackContent: '',
+      // 反馈时项目下的所有任务
+      projectTaskLisInit: [], // 我发起
+      deptNameList: [], // 反馈项目任务参与的部门
+      taskNameList: [], // 反馈项目包含的任务列表
+      taskNameListShow: [], // 需要显示的部门
+      checkListDept: [], // 选中的部门
+      checkListTask: [], // 选中的任务
+      //
       add_list: '',
       checkList1: [],
-      checkList2: [],
-      checkList3: [],
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
-      disabled: false
+      disabled: false,
+      result: '' // 延迟原因内容
+    }
+  },
+  // 侦听器
+  watch: {
+    // 如果 `checkListDept` 发生改变，这个函数就会运行
+    checkListDept: function(newQuestion, oldQuestion) {
+      let taskNameListShow = []
+      let checkListDept = this.checkListDept
+      let taskNameList = this.taskNameList
+      // console.log(taskNameList)
+      for (let i = 0; i < checkListDept.length; i++) {
+        let element = checkListDept[i]
+        let deptTaskData = []
+        for (let j = 0; j < taskNameList.length; j++) {
+          let element_ = taskNameList[j]
+          let taskData = {}
+          if (element_.deptId == element) {
+            taskData = element_
+            deptTaskData.push(taskData)
+          }
+        }
+        // console.log(deptTaskData)
+        taskNameListShow = taskNameListShow.concat(deptTaskData)
+      }
+      this.taskNameListShow = taskNameListShow
+      // console.log(taskNameListShow)
     }
   },
   // 方法
@@ -510,7 +566,24 @@ export default {
     // del(){
     //   this.$delete(this.data,"plain", val)
     // },
-    // 分类二级联动
+
+    listUniq(array, key) {
+      var result = [array[0]]
+      for (var i = 1; i < array.length; i++) {
+        var item = array[i]
+        var repeat = false
+        for (var j = 0; j < result.length; j++) {
+          if (item[key] == result[j][key]) {
+            repeat = true
+            break
+          }
+        }
+        if (!repeat) {
+          result.push(item)
+        }
+      }
+      return result
+    },
     handleChange(value) {
       console.log(value)
       console.log(this.value)
@@ -595,15 +668,18 @@ export default {
         this.table_show = false
       }
     },
-    // 项目详情
-    feedback(e, name) {
-      console.log('反馈' + e)
+    // 按钮
+    feedback(id, name) {
+      // console.log('反馈' + id)
       this.drawer1 = true
       this.drawer1_name = name
+      this.proId = id
+      this.getProjectTaskListInit(id)
     },
-    aredact(e) {
-      console.log('编辑' + e)
+    aredact(id) {
+      console.log('编辑' + id)
       this.drawer2 = true
+      this.getProjectShowDetail(id)
     },
     achieve(e, name, state) {
       console.log('完成' + e)
@@ -612,15 +688,113 @@ export default {
         this.drawer3_name = name
       }
     },
-    expurgate(e) {
-      console.log('删除' + e)
+    // 获取项目详情
+    getProjectShowDetail(id) {
+      let data = `?proId=${id}`
+      this.$axios
+        .post('/pmbs/api/project/showDetail' + data)
+        .then(this.getProjectShowDetailSuss)
+    },
+    // 获取我发起项目下所有任务回调
+    getProjectShowDetailSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+      }
+    },
+    expurgate(id) {
+      // console.log('删除' + id)
+      this.delProject(id)
+    },
+    // 获取我发起项目下所有任务
+    getProjectTaskListInit(id) {
+      let data = `?proId=${id}`
+      this.$axios
+        .post('/pmbs/api/project/projectOfTask' + data)
+        .then(this.getProjectTaskListInitSuss)
+    },
+    // 获取我发起项目下所有任务回调
+    getProjectTaskListInitSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        let projectTaskLisInit = res.data.data
+        this.projectTaskLisInit = projectTaskLisInit
+        let deptNameList = []
+        let taskNameList = []
+        for (let i = 0; i < projectTaskLisInit.length; i++) {
+          let element = projectTaskLisInit[i]
+          let deptNameListData = {
+            deptId: element.deptId,
+            deptName: element.deptName
+          }
+          let taskNameListData = {
+            deptId: element.deptId,
+            deptName: element.deptName,
+            taskId: element.taskId,
+            taskName: element.taskName
+          }
+          taskNameList.push(taskNameListData)
+          deptNameList.push(deptNameListData)
+        }
+        deptNameList = this.listUniq(deptNameList, 'deptId')
+        // console.log(deptNameList)
+        this.deptNameList = deptNameList
+        this.taskNameList = taskNameList
+        // console.log(taskNameList)
+      }
+    },
+    // 项目反馈-任务批量反馈
+    projectFeedback() {
+      // console.log(this.new_task.presetTime)
+      // console.log(expertTime)
+      let updateTime = new Date()
+      let checkListTask = this.checkListTask
+      let taskId = checkListTask.join(',')
+      let data = {
+        feedback: this.feedbackContent, // 反馈内容
+        initUserId: 128, // 反馈人ID
+        proId: this.proId, // 反馈项目ID
+        taskId: taskId, // 反馈任务ID
+        updateTime: updateTime // 反馈时间
+      }
+      this.$axios
+        .post('/pmbs/api/project/projectFeedback', data)
+        .then(this.projectFeedbackSuss)
+    },
+    // 项目反馈-任务批量反馈回调
+    projectFeedbackSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        this.messageWin('反馈成功')
+        this.drawer3 = false
+        this.feedbackContent = ''
+        this.taskFeedbackId = ''
+        // 重新获取项目列表
+        this.getProjectListAjax()
+      }
+    },
+    // /api/project/delProject?projectId=100
+    // 项目删除
+    delProject(id) {
+      let data = `?projectId=${id}`
+      this.$axios
+        .post('/pmbs/api/project/delProject' + data)
+        .then(this.delProjectSuss)
+    },
+    // 项目删除
+    delProjectSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        this.messageWin('项目删除成功')
+        this.getProjectListAjax()
+        // let projectListJoin = res.data.data
+      }
     },
     // 跳转项目详情页面
-    pathPrpjectDetails(id,type) {
+    pathPrpjectDetails(id, type) {
       // console.log(id)
       this.$router.push({
         path: '/home/components/project_details',
-        query: { id: id,type: type }
+        query: { id: id, type: type }
       })
     },
     // 项目管理-我发起获取
@@ -640,9 +814,9 @@ export default {
           element.unfintask = 0
           // console.log(element.listTask)
           for (let j = 0; j < element.listTask.length; j++) {
-            const element_ = element.listTask[j];
+            const element_ = element.listTask[j]
             if (element_.status != 3) {
-              element.unfintask ++
+              element.unfintask++
             }
           }
         }
@@ -651,20 +825,19 @@ export default {
       }
     },
     // 项目管理-我参与获取
-    getUserJoinProjectAjax() {
+    getProjectUserjoinproject() {
       let data = 40
       this.$axios
         .post('/pmbs/api/project/userjoinproject' + '?inituserid=' + data)
-        .then(this.getUserJoinProjectAjaxSuss)
+        .then(this.getProjectUserjoinprojectSuss)
     },
     // 项目管理-我参与获取回调
-    getUserJoinProjectAjaxSuss(res) {
+    getProjectUserjoinprojectSuss(res) {
       // console.log(res)
       if (res.status == 200) {
         let projectListJoin = res.data.data
-        // console.log(projectListJoin)
+        // console.log(projectListOriginate)
         this.projectListJoin = projectListJoin
-        // console.log(this.projectListJoin)
       }
     },
     // 任务反馈
@@ -678,6 +851,33 @@ export default {
     },
     putTaskFeedbackSuss(res) {
       console.log(res)
+    },
+    // // 我发起分页
+    // initiateProjectList(page) {
+    //   this.getProjectListAjax(page)
+    // },
+    // // 我参与分页
+    // participateProjectList(page){
+    //   this.getUserJoinProjectAjax(page)
+    // },
+        // 消息提示
+    messageWin(message) {
+      // 成功提示
+      this.$message({
+        message: message,
+        type: 'success'
+      })
+    },
+    messageWarning(message) {
+      // 警告提示
+      this.$message({
+        message: message,
+        type: 'warning'
+      })
+    },
+    messageError(message) {
+      // 错误提示
+      this.$message.error(message)
     }
   },
   // 钩子函数
@@ -685,7 +885,7 @@ export default {
     this.widthheight()
     // this.getlocalStorage()
     this.getProjectListAjax()
-    this.getUserJoinProjectAjax()
+    this.getProjectUserjoinproject()
   }
 }
 </script>
@@ -789,7 +989,9 @@ export default {
   font-weight: bold;
   background: rgb(236, 235, 235);
 }
-
+.project .feedback .content .el-col {
+  margin-bottom: 24px;
+}
 .project .feedback .title {
   font-size: 18px;
   margin-bottom: 13px;
