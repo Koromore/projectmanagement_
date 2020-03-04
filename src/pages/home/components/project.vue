@@ -6,9 +6,9 @@
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
-            <el-select v-model="client" placeholder="请选择" size="small">
+            <el-select v-model="clientId" clearable placeholder="请选择" size="small">
               <el-option
-                v-for="item in client_list"
+                v-for="item in clientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -22,21 +22,21 @@
               type="primary"
               plain
               size="small"
-              @click="tab1_change(1)"
+              @click="tab1_change(1,22)"
               :class="[tab1_act=='1' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(2)"
+              @click="tab1_change(2,18)"
               :class="[tab1_act=='2' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(3)"
+              @click="tab1_change(3,17)"
               :class="[tab1_act=='3' ? 'act' : '']"
               style="border-left: 0;"
             >数字营销</el-button>
@@ -48,14 +48,14 @@
               type="primary"
               plain
               size="small"
-              @click="tab2_change(1)"
+              @click="tab2_change(1,1)"
               :class="[tab2_act=='1' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab2_change(2)"
+              @click="tab2_change(2,0)"
               :class="[tab2_act=='2' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
           </el-button-group>
@@ -63,19 +63,32 @@
         <el-col :span="8" class="tab tab3">
           <el-button-group>
             <el-tooltip class="item" effect="dark" content="新项目" placement="bottom">
-              <el-button type="primary" size="small">&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
+              <el-button
+                type="primary"
+                size="small"
+                @click="tab3_change(1)"
+              >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
               <el-button
                 type="danger"
                 size="small"
-              >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+                @click="tab3_change(4)"
+              >&nbsp;&nbsp;2&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
-              <el-button type="warning" size="small">&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
+              <el-button
+                type="warning"
+                size="small"
+                @click="tab3_change(2)"
+              >&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
-              <el-button type="success" size="small">&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
+              <el-button
+                type="success"
+                size="small"
+                @click="tab3_change(1)"
+              >&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
             </el-tooltip>
           </el-button-group>
         </el-col>
@@ -88,6 +101,7 @@
       <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
+          v-loading="loading"
           ref="filterTable"
           :data="projectListOriginate"
           style="width: 100%"
@@ -173,6 +187,7 @@
       <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
         <el-table
+          v-loading="loading"
           ref="filterTable"
           :data="projectListJoin"
           style="width: 100%"
@@ -215,7 +230,7 @@
           @current-change="participateProjectList"
         ></el-pagination>-->
       </el-col>
-      
+
       <!-- 抽屉 -->
       <el-drawer title="添加任务" :visible.sync="drawer2" :with-header="false">
         <el-scrollbar style="height: 100%">
@@ -225,24 +240,24 @@
             </el-col>
             <el-col :span="6" class="title">名称</el-col>
             <el-col :span="13">
-              <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+              <el-input placeholder="请输入内容" v-model="new_project.new_name" clearable></el-input>
             </el-col>
             <el-col :span="6" class="title">分类</el-col>
             <el-col :span="13">
               <el-cascader
-                v-model="new_task.business_type"
+                v-model="new_project.business_type"
                 :options="business_type_list"
                 @change="handleChange"
                 style="width: 100%;"
               ></el-cascader>
             </el-col>
             <el-col :span="18" :offset="6">
-              <el-radio v-model="new_task.radio1" label="1">专项</el-radio>
-              <el-radio v-model="new_task.radio1" label="2">日常</el-radio>
+              <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
+              <el-radio v-model="new_project.radio1" label="2">日常</el-radio>
             </el-col>
             <el-col :span="6" class="title">预计时间</el-col>
             <el-col :span="13" class="presetTime">
-              <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
+              <el-date-picker v-model="new_project.presetTime" type="date" placeholder="选择日期"></el-date-picker>
             </el-col>
             <el-col :span="6" class="title">需求</el-col>
             <el-col :span="13">
@@ -250,23 +265,36 @@
                 type="textarea"
                 :autosize="{ minRows: 6, maxRows: 8}"
                 placeholder="请输入内容"
-                v-model="new_task.demand"
+                v-model="new_project.demand"
               ></el-input>
             </el-col>
             <el-col :span="18" :offset="6">
-              <el-radio v-model="new_task.radio2" label="1">项目经理</el-radio>
-              <el-radio v-model="new_task.radio2" label="2">执行部门</el-radio>
+              <el-radio v-model="new_project.radio2" label="1">项目经理</el-radio>
+              <el-radio v-model="new_project.radio2" label="2">执行部门</el-radio>
             </el-col>
-            <el-col :span="13" :offset="6" v-show="new_task.radio2 == 1">
-              <el-input placeholder="请输入内容" v-model="new_task.manager" clearable></el-input>
+            <el-col :span="13" :offset="6" v-show="new_project.radio2 == 1">
+              <el-input placeholder="请输入内容" v-model="new_project.manager" clearable></el-input>
+              <el-select
+              v-model="new_project.managerId"
+              filterable
+              placeholder="请选择"
+              class="userList"
+            >
+              <el-option
+                v-for="item in userList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
             </el-col>
-            <el-col :span="17" :offset="6" v-show="new_task.radio2 == 2">
-              <el-checkbox-group v-model="new_task.checkList" class="check_box">
-                <el-checkbox label="武汉策划"></el-checkbox>
-                <el-checkbox label="上海研发"></el-checkbox>
-                <el-checkbox label="北京网络销售"></el-checkbox>
-                <el-checkbox label="武汉内容"></el-checkbox>
-                <el-checkbox label="上海项目"></el-checkbox>
+            <el-col :span="17" :offset="6" v-show="new_project.radio2 == 2">
+              <el-checkbox-group v-model="new_project.checkList" class="check_box">
+                <el-checkbox
+                  :label="items.id"
+                  v-for="items in deptList"
+                  :key="items.index"
+                >{{items.name}}</el-checkbox>
               </el-checkbox-group>
             </el-col>
             <el-col :span="24">
@@ -275,7 +303,7 @@
             <el-col :span="18" :offset="6" class="know_pop">
               <el-tag
                 :key="tag"
-                v-for="tag in new_task.dynamicTags"
+                v-for="tag in new_project.dynamicTags"
                 closable
                 :disable-transitions="false"
                 @close="handleClose(tag)"
@@ -283,7 +311,14 @@
               >{{tag}}</el-tag>
             </el-col>
             <el-col :span="9" :offset="6">
-              <el-input placeholder="请输入内容" v-model="add_list" clearable></el-input>
+              <el-select v-model="add_list" filterable placeholder="请选择">
+                <el-option
+                  v-for="item in userList"
+                  :key="item.index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
             </el-col>
             <el-col :span="6" :offset="1">
               <el-button size="small" type="primary" @click="showInput">添加</el-button>
@@ -401,6 +436,14 @@ export default {
   data() {
     return {
       proId: '', // 项目ID
+      loading: false, // 表格loading
+      // 查询条件
+      clientIdList: [], // 用户列表
+      clientId: '', // 用户ID
+      serviceId: '', // 业务ID
+      isUsual: '', // 专项-1/日常-0
+      status: '', // 任务状态
+      // 抽屉控制
       drawer1: false,
       drawer2: false,
       drawer3: false,
@@ -411,7 +454,7 @@ export default {
       loginState: true, // 避免多次点击
       project_style: '',
       // 新增
-      new_task: {
+      new_project: {
         new_name: '', // 任务名称
         business_type: [], // 分类
         radio1: '1', // 专项，日常
@@ -424,6 +467,11 @@ export default {
       },
       add_list: '',
       checkList: [],
+      business_type_list: [], // 业务类型列表
+      deptList: [], // 部门列表
+      userList: [], // 用户列表
+      // 点击编辑获取的项目详情
+      projectData: {},
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
@@ -500,9 +548,9 @@ export default {
       tabs_activity: 1,
       table_show: true,
       // 项目类型1选择
-      tab1_act: 1,
+      tab1_act: '',
       // 项目类型2选择
-      tab2_act: 1,
+      tab2_act: '',
       // 反馈内容
       //        TABLE `feedback` (
       //   `feedbackId`   '反馈ID',
@@ -559,6 +607,38 @@ export default {
       }
       this.taskNameListShow = taskNameListShow
       // console.log(taskNameListShow)
+    },
+    // 用户选择侦听
+    clientId: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findProjectList()
+    },
+    // 业务类型侦听
+    serviceId: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findProjectList()
+    },
+    // 专项/日常侦听
+    isUsual: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findProjectList()
+    },
+    // 任务状态侦听
+    status: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findProjectList()
     }
   },
   // 方法
@@ -566,7 +646,44 @@ export default {
     // del(){
     //   this.$delete(this.data,"plain", val)
     // },
-
+    // 时间格式Y-M-D H-M-S
+    formatData2(date) {
+      // var date = new Date();
+      let year = date.getFullYear()
+      let month = date.getMonth() + 1
+      let strDate = date.getDate()
+      let hours = date.getHours()
+      let minutes = date.getMinutes()
+      let seconds = date.getSeconds()
+      if (month >= 1 && month <= 9) {
+        month = '0' + month
+      }
+      if (strDate >= 0 && strDate <= 9) {
+        strDate = '0' + strDate
+      }
+      if (hours >= 0 && hours <= 9) {
+        hours = '0' + hours
+      }
+      if (minutes >= 0 && minutes <= 9) {
+        minutes = '0' + minutes
+      }
+      if (seconds >= 0 && seconds <= 9) {
+        seconds = '0' + seconds
+      }
+      return (
+        year +
+        '-' +
+        month +
+        '-' +
+        strDate +
+        ' ' +
+        hours +
+        ':' +
+        minutes +
+        ':' +
+        seconds
+      )
+    },
     listUniq(array, key) {
       var result = [array[0]]
       for (var i = 1; i < array.length; i++) {
@@ -584,33 +701,69 @@ export default {
       }
       return result
     },
+    // 获取新建项目分类
+    getAllClientAndBusiness() {
+      this.$axios
+        .post('/pmbs/client/getAllClientAndBusiness')
+        .then(this.getAllClientAndBusinessSuss)
+    },
+    // 获取新建项目分类回调
+    getAllClientAndBusinessSuss(res) {
+      if (res.status == 200) {
+        let data = res.data.data
+        let clientIdList = []
+        console.log(data)
+        // let business_type_list = []
+        // 循环提取名称和ID
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          let clientIdListData = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListData)
+        }
+        this.clientIdList = clientIdList
+      }
+      // console.log(res)
+    },
     handleChange(value) {
       console.log(value)
       console.log(this.value)
     },
     // 添加知晓人标签
     showInput() {
-      let list = this.new_task.dynamicTags
+      let list = this.new_project.dynamicTags
       let add_list = this.add_list
+      let userList = this.userList
       let cf = true
-      if (add_list) {
+      if (add_list != '') {
+        let add_list_data = ''
+        for (let i = 0; i < userList.length; i++) {
+          const element = userList[i]
+          if (element.value == add_list) {
+            add_list_data = element.label
+          }
+        }
         for (let i = 0; i < list.length; i++) {
           const element = list[i]
-          if (element == add_list) {
-            console.log('请勿重复添加')
+          if (element == add_list_data) {
+            this.messageWarning('请勿重复添加')
             cf = false
           }
         }
         if (cf) {
-          list.push(add_list)
+          list.push(add_list_data)
           this.add_list = ''
         }
+      } else if (add_list == '') {
+        this.messageWarning('信息为空')
       }
     },
     // 删除知晓人标签
     handleClose(tag) {
-      this.new_task.dynamicTags.splice(
-        this.new_task.dynamicTags.indexOf(tag),
+      this.new_project.dynamicTags.splice(
+        this.new_project.dynamicTags.indexOf(tag),
         1
       )
     },
@@ -638,24 +791,45 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
-    //
-    tab1_change(e) {
+    // 查询按钮
+    tab1_change(e, id) {
       // console.log(e)
-      if (e == 1) {
+      let serviceId = this.serviceId
+      if (serviceId == id) {
+        this.tab1_act = ''
+        this.serviceId = ''
+      } else if (e == 1) {
         this.tab1_act = 1
+        this.serviceId = id
       } else if (e == 2) {
         this.tab1_act = 2
+        this.serviceId = id
       } else if (e == 3) {
         this.tab1_act = 3
+        this.serviceId = id
       }
     },
-    //
-    tab2_change(e) {
-      // console.log(e)
-      if (e == 1) {
+    tab2_change(e, id) {
+      console.log(e)
+      console.log(id)
+      let isUsual = this.isUsual
+      if (isUsual === id) {
+        this.tab2_act = ''
+        this.isUsual = ''
+      } else if (e == 1) {
         this.tab2_act = 1
+        this.isUsual = id
       } else if (e == 2) {
         this.tab2_act = 2
+        this.isUsual = id
+      }
+    },
+    tab3_change(id) {
+      let status = this.status
+      if (status == id) {
+        this.status = ''
+      } else {
+        this.status = id
       }
     },
     // 选项卡
@@ -678,29 +852,51 @@ export default {
     },
     aredact(id) {
       console.log('编辑' + id)
-      this.drawer2 = true
-      this.getProjectShowDetail(id)
+      // this.drawer2 = true
+      // this.getProjectShowDetail(id)
+      // 获取部门列表
+      // this.getDeptList()
+      // 获取用户列表
+      // this.getListAjax()
+      // 获取新建项目分类
+      // this.getAllClientAndBusiness()
+      // 向父组件传值
+      this.$emit('getData', id)
+      // this.$emit('getShopCode',value)
     },
-    achieve(e, name, state) {
-      console.log('完成' + e)
+    achieve(proId, name, state) {
+      // console.log('完成' + proId)
       if (state == 4) {
         this.drawer3 = true
         this.drawer3_name = name
+      } else {
+        let overTime = this.formatData2(new Date())
+        let data = {
+          proId: proId,
+          status: 3,
+          overTime: overTime
+        }
+        this.getProjectSave(data)
       }
     },
-    // 获取项目详情
-    getProjectShowDetail(id) {
-      let data = `?proId=${id}`
+    // 项目新增/修改/完成
+    getProjectSave(data) {
       this.$axios
-        .post('/pmbs/api/project/showDetail' + data)
-        .then(this.getProjectShowDetailSuss)
+        .post('/pmbs/api/project/save', data)
+        .then(this.getProjectSaveSuss)
     },
-    // 获取我发起项目下所有任务回调
-    getProjectShowDetailSuss(res) {
+    // 项目新增/修改/完成回调
+    getProjectSaveSuss(res) {
       console.log(res)
+      let data = res.data.data
       if (res.status == 200) {
+        if (data.status == 3) {
+          this.messageWin('项目已完成')
+          this.getProjectListAjax()
+        }
       }
     },
+
     expurgate(id) {
       // console.log('删除' + id)
       this.delProject(id)
@@ -753,7 +949,7 @@ export default {
         feedback: this.feedbackContent, // 反馈内容
         initUserId: 128, // 反馈人ID
         proId: this.proId, // 反馈项目ID
-        taskId: taskId, // 反馈任务ID
+        moreTaskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
       this.$axios
@@ -765,7 +961,7 @@ export default {
       console.log(res)
       if (res.status == 200) {
         this.messageWin('反馈成功')
-        this.drawer3 = false
+        this.drawer1 = false
         this.feedbackContent = ''
         this.taskFeedbackId = ''
         // 重新获取项目列表
@@ -797,22 +993,55 @@ export default {
         query: { id: id, type: type }
       })
     },
+    findProjectList() {
+      // clientId serviceId isUsual status
+      let clientId = this.clientId
+      let serviceId = this.serviceId
+      let isUsual = this.isUsual
+      let status = this.status
+
+      let clientIdData = `&clientId=${clientId}`
+      let serviceIdData = `&serviceId=${serviceId}`
+      let isUsualData = `&isUsual=${isUsual}`
+      let statusData = `&status=${status}`
+      if (clientId == '') {
+        clientIdData = ''
+      }
+      if (serviceId == '') {
+        serviceIdData = ''
+      }
+      if (isUsual === '') {
+        isUsualData = ''
+      }
+      if (status == '') {
+        statusData = ''
+      }
+      let data = `?inituserid=128${clientIdData}${serviceIdData}${isUsualData}${statusData}`
+      this.getProjectListAjax(data)
+      this.getProjectUserjoinproject(data)
+    },
+    // 获取项目列表
+    getProjectList() {
+      let data0 = `?inituserid=128`
+      let data1 = `?inituserid=128`
+      this.getProjectListAjax(data0)
+      this.getProjectUserjoinproject(data1)
+    },
     // 项目管理-我发起获取
-    getProjectListAjax() {
-      let data = 128
+    getProjectListAjax(data0) {
+      this.loading = true
       this.$axios
-        .post('/pmbs/api/project/listAjax' + '?inituserid=' + data)
+        .post('/pmbs/api/project/listAjax' + data0)
         .then(this.getProjectListAjaxSuss)
     },
     // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
-      // console.log(res)
+      this.loading = false
       if (res.status == 200) {
         let projectListOriginate = res.data.data
         for (let i = 0; i < projectListOriginate.length; i++) {
           const element = projectListOriginate[i]
           element.unfintask = 0
-          // console.log(element.listTask)
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
             if (element_.status != 3) {
@@ -820,38 +1049,37 @@ export default {
             }
           }
         }
-        console.log(projectListOriginate)
+        // console.log(projectListOriginate)
         this.projectListOriginate = projectListOriginate
       }
     },
     // 项目管理-我参与获取
-    getProjectUserjoinproject() {
-      let data = 40
+    getProjectUserjoinproject(data1) {
+      this.loading = true
       this.$axios
-        .post('/pmbs/api/project/userjoinproject' + '?inituserid=' + data)
+        .post('/pmbs/api/project/userjoinproject' + data1)
         .then(this.getProjectUserjoinprojectSuss)
     },
     // 项目管理-我参与获取回调
     getProjectUserjoinprojectSuss(res) {
-      // console.log(res)
+      this.loading = false
       if (res.status == 200) {
         let projectListJoin = res.data.data
-        // console.log(projectListOriginate)
         this.projectListJoin = projectListJoin
       }
     },
     // 任务反馈
-    putTaskFeedback() {
-      let data = {
-        initUserId: '001'
-      }
-      this.$axios
-        .post('/pmbs/api/project/taskfeedback', data)
-        .then(this.putTaskFeedbackSuss)
-    },
-    putTaskFeedbackSuss(res) {
-      console.log(res)
-    },
+    // putTaskFeedback() {
+    //   let data = {
+    //     initUserId: '001'
+    //   }
+    //   this.$axios
+    //     .post('/pmbs/api/project/taskfeedback', data)
+    //     .then(this.putTaskFeedbackSuss)
+    // },
+    // putTaskFeedbackSuss(res) {
+    //   console.log(res)
+    // },
     // // 我发起分页
     // initiateProjectList(page) {
     //   this.getProjectListAjax(page)
@@ -860,7 +1088,7 @@ export default {
     // participateProjectList(page){
     //   this.getUserJoinProjectAjax(page)
     // },
-        // 消息提示
+    // 消息提示
     messageWin(message) {
       // 成功提示
       this.$message({
@@ -883,9 +1111,8 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    // this.getlocalStorage()
-    this.getProjectListAjax()
-    this.getProjectUserjoinproject()
+    this.getAllClientAndBusiness() // 获取
+    this.getProjectList() // 获取项目列表
   }
 }
 </script>

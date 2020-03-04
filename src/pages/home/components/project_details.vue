@@ -124,15 +124,16 @@
                 type="info"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
               >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？">
+              <!-- <el-popconfirm title="确认执行此操作吗？"> -->
                 <!-- @onConfirm="achieve(scope.row.taskId,scope.row.status)" -->
                 <el-button
                   size="small"
                   v-if="scope.row.status != 3"
                   type="primary"
                   slot="reference"
+                  @click="task_detail(scope.row)"
                 >完成</el-button>
-              </el-popconfirm>
+              <!-- </el-popconfirm> -->
             </template>
           </el-table-column>
         </el-table>
@@ -149,7 +150,12 @@
         </el-col>
         <el-col :span="7" class="title">
           <el-col :span="24">项目类别</el-col>
-          <el-col :span="24">广汽本田 - 社区 - 专项</el-col>
+          <el-col :span="24">
+            {{projectShowDetail.clientName}}-
+            {{projectShowDetail.businessName}}-
+            <span v-if="projectShowDetail.isUsual == false">日常</span>
+            <span v-if="projectShowDetail.isUsual == true">专项</span>
+            </el-col>
         </el-col>
         <el-col :span="24" class="need">
           <el-col :span="24" class="span">需求</el-col>
@@ -443,7 +449,7 @@ export default {
   name: 'project_details',
   data() {
     return {
-      loading: true,
+      loading: false,
       proId: '', // 项目ID
       taskId: '', // 任务ID
       type: '', // 项目类型 0我发起 1我参与
@@ -535,6 +541,9 @@ export default {
       // 项目类型选择
       task_type: [],
       task_type_value: '',
+      
+      // 任务详情
+      taskData: {},
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
@@ -543,8 +552,6 @@ export default {
       listProFile: [], // 上传文件信息列表
       suggest_list: [], // 任务反馈意见列表
       file_list: '',
-      // 任务详情
-      taskData: {},
       // 上传文档
       dialogImageUrlResult: '',
       dialogVisibleResult: false,

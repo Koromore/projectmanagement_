@@ -164,7 +164,7 @@ export default {
     },
     // 业务类型列表获取
     getBusinessListAjax(res) {
-      let data = {pageNum:2}
+      let data = {pageNum:1}
       this.$axios
         .post('/pmbs/api/business/listAjax', data)
         .then(this.getBusinessListAjaxSuss)

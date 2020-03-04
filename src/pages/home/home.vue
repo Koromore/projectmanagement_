@@ -32,7 +32,7 @@
       <el-container>
         <!-- 内容 start -->
         <el-main>
-          <router-view></router-view>
+          <router-view @getData="getData"></router-view>
         </el-main>
         <!-- 内容 end -->
       </el-container>
@@ -58,8 +58,8 @@
             ></el-cascader>
           </el-col>
           <el-col :span="18" :offset="6">
-            <el-radio v-model="new_project.radio1" label="0">专项</el-radio>
-            <el-radio v-model="new_project.radio1" label="1">日常</el-radio>
+            <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
+            <el-radio v-model="new_project.radio1" label="0">日常</el-radio>
           </el-col>
           <el-col :span="6" class="title">预计时间</el-col>
           <el-col :span="13" class="presetTime">
@@ -101,6 +101,7 @@
                 :key="items.index"
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
+            <!-- {{new_project.checkList}} -->
           </el-col>
           <el-col :span="24">
             <el-col :span="6" class="title">知晓人</el-col>
@@ -186,9 +187,12 @@ export default {
           deptId: 'id3'
         }
       ],
+      business_type_list: [], // 业务类型列表
       deptList: [], // 部门列表
       userList: [], // 用户列表
       radio2: '1', // 项目经理,执行部门 选择
+      proId: '', // 项目id
+      status: 1,// 项目状态
       // 新增
       new_project: {
         new_name: '', // 任务名称
@@ -212,8 +216,7 @@ export default {
       clientList: [],
       uploadUrl: '',
       file_list: [],
-      // 业务类型列表
-      business_type_list: [],
+
       fileList: []
     }
   },
@@ -302,6 +305,18 @@ export default {
       this.getListAjax()
       // 获取新建项目分类
       this.getAllClientAndBusiness()
+    },
+    getData(data) {
+      this.drawer = true
+      console.log(data)
+      // 获取部门列表
+      this.getDeptList()
+      // 获取用户列表
+      this.getListAjax()
+      // 获取新建项目分类
+      this.getAllClientAndBusiness()
+      // 获取项目详情
+      this.getProjectShowDetail(data)
     },
     // 获取判断路由地址
     router_url() {
@@ -463,6 +478,73 @@ export default {
       }
       // console.log(res)
     },
+    // 获取项目详情
+    getProjectShowDetail(id) {
+      let data = `?proId=${id}`
+      this.$axios
+        .post('/pmbs/api/project/showDetail' + data)
+        .then(this.getProjectShowDetailSuss)
+    },
+    // 获取我发起项目下所有任务回调
+    getProjectShowDetailSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        let data = res.data.data
+        this.proId = data.proId
+        this.status = data.status
+        this.new_project.new_name = data.proName
+        this.new_project.business_type[0] = data.clientId
+        this.new_project.business_type[1] = data.serviceId
+        // this.new_project.radio1 = data.isUsual
+        if (data.isUsual == false) {
+          this.new_project.radio1 = '0'
+        } else {
+          this.new_project.radio1 = '1'
+        }
+        this.new_project.presetTime = data.expertTime
+        this.new_project.remark = data.remark
+        if (data.manager != null) {
+          this.radio2 = '1'
+          this.new_project.managerId = data.manager
+        } else if (data.department != null) {
+          this.radio2 = '2'
+          let department = data.department.split(',')
+          let checkList = []
+          for (let i = 0; i < department.length; i++) {
+            let element = department[i]
+            let deparData = parseInt(element)
+            checkList.push(deparData)
+          }
+          this.new_project.checkList = checkList
+        }
+        if (data.knowUser != '') {
+          let knowUserListS = data.knowUser.split(',')
+          let knowUserList = []
+          for (let i = 0; i < knowUserListS.length; i++) {
+            let element = knowUserListS[i]
+            let knowUserListData = parseInt(element)
+            knowUserList.push(knowUserListData)
+          }
+          // 用户列表
+          let userList = this.userList
+          let knowUserListName = []
+          for (let i = 0; i < knowUserList.length; i++) {
+            let element = knowUserList[i]
+            let knowUserListData = ''
+            for (let j = 0; j < userList.length; j++) {
+              let element_ = userList[j]
+              if (element == element_.value) {
+                knowUserListData = element_.label
+              }
+            }
+            knowUserListName.push(knowUserListData)
+          }
+          this.new_project.dynamicTags = knowUserListName
+        }
+
+        
+      }
+    },
     // 新增项目
     addProject() {
       // 创建时间
@@ -491,9 +573,10 @@ export default {
       let radio2 = this.radio2
       // console.log(knowUser)
       let data = {
+        proId: this.proId, // 项目id
         createTime: createTime, // 创建时间
         initUserId: 128, //'发起人id',
-        status: 1, // 状态
+        status: this.status, // 状态
         proName: this.new_project.new_name, // '项目名称',
         clientId: this.new_project.business_type[0], // '所属客户ID',
         serviceId: this.new_project.business_type[1], // '所属业务ID'
@@ -503,10 +586,13 @@ export default {
         knowUser: knowUser, // '知晓人id，多个用逗号隔开',
         listProFile: this.listProFile // 需求文档列表
       }
+      let changeId = ''
       if (radio2 == 1) {
-        data.manager = this.new_project.managerId // '项目经理id',
+        changeId = this.new_project.managerId
+        data.manager = changeId // '项目经理id',
       } else if (radio2 == 2) {
-        data.department = department // '参与部门ID',
+        changeId = department
+        data.department = changeId // '参与部门ID',
       }
       console.log(data)
       if (
@@ -514,11 +600,9 @@ export default {
         this.new_project.business_type == [] ||
         data.expertTime == '' ||
         data.remark == '' ||
-        data.knowUser == '' ||
-        data.listProFile.length == 0
+        data.listProFile.length == 0 ||
+        changeId == ''
       ) {
-        this.messageError('信息不能为空')
-      } else if (data.manager == '' && data.department == '') {
         this.messageError('信息不能为空')
       } else {
         this.$axios

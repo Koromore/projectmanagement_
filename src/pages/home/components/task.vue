@@ -5,9 +5,9 @@
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
-            <el-select v-model="client" placeholder="请选择" size="small">
+            <el-select v-model="clientId" clearable placeholder="请选择" size="small">
               <el-option
-                v-for="item in client_list"
+                v-for="item in clientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -21,21 +21,21 @@
               type="primary"
               plain
               size="small"
-              @click="tab1_change(1)"
+              @click="tab1_change(1,22)"
               :class="[tab1_act=='1' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(2)"
+              @click="tab1_change(2,18)"
               :class="[tab1_act=='2' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(3)"
+              @click="tab1_change(3,17)"
               :class="[tab1_act=='3' ? 'act' : '']"
               style="border-left: 0;"
             >数字营销</el-button>
@@ -47,14 +47,14 @@
               type="primary"
               plain
               size="small"
-              @click="tab2_change(1)"
+              @click="tab2_change(1,1)"
               :class="[tab2_act=='1' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab2_change(2)"
+              @click="tab2_change(2,0)"
               :class="[tab2_act=='2' ? 'act' : '']"
             >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
           </el-button-group>
@@ -62,19 +62,32 @@
         <el-col :span="8" class="tab tab3">
           <el-button-group>
             <el-tooltip class="item" effect="dark" content="新任务" placement="bottom">
-              <el-button type="primary" size="small">&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
+              <el-button
+                type="primary"
+                size="small"
+                @click="tab3_change(1)"
+              >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
               <el-button
                 type="danger"
                 size="small"
+                @click="tab3_change(4)"
               >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
-              <el-button type="warning" size="small">&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
+              <el-button
+                type="warning"
+                size="small"
+                @click="tab3_change(2)"
+              >&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
-              <el-button type="success" size="small">&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
+              <el-button
+                type="success"
+                size="small"
+                @click="tab3_change(1)"
+              >&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
             </el-tooltip>
           </el-button-group>
         </el-col>
@@ -87,6 +100,7 @@
       <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-show="table_show">
         <el-table
+          v-loading="loading"
           ref="filterTable"
           :data="tasklist"
           style="width: 100%"
@@ -107,17 +121,14 @@
             :filter-method="filterDepartment"
           ></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link
-              slot-scope="scope"
-              @click="task_detail(scope.row.taskId)"
-            >{{scope.row.taskName}}</el-link>
+            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="执行状态">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
-              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
             </template>
           </el-table-column>
           <el-table-column prop="faTaskName" label="父任务"></el-table-column>
@@ -133,12 +144,9 @@
                 size="small"
                 type="info"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-                v-if="scope.row.status != 3 || scope.row.status != 5"
+                v-if="scope.row.status != 3 && scope.row.status != 5"
               >反馈</el-button>
-              <el-popconfirm
-                title="确认执行此操作吗？"
-                @onConfirm="sponsor_achieve(scope.row.id,scope.row.task,scope.row.state)"
-              >
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
                 <el-button
                   size="small"
                   type="primary"
@@ -160,6 +168,7 @@
       <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
         <el-table
+          v-loading="loading"
           ref="filterTable"
           :data="tasklist_"
           style="width: 100%"
@@ -169,17 +178,15 @@
         >
           <el-table-column prop="deptName" label="部门"></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link
-              slot-scope="scope"
-              @click="task_detail(scope.row.taskId)"
-            >{{scope.row.taskName}}</el-link>
+            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
-              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-if="scope.row.ignore == true" class="state_color3">忽略</span>
+              <span v-else-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
             </template>
           </el-table-column>
           <el-table-column prop="doUserName" label="执行人" width="164">
@@ -225,10 +232,13 @@
           </el-table-column>
           <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="join_redact(scope.row.id)">
+              <el-popconfirm
+                title="确认执行此操作吗？"
+                @onConfirm="join_redact(scope.row.proId,scope.row.taskId)"
+              >
                 <el-button
                   size="small"
-                  v-if="scope.row.status == 4 "
+                  v-if="scope.row.status == 4 || scope.row.status == 1 && scope.row.ignore == null"
                   type="info"
                   slot="reference"
                 >忽略</el-button>
@@ -240,10 +250,7 @@
                 slot="reference"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
               >反馈</el-button>
-              <el-popconfirm
-                title="确认执行此操作吗？"
-                @onConfirm="join_achieve(scope.row.id,scope.row.task,scope.row.state)"
-              >
+              <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
                 <el-button
                   size="small"
                   v-if="scope.row.status == 1 || scope.row.status == 4"
@@ -267,24 +274,62 @@
         <el-scrollbar style="height: 100%">
           <el-row class="task_details">
             <el-col :span="6" class="title">执行部门：</el-col>
-            <el-col :span="18">{{taskDetail.deptName}}</el-col>
+            <el-col :span="18">{{taskData.deptName}}</el-col>
             <el-col :span="6" class="title">任务类型：</el-col>
-            <el-col :span="18">网站设计</el-col>
+            <el-col :span="18">{{taskData.typeName}}</el-col>
             <el-col :span="6" class="title">执行人：</el-col>
-            <el-col :span="18">张三</el-col>
+            <el-col :span="18">{{taskData.doUserName}}</el-col>
             <el-col :span="6" class="title">状态：</el-col>
-            <el-col :span="18" class="state_color2">执行中</el-col>
+            <el-col :span="18">
+              <el-select
+                v-model="statusListValue"
+                size="mini"
+                :class="{'state_color1': statusListValue == 1,
+                  'state_color2': statusListValue == 2,
+                  'state_color3': statusListValue == 3,
+                  'state_color4': statusListValue == 4}"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in statusList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
-            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="18">{{taskData.expertTime}}</el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">20-01-21</el-col>
+            <el-col :span="18">{{taskData.overTime}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
-            <el-col :span="18">PC网站设计，客户需求商务简约风，以皓影为主题，突出产品的价值定位及车型特点。</el-col>
+            <el-col :span="18">{{taskData.remark}}</el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18">
-              <div class="smname">
-                <img src="static/images/document/ppt.png" width="24" alt srcset />
-                <br />参考资料
+              <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+                <img
+                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                  src="static/images/document/word.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                  src="static/images/document/excle.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                  src="static/images/document/ppt.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                <div>{{item.fileName}}</div>
               </div>
             </el-col>
             <el-divider content-position="right"></el-divider>
@@ -294,10 +339,18 @@
             </el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18">
-              <div class="smname">
-                <img src="static/images/document/ppt.png" width="24" alt srcset />
-                <br />最终成果
-              </div>
+              <el-upload
+                action="/pmbs/file/upload?upType=1&demandType=1"
+                list-type="picture-card"
+                :on-preview="handlePictureCardPreviewResult"
+                :on-remove="handleRemoveResult"
+                :on-success="handleSuccessResult"
+              >
+                <i class="el-icon-plus"></i>
+              </el-upload>
+              <el-dialog :visible.sync="dialogVisibleResult" class="upload_list">
+                <img width="100%" :src="dialogImageUrlResult" alt />
+              </el-dialog>
             </el-col>
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">反馈意见：</el-col>
@@ -309,21 +362,18 @@
                   v-for="item in suggest_list"
                   :key="item.index"
                 >
-                  <el-col :span="12" class="time">{{item.time}}</el-col>
-                  <el-col :span="12" class="pop">{{item.pop}}</el-col>
-                  <el-col :span="24" class="content">{{item.content}}</el-col>
+                  <el-col :span="12" class="time">{{item.updateTime}}</el-col>
+                  <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
+                  <el-col :span="24" class="content">{{item.feedback}}</el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
-            <!-- <el-footer> -->
-
-            <!-- </el-footer> -->
           </el-row>
         </el-scrollbar>
         <el-row class="batton_pa">
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info" @click="cancel">取消</el-button>
-            <el-button size="small" type="primary">完成</el-button>
+            <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
           </el-col>
         </el-row>
       </el-drawer>
@@ -367,6 +417,13 @@ export default {
   name: 'task',
   data() {
     return {
+      loading: false,
+      // 查询条件
+      clientIdList: [], // 用户列表
+      clientId: '', // 用户ID
+      serviceId: '', // 业务ID
+      isUsual: '', // 专项-1/日常-0
+      status: '', // 任务状态
       // 抽屉控制
       drawer1: false,
       drawer2: false,
@@ -376,63 +433,86 @@ export default {
       change_carryPeople_show: 'true',
       loginState: true, // 避免多次点击
       project_style: '',
-      // 客户列表
-      client_list: [
-        {
-          value: '广汽本田',
-          label: '广汽本田'
-        },
-        {
-          value: '吉利',
-          label: '吉利'
-        },
-        {
-          value: '沃尔沃',
-          label: '沃尔沃'
-        }
-      ],
-      // 客户列表选择结果
-      client: '广汽本田',
+
       tasklist: [], // 我发起任务列表
       initiateTaskListTota: 0, // 我发起任务列表总页数
       tasklist_: [], // 我参与任务列表
       participateTaskListTota: 0, // 我参与任务列表总页数
-      taskDetail: {}, // 任务详情
       // 1审核中 2执行中 3已完成 4延期
       tableData2: [],
       result: '',
       tabs_activity: 1,
       table_show: true,
       // 项目类型1选择
-      tab1_act: 1,
+      tab1_act: '',
       // 项目类型2选择
-      tab2_act: 1,
-      suggest_list: [
-        {
-          time: '2020-01-12 12:00',
-          pop: '客户部-黄振宇',
-          content: '请将色调调整为红色。'
-        },
-        {
-          time: '2020-01-10 10:00',
-          pop: '内容部-张三',
-          content: '调整意见文本内容。'
-        },
-        {
-          time: '2020-01-12 12:00',
-          pop: '客户部-黄振宇',
-          content: '请将色调调整为红色。'
-        },
-        {
-          time: '2020-01-10 10:00',
-          pop: '内容部-张三',
-          content: '调整意见文本内容。'
-        }
+      tab2_act: '',
+      suggest_list: [],
+      // 状态列表
+      statusList: [
+        { value: '1', label: '进行中' },
+        { value: '2', label: '审核中' },
+        { value: '3', label: '完成' },
+        { value: '4', label: '延期' },
+        { value: '5', label: '延期完成' }
       ],
+      statusListValue: '',
+      // 任务详情
+      taskData: {},
       // 反馈任务ID
       taskFeedbackId: '',
       // 反馈内容
-      feedbackContent: ''
+      feedbackContent: '',
+      // 上传附件
+      dialogImageUrl: '',
+      dialogVisible: false,
+      disabled: false,
+      uploadUrl: '',
+      listProFile: [], // 上传文件信息列表
+      suggest_list: [], // 任务反馈意见列表
+      file_list: '',
+      // 上传文档
+      dialogImageUrlResult: '',
+      dialogVisibleResult: false,
+      disabledResult: false,
+      uploadUrl: '',
+      listProFileResult: [] // 上传文件信息列表
+    }
+  },
+  // 侦听器
+  watch: {
+    // 如果 `question` 发生改变，这个函数就会运行
+    // 用户选择侦听
+    clientId: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findTaskList()
+    },
+    // 业务类型侦听
+    serviceId: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findTaskList()
+    },
+    // 专项/日常侦听
+    isUsual: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findTaskList()
+    },
+    // 任务状态侦听
+    status: function(newQuestion, oldQuestion) {
+      // clientId: '', // 用户ID
+      // serviceId: '', // 业务ID
+      // isUsual: '', // 专项-1/日常-0
+      // status: '', // 任务状态
+      this.findTaskList()
     }
   },
   // 方法
@@ -444,32 +524,82 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
+    // 获取新建项目分类
+    getAllClientAndBusiness() {
+      this.$axios
+        .post('/pmbs/client/getAllClientAndBusiness')
+        .then(this.getAllClientAndBusinessSuss)
+    },
+    // 获取新建项目分类回调
+    getAllClientAndBusinessSuss(res) {
+      if (res.status == 200) {
+        let data = res.data.data
+        let clientIdList = []
+        // console.log(data)
+        // let business_type_list = []
+        // 循环提取名称和ID
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          let clientIdListData = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListData)
+        }
+        this.clientIdList = clientIdList
+      }
+      // console.log(res)
+    },
     // 选项卡
     table_tab(e) {
       if (e == 1) {
-        ;(this.tabs_activity = 1), (this.table_show = true)
+        this.tabs_activity = 1
+        this.table_show = true
       } else if (e == 2) {
-        ;(this.tabs_activity = 2), (this.table_show = false)
+        this.tabs_activity = 2
+        this.table_show = false
       }
     },
     //
-    tab1_change(e) {
+    tab1_change(e, id) {
       // console.log(e)
-      if (e == 1) {
+      let tab1_act = this.tab1_act
+      if (tab1_act == e) {
+        this.tab1_act = ''
+        this.serviceId = ''
+      } else if (e == 1) {
         this.tab1_act = 1
+        this.serviceId = id
       } else if (e == 2) {
         this.tab1_act = 2
+        this.serviceId = id
       } else if (e == 3) {
         this.tab1_act = 3
+        this.serviceId = id
       }
     },
     //
-    tab2_change(e) {
+    tab2_change(e, id) {
       // console.log(e)
-      if (e == 1) {
+      let tab2_act = this.tab2_act
+      if (tab2_act == e) {
+        this.tab2_act = ''
+        this.isUsual = ''
+      } else if (e == 1) {
         this.tab2_act = 1
+        this.isUsual = id
       } else if (e == 2) {
         this.tab2_act = 2
+        this.isUsual = id
+      }
+    },
+    //
+    tab3_change(id) {
+      let status = this.status
+      if (status == id) {
+        this.status = ''
+      } else {
+        this.status = id
       }
     },
     // 反馈按钮
@@ -486,14 +616,16 @@ export default {
         this.drawer3_task = task
       }
     },
-    join_redact(e) {
-      console.log('我参与忽略' + e)
+    join_redact(proId, taskId) {
+      console.log('我参与忽略' + taskId)
+      let data = {
+        // proId: proId,
+        taskId: taskId,
+        isIgnore: 1,
+        taskfileList: {}
+      }
+      this.taskSave(data)
     },
-    // join_feedback(id, task) {
-    //   console.log('我参与反馈' + e)
-    //   this.drawer2 = true
-    //   this.drawer2_task = task
-    // },
     join_achieve(e, task, state) {
       console.log('我参与完成' + e)
       if (state == 4) {
@@ -508,29 +640,72 @@ export default {
     filterDepartment(value, row) {
       return row.department === value
     },
-    task_detail(id) {
+    task_detail(taskData) {
+      console.log(taskData)
       this.drawer1 = true
-      this.getTaskShow(id)
+      this.statusListValue = taskData.status.toString()
+      this.getTaskShow(taskData.taskId)
     },
     change_carryPeople(e) {
       this.change_carryPeople_show = e
     },
-    // 获取我发起任务列表
-    getTasklistAjax(page) {
+    // 查询任务列表
+    findTaskList() {
+      let data0 = {
+        type: 0,
+        clientId: this.clientId,
+        serviceId: this.serviceId,
+        isUsual: this.isUsual,
+        task: {
+          initUserId: 128,
+          status: this.status
+        },
+        pageNum: 1
+      }
+      let data1 = {
+        type: 1,
+        clientId: this.clientId,
+        serviceId: this.serviceId,
+        isUsual: this.isUsual,
+        task: {
+          initUserId: 128,
+          status: this.status
+        },
+        pageNum: 1
+      }
+      this.getTasklistAjax(data0)
+      this.getTasklistAjax_(data1)
+    },
+    // 获取任务列表
+    getTasklist() {
       // console.log("123")
-      let data = {
+      let data0 = {
         type: 0,
         task: {
           initUserId: 128
         },
-        pageNum: page
+        pageNum: 1
       }
+      let data1 = {
+        type: 1,
+        task: {
+          initUserId: 128
+        },
+        pageNum: 1
+      }
+      this.getTasklistAjax(data0)
+      this.getTasklistAjax_(data1)
+    },
+    // 获取我发起任务列表
+    getTasklistAjax(data0) {
+      this.loading = true
       this.$axios
-        .post('/pmbs/api/task/listAjax', data)
+        .post('/pmbs/api/task/listAjax', data0)
         .then(this.getTasklistAjaxSuss)
     },
     // 获取我发起任务列表回调
     getTasklistAjaxSuss(res) {
+      this.loading = false
       if (res.status == 200) {
         let data = res.data.items
         this.tasklist = data
@@ -540,21 +715,15 @@ export default {
       // console.log(res)
     },
     // 获取我参与任务列表
-    getTasklistAjax_(page) {
-      // console.log("123")/api/task/listAjax
-      let data = {
-        type: 1,
-        task: {
-          initUserId: 128
-        },
-        pageNum: page
-      }
+    getTasklistAjax_(data1) {
+      this.loading = true
       this.$axios
-        .post('/pmbs/api/task/listAjax', data)
+        .post('/pmbs/api/task/listAjax', data1)
         .then(this.getTasklistAjax_Suss)
     },
     // 获取我参与任务列表回调
     getTasklistAjax_Suss(res) {
+      this.loading = false
       if (res.status == 200) {
         let data = res.data.items
         this.tasklist_ = data
@@ -572,9 +741,111 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data
-        this.taskDetail = data
+        this.taskData = data
+        this.suggest_list = data.feedbackList
       }
-      // console.log(this.taskDetail)
+      // console.log(this.taskData)
+    },
+    // 上传文档
+    // 删除
+    handleRemoveResult(file) {
+      // console.log(file)
+      let data = file.response.data
+      let listProFileResult = this.listProFileResult
+      for (let i = 0; i < listProFileResult.length; i++) {
+        let element = listProFileResult[i]
+        if (element.localPath == data.path) {
+          listProFileResult.splice(i, 1)
+          console.log('删除')
+        }
+      }
+      this.listProFileResult = listProFileResult
+      console.log(this.listProFileResult)
+    },
+    // 预览
+    handlePictureCardPreviewResult(file) {
+      // console.log(file)
+      this.dialogImageUrlResult = file.url
+      this.dialogVisibleResult = true
+    },
+    // 上传回调
+    handleSuccessResult(res, file, fileList) {
+      // console.log('上传附件成功')
+      if (res.errcode == 0) {
+        let resData = res.data
+        let listProFileResult = this.listProFileResult
+        // console.log(listProFile)
+        let listProFileResultData = {
+          proId: this.taskData.proId, // 项目ID
+          taskId: this.taskData.taskId, // 任务ID
+          fileId: '', // 文档ID
+          updateUserId: 128, // 上传人ID
+          fileName: resData.fileName, //'文档名称',
+          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
+          localPath: resData.path, //'本地路径',
+          suffix: resData.fileType //'文档后缀'
+        }
+        listProFileResult.push(listProFileResultData)
+        this.listProFileResult = listProFileResult
+        console.log(this.listProFileResult)
+      }
+    },
+    // 修改任务详情
+    changeTaskDeil() {
+      // console.log('修改任务详情')
+      let taskData = this.taskData
+      let listProFileResult = this.listProFileResult
+      let taskfileList = []
+      if (listProFileResult.length == 0) {
+        for (let i = 0; i < taskData.taskfileList.length; i++) {
+          let element = taskData.taskfileList[i]
+          let taskfileListData = {
+            fileId: element.fileId,
+            fileName: element.fileName,
+            suffix: element.suffix,
+            localPath: element.localPath,
+            proId: element.proId,
+            taskId: element.taskId,
+            updateUserId: 128
+          }
+          taskfileList.push(taskfileListData)
+        }
+      } else {
+        taskfileList = listProFileResult
+      }
+
+      let data = {
+        proId: taskData.proId, // '所属项目id',
+        taskId: taskData.taskId, // 任务id
+        status: this.statusListValue, // 状态
+        overDesc: this.result, // 完成结果
+        taskfileList: taskfileList // 上传文档列表
+      }
+      if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
+        data.oldFileId = fileId
+      }
+      this.taskSave(data)
+    },
+    // 任务新增/修改/完成
+    taskSave(data) {
+      // console.log(this.new_task.presetTime)
+      // console.log(expertTime)
+      this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
+    },
+    // 任务新增/修改/完成回调
+    taskSaveSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        // this.projectListJoin = res.data.data
+        this.messageWin(res.data.msg)
+        this.drawer1 = false
+        this.drawer5 = false
+        this.result = ''
+        this.listProFile = []
+        this.listProFileResult = []
+        this.getTasklist()
+        // console.log(this.projectListJoin)
+      }
     },
     // 任务删除
     taskDelete(id) {
@@ -586,9 +857,8 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data
-        // this.taskDetail = data
+        // this.taskData = data
       }
-      // console.log(this.taskDetail)
     },
     // 任务反馈
     taskFeedback() {
@@ -614,8 +884,7 @@ export default {
         this.feedbackContent = ''
         this.taskFeedbackId = ''
         // 重新获取任务列表
-        this.getTasklistAjax(1)
-        this.getTasklistAjax_(1) // 重新获取任务列表
+        this.getTasklist() // 重新获取任务列表
       }
     },
     // 取消按钮
@@ -624,11 +893,33 @@ export default {
     },
     // 我发起分页
     initiateTaskList(page) {
-      this.getTasklistAjax(page)
+      let data0 = {
+        type: 0,
+        clientId: this.clientId,
+        serviceId: this.serviceId,
+        isUsual: this.isUsual,
+        task: {
+          initUserId: 128,
+          status: this.status
+        },
+        pageNum: page
+      }
+      this.getTasklistAjax(data0)
     },
     // 我参与分页
     participateTaskList(page) {
-      this.getTasklistAjax_(page)
+      let data1 = {
+        type: 1,
+        clientId: this.clientId,
+        serviceId: this.serviceId,
+        isUsual: this.isUsual,
+        task: {
+          initUserId: 128,
+          status: this.status
+        },
+        pageNum: page
+      }
+      this.getTasklistAjax_(data1)
     },
     // 消息提示
     messageWin(message) {
@@ -653,8 +944,8 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    this.getTasklistAjax(1)
-    this.getTasklistAjax_(1)
+    this.getAllClientAndBusiness() // 获取客户和业务
+    this.getTasklist() // 获取任务列表
   }
 }
 </script>
