@@ -162,7 +162,6 @@
                 <el-upload
                   :action="uploadUrl"
                   list-type="picture-card"
-                  :on-preview="handlePictureCardPreview"
                   :on-remove="handleRemove"
                   :on-success="handleSuccess"
                   :file-list="fileList"
