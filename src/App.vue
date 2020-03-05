@@ -48,4 +48,7 @@ select{outline:none; appearance:none; -webkit-appearance: none; -moz-appearance:
     font-weight: normal;
     color: #337ab7;
 }
+.el-drawer{
+    min-width: 480px;
+}
 </style>

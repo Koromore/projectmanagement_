@@ -32,7 +32,7 @@
       <el-container>
         <!-- 内容 start -->
         <el-main>
-          <router-view @getData="getData"></router-view>
+          <router-view @getData="getData" ref="project"></router-view>
         </el-main>
         <!-- 内容 end -->
       </el-container>
@@ -305,6 +305,7 @@ export default {
       this.getListAjax()
       // 获取新建项目分类
       this.getAllClientAndBusiness()
+      // this.$refs.router.getProjectList()
     },
     getData(data) {
       this.drawer = true
@@ -381,7 +382,8 @@ export default {
         let listProFileData = {
           fileName: resData.fileName, //'附件名称',
           localPath: resData.path, //'本地路径',
-          suffix: resData.fileType //'文档后缀'
+          suffix: resData.fileType, //'文档后缀'
+          isPro: 0 // 文档需求
         }
         listProFile.push(listProFileData)
         this.listProFile = listProFile
@@ -626,6 +628,8 @@ export default {
         this.listProFile = []
         this.file_list = []
         this.new_project.dynamicTags = []
+
+        // this.$refs[projeck].getProjectList()
       }
     },
     // 获取项目反馈-项目详情
@@ -712,7 +716,7 @@ export default {
   margin-right: 5px;
 }
 .el-main {
-  min-width: 1200px;
+  min-width: 1020px;
 }
 .home .add_box {
   /* height: 985px; */

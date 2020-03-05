@@ -1,14 +1,14 @@
 <template>
-    <div class="document">
+    <div class="document task">
         <div>
             <el-row>
               <el-col :span="24" class="top">
                 <el-col :span="5" class>
                   <el-col :span="4" class="title">客户</el-col>
                   <el-col :span="20">
-                    <el-select v-model="client" placeholder="请选择" size="small">
+                    <el-select v-model="clientId" placeholder="请选择" size="small">
                       <el-option
-                        v-for="item in client_list"
+                        v-for="item in clientIdList"
                         :key="item.value"
                         :label="item.label"
                         :value="item.value"
@@ -22,21 +22,21 @@
                       type="primary"
                       plain
                       size="small"
-                      @click="tab1_change(1)"
+                      @click="tab1_change(1,22)"
                       :class="[tab1_act=='1' ? 'act' : '']"
                     >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
                     <el-button
                       type="primary"
                       plain
                       size="small"
-                      @click="tab1_change(2)"
+                      @click="tab1_change(2,18)"
                       :class="[tab1_act=='2' ? 'act' : '']"
                     >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
                     <el-button
                       type="primary"
                       plain
                       size="small"
-                      @click="tab1_change(3)"
+                      @click="tab1_change(3,17)"
                       :class="[tab1_act=='3' ? 'act' : '']"
                       style="border-left: 0;"
                     >数字营销</el-button>
@@ -48,14 +48,14 @@
                       type="primary"
                       plain
                       size="small"
-                      @click="tab2_change(1)"
+                      @click="tab2_change(1,1)"
                       :class="[tab2_act=='1' ? 'act' : '']"
                     >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
                     <el-button
                       type="primary"
                       plain
                       size="small"
-                      @click="tab2_change(2)"
+                      @click="tab2_change(2,0)"
                       :class="[tab2_act=='2' ? 'act' : '']"
                     >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
                   </el-button-group>
@@ -90,7 +90,28 @@
                             </div>
                             <div v-else>
                             <!-- el-icon-picture -->
-                                <i class="el-icon-folder"></i>
+                                <img
+                                  v-if="scope.row.suffix == 'doc' || scope.row.suffix == 'docx'"
+                                  src="static/images/document/word.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img
+                                  v-else-if="scope.row.suffix == 'xls' || scope.row.suffix == 'xlsx'"
+                                  src="static/images/document/excle.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img
+                                  v-else-if="scope.row.suffix == 'ppt' || scope.row.suffix == 'pptx'"
+                                  src="static/images/document/ppt.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img v-else src="static/images/document/other.png" width="16" alt srcset />
                                 <span>{{ scope.row.fileName }}</span>
                             </div>
                         </div>
@@ -116,7 +137,7 @@
                     @size-change="handleSizeChange"
                     @current-change="handleCurrentChange"
                     :current-page="pageNum"
-                    layout="total, prev, pager, next, jumper"
+                    layout="total, prev, pager, next"
                     :total="totalnum"  background>
                   </el-pagination>
               </div>
@@ -133,7 +154,29 @@
                           <el-card>
                             <h4>更新人：{{item.realName}}</h4>
                             <p class="fileName">
-                                <i class="el-icon-folder"></i>
+                                <!-- <i class="el-icon-folder"></i> -->
+                                <img
+                                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                                  src="static/images/document/word.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img
+                                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                                  src="static/images/document/excle.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img
+                                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                                  src="static/images/document/ppt.png"
+                                  width="16"
+                                  alt
+                                  srcset
+                                />
+                                <img v-else src="static/images/document/other.png" width="16" alt srcset />
                                 <span>{{item.fileName}}</span>
                             </p>
                             <p>
@@ -149,13 +192,110 @@
         </el-drawer>
         
         <!-- 任务详情 -->
-        <el-drawer title="任务详情" :visible.sync="openTaskVisible" :with-header="false">
-            <el-scrollbar>
-                <div class="history-main">
-                    
-                </div>
-            </el-scrollbar>
-        </el-drawer>
+        <!-- 抽屉 -->
+      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
+        <el-scrollbar style="height: 100%">
+          <el-row class="task_details">
+            <el-col :span="6" class="title">执行部门：</el-col>
+            <el-col :span="18">{{taskData.deptName}}</el-col>
+            <el-col :span="6" class="title">任务类型：</el-col>
+            <el-col :span="18">{{taskData.typeName}}</el-col>
+            <el-col :span="6" class="title">执行人：</el-col>
+            <el-col :span="18">{{taskData.doUserName}}</el-col>
+            <el-col :span="6" class="title">状态：</el-col>
+            <el-col :span="18">
+              <el-select
+                v-model="statusListValue"
+                size="mini"
+                :class="{'state_color1': statusListValue == 1,
+                  'state_color2': statusListValue == 2,
+                  'state_color3': statusListValue == 3,
+                  'state_color4': statusListValue == 4}"
+                placeholder="请选择"
+              >
+                <el-option
+                  v-for="item in statusList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="6" class="title">预计时间：</el-col>
+            <el-col :span="18">{{taskData.expertTime}}</el-col>
+            <el-col :span="6" class="title">完成时间：</el-col>
+            <el-col :span="18">{{taskData.overTime}}</el-col>
+            <el-col :span="6" class="title">需求：</el-col>
+            <el-col :span="18">{{taskData.remark}}</el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+                <img
+                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                  src="static/images/document/word.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                  src="static/images/document/excle.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                  src="static/images/document/ppt.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                <div>{{item.fileName}}</div>
+              </div>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">完成结果：</el-col>
+            <el-col :span="18">
+              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
+            </el-col>
+            <el-col :span="6" class="title">附件：</el-col>
+            <el-col :span="18">
+              <el-upload
+                action="/pmbs/file/upload?upType=1&demandType=1"
+                list-type="picture-card"
+                :on-remove="handleRemoveResult"
+                :on-success="handleSuccessResult"
+              >
+                <i class="el-icon-plus"></i>
+              </el-upload>
+            </el-col>
+            <el-divider content-position="right"></el-divider>
+            <el-col :span="6" class="title">反馈意见：</el-col>
+            <el-col :span="18" class="suggest">
+              <el-scrollbar style="height: 100%;">
+                <el-col
+                  :span="23"
+                  class="suggest_list"
+                  v-for="item in suggest_list"
+                  :key="item.index"
+                >
+                  <el-col :span="12" class="time">{{item.updateTime}}</el-col>
+                  <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
+                  <el-col :span="24" class="content">{{item.feedback}}</el-col>
+                </el-col>
+              </el-scrollbar>
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+        <el-row class="batton_pa">
+          <el-col :span="12" :offset="7" class="batton">
+            <el-button size="small" type="info" @click="cancel">取消</el-button>
+            <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
+          </el-col>
+        </el-row>
+      </el-drawer>
         <!-- 重新上传弹框 -->
         <el-dialog title="修改附件" :visible.sync="dialogFileVisible">
             <div>
@@ -192,26 +332,13 @@ export default {
             name:'',//搜索的关键字
             loading:false, //是否正在加载中
              // 项目类型1选择
-            tab1_act: 1,
+            tab1_act: '',
               // 项目类型2选择
-            tab2_act: 1,
+            tab2_act: '',
+            clientIdList:[],//客户列表
             client: '广汽本田',
             fileHistoryList:[],//文件历史数据
             fileHistoryLoading:false, //侧栏文件是否正在加载中
-            client_list: [
-                {
-                  value: '广汽本田',
-                  label: '广汽本田'
-                },
-                {
-                  value: '吉利',
-                  label: '吉利'
-                },
-                {
-                  value: '沃尔沃',
-                  label: '沃尔沃'
-                }
-            ],
             tableData: [],//文件列表数据
             editable:[], //控制文件名修改
             pageNum:1,//当前的页码
@@ -222,36 +349,182 @@ export default {
             dialogFileVisible:false,//控制显示重新上传附件的弹框
             editData:'',//用于修改附件赋值的临时存储
             openTaskVisible:false,//显示任务详情侧栏
+            // 任务详情
+            taskData: {},
+            suggest_list: [],
+              // 状态列表
+            statusList: [
+                { value: '1', label: '进行中' },
+                { value: '2', label: '审核中' },
+                { value: '3', label: '完成' },
+                { value: '4', label: '延期' },
+                { value: '5', label: '延期完成' }
+            ],
+            statusListValue: '',
+            drawer1:false,
+            listProFileResult:[],
+            result:'',
+            taskData:[],
         }
     },
     methods: {
+        getAllClientAndBusiness() {
+      this.$axios
+        .post('/pmbs/client/getAllClientAndBusiness')
+        .then(this.getAllClientAndBusinessSuss)
+    },
+    // 获取新建项目分类回调
+    getAllClientAndBusinessSuss(res) {
+      if (res.status == 200) {
+        let data = res.data.data
+        let clientIdList = []
+        // 循环提取名称和ID
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          let clientIdListData = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListData)
+        }
+        this.clientIdList = clientIdList
+      }
+      // console.log(res)
+    },
+         handleRemoveResult(file) {
+      // console.log(file)
+      let data = file.response.data
+      let listProFileResult = this.listProFileResult
+      for (let i = 0; i < listProFileResult.length; i++) {
+        let element = listProFileResult[i]
+        if (element.localPath == data.path) {
+          listProFileResult.splice(i, 1)
+          console.log('删除')
+        }
+      }
+      this.listProFileResult = listProFileResult
+    },
+    // 预览
+    handlePictureCardPreviewResult(file) {
+      // console.log(file)
+      this.dialogImageUrlResult = file.url
+      this.dialogVisibleResult = true
+    },
+    // 上传回调
+    handleSuccessResult(res, file, fileList) {
+      // console.log('上传附件成功')
+      if (res.errcode == 0) {
+        let resData = res.data
+        let listProFileResult = this.listProFileResult
+        // console.log(listProFile)
+        let listProFileResultData = {
+          proId: this.taskData.proId, // 项目ID
+          taskId: this.taskData.taskId, // 任务ID
+          fileId: '', // 文档ID
+          updateUserId: 128, // 上传人ID
+          fileName: resData.fileName, //'文档名称',
+          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
+          localPath: resData.path, //'本地路径',
+          suffix: resData.fileType //'文档后缀'
+        }
+        listProFileResult.push(listProFileResultData)
+        this.listProFileResult = listProFileResult
+      }
+    },
+    // 修改任务详情
+    changeTaskDeil() {
+      // console.log('修改任务详情')
+      let taskData = this.taskData
+      let listProFileResult = this.listProFileResult
+      let taskfileList = []
+      if (listProFileResult.length == 0) {
+        for (let i = 0; i < taskData.taskfileList.length; i++) {
+          let element = taskData.taskfileList[i]
+          let taskfileListData = {
+            fileId: element.fileId,
+            fileName: element.fileName,
+            suffix: element.suffix,
+            localPath: element.localPath,
+            proId: element.proId,
+            taskId: element.taskId,
+            updateUserId: 128
+          }
+          taskfileList.push(taskfileListData)
+        }
+      } else {
+        taskfileList = listProFileResult
+      }
+
+      let data = {
+        proId: taskData.proId, // '所属项目id',
+        taskId: taskData.taskId, // 任务id
+        status: this.statusListValue, // 状态
+        overDesc: this.result, // 完成结果
+        taskfileList: taskfileList // 上传文档列表
+      }
+      if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
+        data.oldFileId = fileId
+      }
+      this.taskSave(data)
+    },
+    // 任务新增/修改/完成
+    taskSave(data) {
+      // console.log(this.new_task.presetTime)
+      // console.log(expertTime)
+      this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
+    },
+    // 任务新增/修改/完成回调
+    taskSaveSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        // this.projectListJoin = res.data.data
+        this.$message({
+            message: res.data.msg,
+            type: 'success'
+          })
+        this.drawer1 = false
+        this.drawer5 = false
+        this.result = ''
+        this.listProFile = []
+        this.listProFileResult = []
+        this.getTaskfilePageList()
+
+      }
+    },
+    // 取消按钮
+    cancel() {
+      this.drawer1 = false
+    },
         handleSizeChange(){
 
         },
         //下一页
         handleCurrentChange(page){
             this.pageNum = page
-            let data = {
-                userid: 1,
-                pageNum: this.pageNum,
-                pageSize: 10,
-                // clientId:'',//客户ID
-                // serviceId:'',//
-                // isUsual:'', //是否是专项
-                name:'',//搜索的关键字
-            }
-            this.getTaskfilePageList(data);
+            this.getTaskfilePageList();
         },
         /**
          * [enterDetail 进入详情]
          */
         enterDetail(index, row) {
-            this.openTaskVisible = true;
-            let id = row.taskId;
-            let data = `?id=${id}`
-            this.$axios.post('/pmbs/api/task/show' + data).then((res)=>{
-                console.log(res);
-            })
+            this.drawer1 = true
+            this.statusListValue = row.status.toString()
+            this.getTaskShow(row.taskId)
+            // this.openTaskVisible = true;
+        },
+        getTaskShow(id) {
+          let data = `?id=${id}`
+          this.$axios.post('/pmbs/api/task/show' + data).then(this.getTaskShowSuss)
+        },
+        // 获取任务详情回调
+        getTaskShowSuss(res) {
+          console.log(res)
+          if (res.status == 200) {
+            let data = res.data
+            this.taskData = data
+            this.suggest_list = data.feedbackList
+          }
+          // console.log(this.taskData)
         },
         //取消附件上传
         fileRemove:function () {
@@ -260,24 +533,20 @@ export default {
         //上传文件修改附件
         fileUpload:function () {
 
-            // console.log(this.editData)
-            // console.log('后台数据不全需要')
-            // proId=1  taskId=30  updateuserId=128
-            
             var taskfile = {
-                proId:1,
-                taskId:30,
-                updateUserId:128,
+                proId:this.editData.proId,
+                taskId:this.editData.taskId,
+                updateUserId:this.editData.updateUserId,
+                clientName:this.editData.clientName,
+                proName:this.editData.proName,
+                realName:this.editData.realName,
+                taskName:this.editData.taskName,
                 oldFileId:this.editData.fileId.toString()
             }
-            var data = {
-                taskfile:Object.assign(taskfile,this.listProFile[0])
-            }
 
-            //更新附件 参数修改的文件ID 以及
-            this.$axios.post('/pmbs/api/taskfile/importupdate',data).then((res)=>{
+            this.$axios.post('/pmbs/api/taskfile/importupdate',Object.assign(taskfile,this.listProFile[0])).then((res)=>{
                 console.log(res)
-               
+                this.dialogFileVisible = false;
             })
         },
         handleExceed:function (file, fileList) {
@@ -298,11 +567,6 @@ export default {
           }
           this.listProFile = listProFile
         },
-        // 预览
-        handlePictureCardPreview(file) {
-          this.dialogImageUrl = file.url
-          this.dialogVisible = true
-        },
         // 上传回调
         handleSuccess(res, file, fileList) {
           // console.log('上传附件成功')
@@ -318,26 +582,28 @@ export default {
             this.listProFile = listProFile
           }
         },
-        tab1_change(e) {
-            this.tab1_act = e;
+        tab1_change(e,id) {
+            if (this.tab1_act==e) {
+                this.tab1_act = '';
+                this.serviceId = ''; //官网 口碑 数字营销
+            }else{
+                this.tab1_act = e;
+                this.serviceId = id; //官网 口碑 数字营销
+            }
         },
         //
-        tab2_change(e) {
-            this.tab2_act = e;
+        tab2_change(e,id) {
+            if(this.tab2_act==e){
+                this.tab2_act = '';
+                this.isUsual = ''; //0 是日常 1是专项
+            }else{
+                this.tab2_act = e;
+                this.isUsual = id; //0 是日常 1是专项
+            }
         },
         // 搜索处理
         searchHandle:function () {
-            // 获取文档列表
-            let data = {
-                userid: 1,
-                pageNum: this.pageNum,
-                pageSize: 10,
-                // clientId:'',//客户ID
-                // serviceId:'',//
-                // isUsual:'', //是否是专项
-                name:this.name,//搜索的关键字
-            }
-            this.getTaskfilePageList(data)
+            this.getTaskfilePageList()
         },
         tableRowClassName ({row, rowIndex}) {
             //把每一行的索引放进row
@@ -425,6 +691,16 @@ export default {
         getTaskfilePageList(data) {
           if(!this.loading){
               this.loading = true;
+
+              let data = {
+                userid: 128,
+                pageNum: this.pageNum,
+                pageSize: 10,
+                clientId:this.clientId,//客户ID
+                serviceId:this.serviceId,//
+                isUsual:this.isUsual, //是否是专项
+                name:this.name,//搜索的关键字
+            }
                this.$axios.post('/pmbs/api/taskfile/getTaskfilePageList', data).then(this.getTaskfilePageListSuss)
           }
         },
@@ -432,24 +708,30 @@ export default {
         getTaskfilePageListSuss(res) {
             if (res.status == 200) {
                 this.loading = false;
-                this.totalnum = res.data.length;
-                this.tableData = res.data;
+                this.totalnum = res.data.totalRows;
+                this.tableData = res.data.items;
             }
         },
   },
+    watch: {
+    clientId: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+    // 业务类型侦听
+    serviceId: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+    // 专项/日常侦听
+    isUsual: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+  },
   // 钩子函数
   mounted() {
-    // 获取文档列表
-    let data = {
-        userid: 1,
-        pageNum: this.pageNum,
-        pageSize: 10,
-        // clientId:'',//客户ID
-        // serviceId:'',//
-        // isUsual:'', //是否是专项
-        name:'',//搜索的关键字
-    }
-    this.getTaskfilePageList(data);
+
+        //获取客户下拉数据
+        this.getAllClientAndBusiness();
+        this.getTaskfilePageList();
 
         let upType = 0;
         let demandType = 0;
@@ -579,5 +861,100 @@ export default {
 }
 .document .records_document .el-card:hover .down {
   display: inline-block;
+}
+
+.task .task_details {
+  height: 100%;
+  padding: 36px 36px 108px 36px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-content: space-between;
+  align-items: flex-start;
+}
+.task .task_details > .el-col {
+  margin-bottom: 18px;
+}
+.task .task_details .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.task .task_details .smname {
+  width: 72px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+}
+.task .task_details .suggest {
+  height: 108px;
+}
+/* .task .task_details .suggest .el-scrollbar{
+  height: 100%;
+  overflow-x: scroll;
+} */
+.task .task_details .suggest .suggest_list {
+  height: 48px;
+  margin-bottom: 12px;
+}
+.task .task_details .suggest .suggest_list .pop,
+.task .task_details .suggest .suggest_list .time {
+  height: 24px;
+  line-height: 24px;
+  font-size: 14px;
+  color: rgb(162, 162, 162);
+}
+.task .task_details .suggest .suggest_list .pop {
+  text-align: right;
+}
+.task .task_details .suggest .suggest_list .content {
+  color: #000;
+  font-size: 16px;
+}
+.task .batton_pa {
+  width: 100%;
+  padding: 36px;
+  background: white;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+.task .task_details >>> .el-select input {
+  width: 81px;
+  border: none;
+  font-size: 16px;
+  padding-left: 0;
+}
+.task .batton {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.task .batton button {
+  width: 36%;
+}
+.feedback {
+  height: 100%;
+  padding: 36px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  align-content: space-between;
+}
+.feedback .title:nth-of-type(1) {
+  font-weight: 600;
+  margin-bottom: 36px;
+}
+.feedback .title {
+  font-size: 18px;
+  margin-bottom: 13px;
+}
+/* .task >>> .el-drawer__body {
+  height: 100%;
+} */
+.task >>> .el-scrollbar__wrap {
+  overflow-x: hidden;
 }
 </style>

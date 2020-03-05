@@ -69,7 +69,7 @@
                 @click="tab3_change(1)"
               >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
+            <el-tooltip class="item" effect="dark" content="延期" placement="bottom">
               <el-button
                 type="danger"
                 size="small"
@@ -116,7 +116,7 @@
           </el-table-column>
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
               <span v-if="scope.row.status == 3" class="state_color3">完成</span>
               <span v-if="scope.row.status == 4" class="state_color4">延期</span>
@@ -202,7 +202,7 @@
           </el-table-column>
           <el-table-column prop="state_text" label="状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
+              <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
               <span v-if="scope.row.status == 3" class="state_color3">完成</span>
               <span v-if="scope.row.status == 4" class="state_color4">延期</span>
@@ -406,7 +406,7 @@
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary" @click="projectFeedback">提交</el-button>
           </el-col>
         </el-row>
@@ -422,7 +422,7 @@
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
         </el-row>
@@ -538,7 +538,7 @@ export default {
       ],
       // 客户列表选择结果
       client: '广汽本田',
-      // 1-进行中，2-审核中，3-完成，4-延期，5-延期完成
+      // 1-执行中，2-审核中，3-完成，4-延期，5-延期完成
       projectListOriginate: [], // 项目列表我发起
       initiateProjectListTota: [], // 项目列表我发起总页数
       projectListJoin: [], // 项目列表我参与
@@ -712,7 +712,7 @@ export default {
       if (res.status == 200) {
         let data = res.data.data
         let clientIdList = []
-        console.log(data)
+        // console.log(data)
         // let business_type_list = []
         // 循环提取名称和ID
         for (let i = 0; i < data.length; i++) {
@@ -892,7 +892,7 @@ export default {
       if (res.status == 200) {
         if (data.status == 3) {
           this.messageWin('项目已完成')
-          this.getProjectListAjax()
+          this.getProjectList()
         }
       }
     },
@@ -965,7 +965,7 @@ export default {
         this.feedbackContent = ''
         this.taskFeedbackId = ''
         // 重新获取项目列表
-        this.getProjectListAjax()
+        this.getProjectList()
       }
     },
     // /api/project/delProject?projectId=100
@@ -981,7 +981,7 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         this.messageWin('项目删除成功')
-        this.getProjectListAjax()
+        this.getProjectList()
         // let projectListJoin = res.data.data
       }
     },
@@ -1026,6 +1026,7 @@ export default {
       let data1 = `?inituserid=128`
       this.getProjectListAjax(data0)
       this.getProjectUserjoinproject(data1)
+      // console.log('获取项目列表')
     },
     // 项目管理-我发起获取
     getProjectListAjax(data0) {
@@ -1088,6 +1089,13 @@ export default {
     // participateProjectList(page){
     //   this.getUserJoinProjectAjax(page)
     // },
+    // 抽屉取消按钮
+    empty(){
+      this.drawer3 = false
+      this.drawer2 = false
+      this.feedbackContent = ''
+      this.result = ''
+    },
     // 消息提示
     messageWin(message) {
       // 成功提示

@@ -36,50 +36,7 @@ export default {
   },
   data() {
     return {
-      data: [
-        {
-          id: 2,
-          name: '租房子',
-          startDate: '2019-09-20',
-          endDate: '2019-12-31'
-        },
-        {
-          id: 3,
-          name: '云台之间',
-          startDate: '2019-09-01',
-          endDate: '2019-09-09'
-        },
-        {
-          id: 4,
-          name: '日落云巅',
-          startDate: '2019-09-01',
-          endDate: '2019-09-09'
-        },
-        {
-          id: 5,
-          name: '天空之镜',
-          startDate: '2019-09-08',
-          endDate: '2019-10-02'
-        },
-        {
-          id: 6,
-          name: '蓬莱之岛',
-          startDate: '2019-10-20',
-          endDate: '2019-11-10'
-        },
-        {
-          id: 7,
-          name: '西塘之南',
-          startDate: '2019-12-02',
-          endDate: '2019-12-07'
-        },
-        {
-          id: 8,
-          name: '凤凰之缘',
-          startDate: '2020-01-01',
-          endDate: '2020-01-10'
-        }
-      ]
+      data: []
     }
   },
   methods: {

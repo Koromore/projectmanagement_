@@ -68,7 +68,7 @@
                 @click="tab3_change(1)"
               >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="延期" placement="bottom">
+            <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
               <el-button
                 type="danger"
                 size="small"
@@ -125,12 +125,10 @@
           </el-table-column>
           <el-table-column prop="status" label="执行状态">
             <template slot-scope="scope">
-              <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
-              <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
+              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
               <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
               <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
-              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
           <el-table-column prop="faTaskName" label="父任务"></el-table-column>
@@ -159,14 +157,12 @@
           </el-table-column>
         </el-table>
         <!-- 分页 -->
-        <el-col :span="24" class="page">
-          <el-pagination
-            background
-            layout="total, prev, pager, next"
-            :total="initiateTaskListTota"
-            @current-change="initiateTaskList"
-          ></el-pagination>
-        </el-col>
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="initiateTaskListTota"
+          @current-change="initiateTaskList"
+        ></el-pagination>
       </el-col>
       <!--  -->
       <!-- 我参与 -->
@@ -187,7 +183,7 @@
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
-              <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
+              <span v-else-if="scope.row.status == 1" class="state_color1">进行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
               <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
               <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
@@ -276,14 +272,12 @@
           </el-table-column>
         </el-table>
         <!-- 分页 -->
-        <el-col :span="24" class="page">
-          <el-pagination
-            background
-            layout="total, prev, pager, next"
-            :total="participateTaskListTota"
-            @current-change="participateTaskList"
-          ></el-pagination>
-        </el-col>
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="participateTaskListTota"
+          @current-change="participateTaskList"
+        ></el-pagination>
       </el-col>
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
@@ -301,7 +295,9 @@
                 v-model="statusListValue"
                 size="mini"
                 :class="{'state_color1': statusListValue == 1,
-                  'state_color2': statusListValue == 2}"
+                  'state_color2': statusListValue == 2,
+                  'state_color3': statusListValue == 3,
+                  'state_color4': statusListValue == 4}"
                 placeholder="请选择"
               >
                 <el-option
@@ -356,6 +352,7 @@
               <el-upload
                 action="/pmbs/file/upload?upType=1&demandType=1"
                 list-type="picture-card"
+                :on-preview="handlePictureCardPreviewResult"
                 :on-remove="handleRemoveResult"
                 :on-success="handleSuccessResult"
               >
@@ -401,7 +398,7 @@
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info" @click="empty">取消</el-button>
+            <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary" @click="taskFeedback">提交</el-button>
           </el-col>
         </el-row>
@@ -417,7 +414,7 @@
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info" @click="empty">取消</el-button>
+            <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary">提交</el-button>
           </el-col>
         </el-row>
@@ -468,8 +465,11 @@ export default {
       suggest_list: [],
       // 状态列表
       statusList: [
-        { value: '1', label: '执行中' },
-        { value: '2', label: '完成' }
+        { value: '1', label: '进行中' },
+        { value: '2', label: '审核中' },
+        { value: '3', label: '完成' },
+        { value: '4', label: '延期' },
+        { value: '5', label: '延期完成' }
       ],
       statusListValue: '',
       // 任务详情
@@ -865,6 +865,12 @@ export default {
       this.listProFileResult = listProFileResult
       console.log(this.listProFileResult)
     },
+    // 预览
+    handlePictureCardPreviewResult(file) {
+      // console.log(file)
+      this.dialogImageUrlResult = file.url
+      this.dialogVisibleResult = true
+    },
     // 上传回调
     handleSuccessResult(res, file, fileList) {
       // console.log('上传附件成功')
@@ -925,8 +931,6 @@ export default {
     },
     // 任务新增/修改/完成
     taskSave(data) {
-      // console.log(this.new_task.presetTime)
-      // console.log(expertTime)
       this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
     },
     // 任务新增/修改/完成回调
@@ -944,11 +948,6 @@ export default {
         // console.log(this.projectListJoin)
       }
     },
-    // 任务删除
-    taskDelete(id) {
-      let data = `?id=${id}`
-      this.$axios.post('/pmbs/api/task/delete' + data).then(this.taskDeleteSuss)
-    },
     // 获取任务详情回调
     taskDeleteSuss(res) {
       // console.log(res)
@@ -957,73 +956,9 @@ export default {
         // this.taskData = data
       }
     },
-    // 任务反馈
-    taskFeedback() {
-      let updateTime = new Date()
-      let data = {
-        // deleteFlag: true,
-        feedback: this.feedbackContent, // 反馈内容
-        // feedbackId: 0,
-        initUserId: 128, // 反馈人ID
-        taskId: this.taskFeedbackId, // 反馈任务ID
-        updateTime: updateTime // 反馈时间
-      }
-      this.$axios
-        .post('/pmbs/api/project/taskfeedback', data)
-        .then(this.taskFeedbackSuss)
-    },
-    // 任务反馈回调
-    taskFeedbackSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        this.messageWin('反馈成功')
-        this.drawer2 = false
-        this.feedbackContent = ''
-        this.taskFeedbackId = ''
-        // 重新获取任务列表
-        this.getTasklist() // 重新获取任务列表
-      }
-    },
     // 取消按钮
     cancel() {
       this.drawer1 = false
-    },
-    // 我发起分页
-    initiateTaskList(page) {
-      let data0 = {
-        type: 0,
-        clientId: this.clientId,
-        serviceId: this.serviceId,
-        isUsual: this.isUsual,
-        task: {
-          initUserId: 128,
-          status: this.status
-        },
-        pageNum: page
-      }
-      this.getTasklistAjax(data0)
-    },
-    // 我参与分页
-    participateTaskList(page) {
-      let data1 = {
-        type: 1,
-        clientId: this.clientId,
-        serviceId: this.serviceId,
-        isUsual: this.isUsual,
-        task: {
-          initUserId: 128,
-          status: this.status
-        },
-        pageNum: page
-      }
-      this.getTasklistAjax_(data1)
-    },
-    // 抽屉取消按钮
-    empty(){
-      this.drawer3 = false
-      this.drawer2 = false
-      this.feedbackContent = ''
-      this.result = ''
     },
     // 消息提示
     messageWin(message) {
@@ -1043,29 +978,10 @@ export default {
     messageError(message) {
       // 错误提示
       this.$message.error(message)
-    },
-    MessageBox() {
-      this.$alert('这是一段内容', '标题名称', {
-        confirmButtonText: '确定',
-        callback: action => {
-          this.join_redact()
-          // this.$message({
-          //   type: 'info',
-          //   message: `action: ${ action }`
-          // });
-        }
-      })
-    },
-    test() {
-      console.log('打印测试')
     }
   },
   // 钩子函数
-  mounted() {
-    this.widthheight()
-    this.getAllClientAndBusiness() // 获取客户和业务
-    this.getTasklist() // 获取任务列表
-  }
+  mounted() {}
 }
 </script>
 <style scoped>
@@ -1168,9 +1084,6 @@ export default {
 
 .task .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
-}
-.task .table .page{
-  text-align: center;
 }
 .state_color1 {
   color: rgb(1, 176, 114);

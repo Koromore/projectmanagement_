@@ -35,6 +35,14 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-col :span="24" class="page">
+          <el-pagination
+            background
+            layout="total, prev, pager, next"
+            :total="20"
+            @current-change="businessListPage"
+          ></el-pagination>
+        </el-col>
       </el-col>
       <!-- 客户 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
@@ -47,11 +55,11 @@
         >
           <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column prop="businessList" label="业务">
-            
             <template slot-scope="scope">
-              <span v-for="items in scope.row.businessList" :key="items.index">
-                {{items.businessName}}、
-              </span>
+              <span
+                v-for="(items, index) in scope.row.businessList"
+                :key="index"
+              ><span v-if="index != 0">、</span>{{items.businessName}}</span>
             </template>
           </el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
@@ -67,6 +75,14 @@
             </template>
           </el-table-column>
         </el-table>
+        <el-col :span="24" class="page">
+          <el-pagination
+            background
+            layout="total, prev, pager, next"
+            :total="20"
+            @current-change="clientListPage"
+          ></el-pagination>
+        </el-col>
       </el-col>
     </el-row>
     <!-- 抽屉 -->
@@ -163,25 +179,25 @@ export default {
       }
     },
     // 业务类型列表获取
-    getBusinessListAjax(res) {
-      let data = {pageNum:1}
+    getBusinessListAjax(data) {
+      if (data == undefined) {
+        data = {}
+      }
       this.$axios
         .post('/pmbs/api/business/listAjax', data)
         .then(this.getBusinessListAjaxSuss)
     },
     // 业务类型列表获取回调
     getBusinessListAjaxSuss(res) {
-      // console.log(res)
       if (res.status == 200) {
         this.businessList = res.data.data.items
         this.loading = false
-        // console.log(this.businessList)
       }
     },
     // 客户列表获取
-    getClientListAjax(res) {
-      let data = { 
-        // pageNum: 1 
+    getClientListAjax(data) {
+      if (data == undefined) {
+        data = {}
       }
       this.$axios
         .post('/pmbs/client/list', data)
@@ -189,7 +205,6 @@ export default {
     },
     // 客户列表获取回调
     getClientListAjaxSuss(res) {
-      // console.log(res)
       if (res.status == 200) {
         this.clientList = res.data.data.items
         console.log(this.clientList)
@@ -330,7 +345,9 @@ export default {
     businessDelete(res) {
       let data = '?id=' + res
       // console.log(data)
-      this.$axios.post('/pmbs/api/business/delete' + data).then(this.businessDeleteSuss)
+      this.$axios
+        .post('/pmbs/api/business/delete' + data)
+        .then(this.businessDeleteSuss)
     },
     // 业务类型删除请求回调
     businessDeleteSuss(res) {
@@ -358,6 +375,19 @@ export default {
         // 重新获取客户列表
         this.getClientListAjax()
       }
+    },
+    // 分页函数
+    businessListPage(page) {
+      let data = {
+        pageNum: page
+      }
+      this.getBusinessListAjax(data)
+    },
+    clientListPage(page) {
+      let data = {
+        pageNum: page
+      }
+      this.getClientListAjax(data)
     },
     // 消息提示
     messageWin(message) {
@@ -463,6 +493,9 @@ export default {
 }
 .set .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
+}
+.set .table .page{
+  text-align: center;
 }
 .set .add_box {
   height: 100%;
