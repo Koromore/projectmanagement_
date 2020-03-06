@@ -125,18 +125,8 @@
           <el-table-column prop="num" label="总任务数/待完成">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间">
-            <template slot="header">
-              完成时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="realName" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
@@ -208,18 +198,8 @@
               <span v-if="scope.row.status == 4" class="state_color4">延期</span>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间">
-            <template slot="header">
-              完成时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="realName" label="下达人" filter-placement="bottom-end"></el-table-column>
         </el-table>
         <!-- 分页 -->
@@ -728,8 +708,8 @@ export default {
       // console.log(res)
     },
     handleChange(value) {
-      console.log(value)
-      console.log(this.value)
+      // console.log(value)
+      // console.log(this.value)
     },
     // 添加知晓人标签
     showInput() {
@@ -769,20 +749,20 @@ export default {
     },
     // 上传附件
     handleRemove(file) {
-      console.log(file)
+      // console.log(file)
     },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
     handleDownload(file) {
-      console.log(file)
+      // console.log(file)
     },
     // 上传回调
     testtest(res, file, fileList) {
-      console.log(res)
-      console.log(file)
-      console.log(fileList)
+      // console.log(res)
+      // console.log(file)
+      // console.log(fileList)
     },
     // 获取浏览器宽高
     widthheight() {
@@ -810,8 +790,8 @@ export default {
       }
     },
     tab2_change(e, id) {
-      console.log(e)
-      console.log(id)
+      // console.log(e)
+      // console.log(id)
       let isUsual = this.isUsual
       if (isUsual === id) {
         this.tab2_act = ''
@@ -851,7 +831,7 @@ export default {
       this.getProjectTaskListInit(id)
     },
     aredact(id) {
-      console.log('编辑' + id)
+      // console.log('编辑' + id)
       // this.drawer2 = true
       // this.getProjectShowDetail(id)
       // 获取部门列表
@@ -887,7 +867,7 @@ export default {
     },
     // 项目新增/修改/完成回调
     getProjectSaveSuss(res) {
-      console.log(res)
+      // console.log(res)
       let data = res.data.data
       if (res.status == 200) {
         if (data.status == 3) {
@@ -958,7 +938,7 @@ export default {
     },
     // 项目反馈-任务批量反馈回调
     projectFeedbackSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         this.messageWin('反馈成功')
         this.drawer1 = false
@@ -1022,6 +1002,8 @@ export default {
     },
     // 获取项目列表
     getProjectList() {
+      let name = this.$route.query.name
+      // console.log(name)
       let data0 = `?inituserid=128`
       let data1 = `?inituserid=128`
       this.getProjectListAjax(data0)

@@ -354,11 +354,8 @@ export default {
             suggest_list: [],
               // 状态列表
             statusList: [
-                { value: '1', label: '进行中' },
-                { value: '2', label: '审核中' },
-                { value: '3', label: '完成' },
-                { value: '4', label: '延期' },
-                { value: '5', label: '延期完成' }
+                { value: '1', label: '执行中' },
+                { value: '2', label: '完成' }
             ],
             statusListValue: '',
             drawer1:false,
@@ -369,132 +366,126 @@ export default {
     },
     methods: {
         getAllClientAndBusiness() {
-      this.$axios
-        .post('/pmbs/client/getAllClientAndBusiness')
-        .then(this.getAllClientAndBusinessSuss)
-    },
-    // 获取新建项目分类回调
-    getAllClientAndBusinessSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        let clientIdList = []
-        // 循环提取名称和ID
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          let clientIdListData = {
-            value: element.clientId,
-            label: element.clientName
+          this.$axios
+            .post('/pmbs/client/getAllClientAndBusiness')
+            .then(this.getAllClientAndBusinessSuss)
+        },
+        // 获取新建项目分类回调
+        getAllClientAndBusinessSuss(res) {
+          if (res.status == 200) {
+            let data = res.data.data
+            let clientIdList = []
+            // 循环提取名称和ID
+            for (let i = 0; i < data.length; i++) {
+              let element = data[i]
+              let clientIdListData = {
+                value: element.clientId,
+                label: element.clientName
+              }
+              clientIdList.push(clientIdListData)
+            }
+            this.clientIdList = clientIdList
           }
-          clientIdList.push(clientIdListData)
-        }
-        this.clientIdList = clientIdList
-      }
-      // console.log(res)
-    },
-         handleRemoveResult(file) {
-      // console.log(file)
-      let data = file.response.data
-      let listProFileResult = this.listProFileResult
-      for (let i = 0; i < listProFileResult.length; i++) {
-        let element = listProFileResult[i]
-        if (element.localPath == data.path) {
-          listProFileResult.splice(i, 1)
-          console.log('删除')
-        }
-      }
-      this.listProFileResult = listProFileResult
-    },
-    // 预览
-    handlePictureCardPreviewResult(file) {
-      // console.log(file)
-      this.dialogImageUrlResult = file.url
-      this.dialogVisibleResult = true
-    },
-    // 上传回调
-    handleSuccessResult(res, file, fileList) {
-      // console.log('上传附件成功')
-      if (res.errcode == 0) {
-        let resData = res.data
-        let listProFileResult = this.listProFileResult
-        // console.log(listProFile)
-        let listProFileResultData = {
-          proId: this.taskData.proId, // 项目ID
-          taskId: this.taskData.taskId, // 任务ID
-          fileId: '', // 文档ID
-          updateUserId: 128, // 上传人ID
-          fileName: resData.fileName, //'文档名称',
-          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
-          localPath: resData.path, //'本地路径',
-          suffix: resData.fileType //'文档后缀'
-        }
-        listProFileResult.push(listProFileResultData)
-        this.listProFileResult = listProFileResult
-      }
-    },
-    // 修改任务详情
-    changeTaskDeil() {
-      // console.log('修改任务详情')
-      let taskData = this.taskData
-      let listProFileResult = this.listProFileResult
-      let taskfileList = []
-      if (listProFileResult.length == 0) {
-        for (let i = 0; i < taskData.taskfileList.length; i++) {
-          let element = taskData.taskfileList[i]
-          let taskfileListData = {
-            fileId: element.fileId,
-            fileName: element.fileName,
-            suffix: element.suffix,
-            localPath: element.localPath,
-            proId: element.proId,
-            taskId: element.taskId,
-            updateUserId: 128
+          // console.log(res)
+        },
+        handleRemoveResult(file) {
+          // console.log(file)
+          let data = file.response.data
+          let listProFileResult = this.listProFileResult
+          for (let i = 0; i < listProFileResult.length; i++) {
+            let element = listProFileResult[i]
+            if (element.localPath == data.path) {
+              listProFileResult.splice(i, 1)
+              console.log('删除')
+            }
           }
-          taskfileList.push(taskfileListData)
-        }
-      } else {
-        taskfileList = listProFileResult
-      }
+          this.listProFileResult = listProFileResult
+        },
+        // 上传回调
+        handleSuccessResult(res, file, fileList) {
+          // console.log('上传附件成功')
+          if (res.errcode == 0) {
+            let resData = res.data
+            let listProFileResult = this.listProFileResult
+            // console.log(listProFile)
+            let listProFileResultData = {
+              proId: this.taskData.proId, // 项目ID
+              taskId: this.taskData.taskId, // 任务ID
+              fileId: '', // 文档ID
+              updateUserId: 128, // 上传人ID
+              fileName: resData.fileName, //'文档名称',
+              isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
+              localPath: resData.path, //'本地路径',
+              suffix: resData.fileType //'文档后缀'
+            }
+            listProFileResult.push(listProFileResultData)
+            this.listProFileResult = listProFileResult
+          }
+        },
+        // 修改任务详情
+        changeTaskDeil() {
+          // console.log('修改任务详情')
+          let taskData = this.taskData
+          let listProFileResult = this.listProFileResult
+          let taskfileList = []
+          if (listProFileResult.length == 0) {
+            for (let i = 0; i < taskData.taskfileList.length; i++) {
+              let element = taskData.taskfileList[i]
+              let taskfileListData = {
+                fileId: element.fileId,
+                fileName: element.fileName,
+                suffix: element.suffix,
+                localPath: element.localPath,
+                proId: element.proId,
+                taskId: element.taskId,
+                updateUserId: 128
+              }
+              taskfileList.push(taskfileListData)
+            }
+          } else {
+            taskfileList = listProFileResult
+          }
 
-      let data = {
-        proId: taskData.proId, // '所属项目id',
-        taskId: taskData.taskId, // 任务id
-        status: this.statusListValue, // 状态
-        overDesc: this.result, // 完成结果
-        taskfileList: taskfileList // 上传文档列表
-      }
-      if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
-        data.oldFileId = fileId
-      }
-      this.taskSave(data)
-    },
-    // 任务新增/修改/完成
-    taskSave(data) {
-      // console.log(this.new_task.presetTime)
-      // console.log(expertTime)
-      this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
-    },
-    // 任务新增/修改/完成回调
-    taskSaveSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        // this.projectListJoin = res.data.data
-        this.$message({
-            message: res.data.msg,
-            type: 'success'
-          })
-        this.drawer1 = false
-        this.drawer5 = false
-        this.result = ''
-        this.listProFile = []
-        this.listProFileResult = []
-        this.getTaskfilePageList()
+          let data = {
+            proId: taskData.proId, // '所属项目id',
+            taskId: taskData.taskId, // 任务id
+            status: this.statusListValue, // 状态
+            overDesc: this.result, // 完成结果
+            taskfileList: taskfileList // 上传文档列表
+          }
+          if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
+            data.oldFileId = fileId
+          }
+          this.taskSave(data)
+        },
+        // 任务新增/修改/完成
+        taskSave(data) {
+          // console.log(this.new_task.presetTime)
+          // console.log(expertTime)
+          this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
+        },
+        // 任务新增/修改/完成回调
+        taskSaveSuss(res) {
+          // console.log(res)
+          if (res.status == 200) {
+            // this.projectListJoin = res.data.data
+            this.$message({
+                message: res.data.msg,
+                type: 'success'
+              })
+            this.drawer1 = false
+            this.drawer5 = false
+            this.result = ''
+            this.listProFile = []
+            this.listProFileResult = []
+            this.getTaskfilePageList()
 
-      }
-    },
-    // 取消按钮
-    cancel() {
-      this.drawer1 = false
-    },
+          }
+        },
+        // 取消按钮
+        cancel() {
+          this.drawer1 = false
+        },
         handleSizeChange(){
 
         },
@@ -669,14 +660,15 @@ export default {
         lookHistory(index, row) {
             // console.log(row);
             this.openHistory = true;
-            let proId = row.proId;//项目ID查询
+            let fileId = row.fileId;//项目ID查询
 
             if (!this.fileHistoryLoading) {
                 this.fileHistoryLoading = true;
                 this.$axios
-                .post('/pmbs/api/taskfile/getTaskfileById', { proId: proId})
+                .post('/pmbs/api/taskfile/getTaskfileByEdition?fileId='+fileId, {})
                 .then((res)=> {
                     this.fileHistoryLoading = false;
+
                     if (res.data && res.data.length!=0) {
                         this.fileHistoryList = res.data;
                     }else{
@@ -737,6 +729,8 @@ export default {
         let demandType = 0;
         let uploadUrl = `/pmbs/file/upload?upType=${upType}&demandType=${demandType}`;
         this.uploadUrl = uploadUrl;
+
+        // console.log(this.$store.state)
   }
 }
 </script>

@@ -748,7 +748,9 @@ export default {
       }
     },
     gantt(e) {
-      this.$router.push({ path: '/gantti', query: { id: 2 } })
+      let proId = this.$route.query.id
+      let type = this.$route.query.type
+      this.$router.push({ path: '/gantti', query: { id: proId,type:type } })
     },
     sousuoShow(e) {
       this.sousuo_show = !this.sousuo_show
@@ -774,7 +776,7 @@ export default {
     },
     // 获取任务详情回调
     getTaskDetailSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         this.taskData = res.data
         // console.log(this.projectListJoin)
@@ -792,14 +794,14 @@ export default {
     },
     // 删除
     handleRemove(file) {
-      console.log(file)
+      // console.log(file)
       let data = file.response.data
       let listProFile = this.listProFile
       for (let i = 0; i < listProFile.length; i++) {
         let element = listProFile[i]
         if (element.localPath == data.path) {
           listProFile.splice(i, 1)
-          console.log('删除')
+          // console.log('删除')
         }
       }
       this.listProFile = listProFile
@@ -826,18 +828,18 @@ export default {
     // 上传文档
     // 删除
     handleRemoveResult(file) {
-      console.log(file)
+      // console.log(file)
       let data = file.response.data
       let listProFileResult = this.listProFileResult
       for (let i = 0; i < listProFileResult.length; i++) {
         let element = listProFileResult[i]
         if (element.localPath == data.path) {
           listProFileResult.splice(i, 1)
-          console.log('删除')
+          // console.log('删除')
         }
       }
       this.listProFileResult = listProFileResult
-      console.log(this.listProFileResult)
+      // console.log(this.listProFileResult)
     },
     // 上传回调
     handleSuccessResult(res, file, fileList) {
@@ -937,7 +939,7 @@ export default {
     },
     // 获取项目详情-我参与回调
     getProjectOfUserTaskSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         this.loading = false
         let taskList = res.data.data
@@ -1153,10 +1155,10 @@ export default {
     changeDoUserNameAffirm(data) {
       // console.log(data)
       let nextuserValue = this.nextuserValue
-      data.doUserId = nextuserValue
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {
+        data.doUserId = nextuserValue
         this.$axios
           .post('/pmbs/api/task/save', data)
           .then(this.changeDoUserNameAffirmSuss)

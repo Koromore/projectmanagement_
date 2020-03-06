@@ -35,11 +35,12 @@
             </template>
           </el-table-column>
         </el-table>
+        <!-- 分页 -->
         <el-col :span="24" class="page">
           <el-pagination
             background
             layout="total, prev, pager, next"
-            :total="20"
+            :total="businessPage.pageRows"
             @current-change="businessListPage"
           ></el-pagination>
         </el-col>
@@ -67,7 +68,7 @@
               <el-button
                 size="small"
                 type="info"
-                @click="client_change(scope.row.clientId,scope.row.clientName)"
+                @click="client_change(scope.row)"
               >修改</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
                 <el-button size="small" type="primary" slot="reference">删除</el-button>
@@ -75,11 +76,12 @@
             </template>
           </el-table-column>
         </el-table>
+        <!-- 分页 -->
         <el-col :span="24" class="page">
           <el-pagination
             background
             layout="total, prev, pager, next"
-            :total="20"
+            :total="clientPage.pageRows"
             @current-change="clientListPage"
           ></el-pagination>
         </el-col>
@@ -149,7 +151,9 @@ export default {
       // 新增
       new_name: '',
       // 选中的业务类型
-      businessListCheck: []
+      businessListCheck: [],
+      businessPage: {}, // 业务分页信息
+      clientPage: {}, // 客户分页信息
     }
   },
   // 方法
@@ -180,6 +184,7 @@ export default {
     },
     // 业务类型列表获取
     getBusinessListAjax(data) {
+      this.loading = true
       if (data == undefined) {
         data = {}
       }
@@ -189,13 +194,16 @@ export default {
     },
     // 业务类型列表获取回调
     getBusinessListAjaxSuss(res) {
+      this.loading = false
       if (res.status == 200) {
         this.businessList = res.data.data.items
-        this.loading = false
+        this.businessPage = res.data.data
+        // pageRows
       }
     },
     // 客户列表获取
     getClientListAjax(data) {
+      this.loading = true
       if (data == undefined) {
         data = {}
       }
@@ -205,9 +213,10 @@ export default {
     },
     // 客户列表获取回调
     getClientListAjaxSuss(res) {
+      this.loading = false
       if (res.status == 200) {
         this.clientList = res.data.data.items
-        console.log(this.clientList)
+        this.clientPage = res.data.data
       }
     },
     // 新增按钮
@@ -225,11 +234,20 @@ export default {
       this.new_name = name
     },
     // 客户修改
-    client_change(id, name) {
+    client_change(data) {
+      // console.log(data)
       this.drawer = true
       this.operation = 2
-      this.transferId = id
-      this.new_name = name
+      this.transferId = data.clientId
+      this.new_name = data.clientName
+
+      let businessListCheck = []
+      for (let i = 0; i < data.businessList.length; i++) {
+        let element = data.businessList[i];
+        businessListCheck.push(element.businessId)
+      }
+      this.businessListCheck = businessListCheck
+      // .clientId,scope.row.clientName
     },
     // 提交按钮--包含业务类型和客户的新增和修改
     putIn() {
@@ -290,7 +308,7 @@ export default {
     },
     // 业务类型新增/修改回调
     businessSaveSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         // 获取业务类型列表
         this.getBusinessListAjax()
@@ -305,7 +323,7 @@ export default {
     // 客户新增/修改
     clientSave(res) {
       let data = res
-      console.log(data)
+      // console.log(data)
       if (data.clientName == '' || data.businessList.businessId == '') {
         let message = '请信息填写完整！'
         this.messageError(message)
@@ -315,7 +333,7 @@ export default {
     },
     // 客户新增/修改回调
     clientSaveSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         // 获取客户列表
         this.getClientListAjax()

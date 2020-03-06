@@ -3,8 +3,8 @@
     <div v-for="(item,index) in gante_data" :key="index" class="ganteview-ones">
       <div class="ganteview-content-one">
         <div v-if="!item.children" @mousemove="showToast"  @mouseleave="hideToast" :data-toast="index" :style="{width:item.width?item.width+'px':0,left:item.left?item.left+'px':0,background:item.bg_color?item.bg_color:'#00b0ff'}" class="ganteview-item">
-          <div>{{item.params.start_time}}</div>
-          <div>{{item.params.end_time}}</div>
+          <div class="start_time">{{item.params.start_time}}</div>
+          <div class="end_time">{{item.params.end_time}}</div>
         </div>
         <div v-else @mousemove="showToast" @mouseleave="hideToast"  :data-toast="index" :style="{width:item.width?item.width+'px':0,left:item.left?item.left+'px':0,background:item.bg_color?item.bg_color:'#00b0ff'}" class="ganteview-item has-child">
           <span :style="{borderLeftColor:item.bg_color?item.bg_color:'#00b0ff'}" class="sanjiao-left"></span>
@@ -117,5 +117,20 @@
     border-top: 5px solid transparent;
     border-right: 12px solid #00b0ff;
     border-bottom: 20px solid transparent;
+  }
+  .start_time{
+    width: 72px;
+    color: black;
+    position: absolute;
+    top:0;
+    left: 0;
+  }
+  .end_time{
+    display: none;
+    width: 72px;
+    color: black;
+    position: absolute;
+    top:0;
+    right: -100px;
   }
 </style>

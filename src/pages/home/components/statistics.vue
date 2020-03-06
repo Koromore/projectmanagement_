@@ -71,7 +71,7 @@ export default {
           //   clientList.push(element_.clientId)
           // }
           let data = {
-            value: element.listProject, //.length,
+            value: element.listProject.length,
             name: element.businessName,
             clientList: clientList
           }
@@ -80,8 +80,8 @@ export default {
         }
         this.businessNameData = businessNameData // 业务名称
         this.businessListData = businessListData // 业务数量和业务包含的客户
-        console.log(this.businessNameData)
-        console.log(this.businessListData)
+        // console.log(this.businessNameData)
+        // console.log(this.businessListData)
 
         // 项目状态
         let listProjectStatus = statisticsData.listProjectStatus
@@ -91,7 +91,7 @@ export default {
         for (let i = 0; i < listProjectStatus.length; i++) {
           let element = listProjectStatus[i]
           let data = {}
-          data.value = element.ratio
+          data.value = element.proNum
           data.name = element.status
           statusNameData.push(element.status)
           statusListData.push(data)
@@ -112,17 +112,104 @@ export default {
         // console.log(listClient)
         // console.log(clientNameData)
         this.clientNameData = clientNameData // 客户名称
+        // console.log(this.clientNameData)
+        let clientStatusDataList1 = {
+          name: '延期',
+          type: 'bar',
+          stack: '广告',
+          data: [],
+          nodeClick: 'link'
+        }
+        let clientStatusDataList2 = {
+          name: '审核中',
+          type: 'bar',
+          stack: '广告',
+          data: [],
+          nodeClick: 'link'
+        }
+        let clientStatusDataList3 = {
+          name: '执行中',
+          type: 'bar',
+          stack: '广告',
+          data: [],
+          nodeClick: 'link'
+        }
+        for (let i = 0; i < listClient.length; i++) {
+          let element = listClient[i]
+          let num = 0
+          for (let j = 0; j < element.projectList.length; j++) {
+            let element_ = element.projectList[j]
+            if (element_.status == 4) {
+              num++
+            }
+          }
+          clientStatusDataList1.data.push(num)
+        }
+        for (let i = 0; i < listClient.length; i++) {
+          let element = listClient[i]
+          let num = 0
+          for (let j = 0; j < element.projectList.length; j++) {
+            let element_ = element.projectList[j]
+            if (element_.status == 2) {
+              num++
+            }
+          }
+          clientStatusDataList2.data.push(num)
+        }
+        for (let i = 0; i < listClient.length; i++) {
+          let element = listClient[i]
+          let num = 0
+          for (let j = 0; j < element.projectList.length; j++) {
+            let element_ = element.projectList[j]
+            if (element_.status == 1) {
+              num++
+            }
+          }
+          clientStatusDataList3.data.push(num)
+        }
+        // console.log(clientStatusDataList1)
+        // console.log(clientStatusDataList2)
+        // console.log(clientStatusDataList3)
+        clientStatusData.push(clientStatusDataList1)
+        clientStatusData.push(clientStatusDataList2)
+        clientStatusData.push(clientStatusDataList3)
+        this.clientStatusData = clientStatusData
+        // [
+        //   {
+        //     name: '延期',
+        //     type: 'bar',
+        //     stack: '客户',
+        //     data: [120, 132, 101, 134, 90, 230, 210, 210, 210, 210],
+        //     nodeClick: 'link'
+        //   },
+        //   {
+        //     name: '审核中',
+        //     type: 'bar',
+        //     stack: '广告',
+        //     data: [220, 182, 191, 234, 290, 330, 310, 210, 210, 210]
+        //   },
+        //   {
+        //     name: '执行中',
+        //     type: 'bar',
+        //     stack: '广告',
+        //     data: [150, 232, 201, 154, 190, 330, 410, 210, 210, 210]
+        //   }
+        // ]
 
         // 甘特图
-        this.business_gantt(businessNameData,businessListData)
+        this.business_gantt(businessNameData, businessListData)
         this.project_state_gantt()
         this.client_state_gantt()
       }
     },
     // 业务占比甘特图
-    business_gantt(name,list) {
+    business_gantt(name, list) {
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById('business'))
+      let businessNameData = this.businessNameData
+      let businessListData = this.businessListData
+      // console.log(businessNameData)
+      // console.log(businessListData)
       // 绘制图表
       myChart.setOption({
         // 标题
@@ -164,7 +251,7 @@ export default {
           icon: 'circle',
           orient: 'horizontal',
           bottom: 10,
-          data: ['口碑', '网站', '数字营销', 'APP']
+          data: businessNameData
           // data: name
         },
         series: [
@@ -191,28 +278,29 @@ export default {
                 show: false
               }
             },
-            data: [
-              {
-                value: 335,
-                name: '口碑',
-                clientList: ['吉利', '沃尔沃', '长城']
-              },
-              {
-                value: 310,
-                name: '网站',
-                clientList: ['吉利', '沃尔沃', '长城']
-              },
-              {
-                value: 234,
-                name: '数字营销',
-                clientList: ['吉利', '沃尔沃', '长城']
-              },
-              {
-                value: 135,
-                name: 'APP',
-                clientList: ['吉利', '沃尔沃', '长城']
-              }
-            ]
+            data: businessListData
+            // [
+            //   {
+            //     value: 335,
+            //     name: '口碑',
+            //     clientList: ['吉利', '沃尔沃', '长城']
+            //   },
+            //   {
+            //     value: 310,
+            //     name: '网站',
+            //     clientList: ['吉利', '沃尔沃', '长城']
+            //   },
+            //   {
+            //     value: 234,
+            //     name: '数字营销',
+            //     clientList: ['吉利', '沃尔沃', '长城']
+            //   },
+            //   {
+            //     value: 135,
+            //     name: 'APP',
+            //     clientList: ['吉利', '沃尔沃', '长城']
+            //   }
+            // ]
             // data: list
           }
         ]
@@ -222,10 +310,12 @@ export default {
     project_state_gantt() {
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById('project_state'))
+      let statusNameData = this.statusNameData
+      let statusListData = this.statusListData
       // 绘制图表
       myChart.setOption({
         title: { text: '项目状态', padding: 16 },
-        color: ['#23D7BB', '#f5b96a', '#FF0000', '#C9C9C9'],
+        color: ['#23D7BB', '#f5b96a', '#C9C9C9', '#FF0000'],
         tooltip: {
           trigger: 'item',
           formatter: '{b}({d}%)'
@@ -237,7 +327,7 @@ export default {
           // left: 40,
           bottom: 10,
           align: 'auto',
-          data: ['执行中', '审核中', '延期', '已完成']
+          data: statusNameData //['执行中', '审核中', '延期', '已完成']
         },
         series: [
           {
@@ -263,20 +353,25 @@ export default {
                 show: false
               }
             },
-            data: [
-              { value: 335, name: '执行中' },
-              { value: 310, name: '审核中' },
-              { value: 234, name: '延期' },
-              { value: 234, name: '已完成' }
-            ]
+            data: statusListData
+            // [
+            //   { value: 335, name: '执行中' },
+            //   { value: 310, name: '审核中' },
+            //   { value: 234, name: '延期' },
+            //   { value: 234, name: '已完成' }
+            // ]
           }
         ]
       })
     },
     // 客户状态甘特图
     client_state_gantt() {
+      let that = this
       // 基于准备好的dom，初始化echarts实例
       let myChart = this.$echarts.init(document.getElementById('client_state'))
+      let clientNameData = this.clientNameData
+      let clientStatusData = this.clientStatusData
+      // console.log(clientNameData)
       // 绘制图表
       myChart.setOption({
         title: {
@@ -312,18 +407,19 @@ export default {
         xAxis: [
           {
             type: 'category',
-            data: [
-              '客户1',
-              '客户2',
-              '客户3',
-              '客户4',
-              '客户5',
-              '客户6',
-              '客户7',
-              '客户8',
-              '客户9',
-              '客户10'
-            ],
+            data: clientNameData,
+            // [
+            //   '客户1',
+            //   '客户2',
+            //   '客户3',
+            //   '客户4',
+            //   '客户5',
+            //   '客户6',
+            //   '客户7',
+            //   '客户8',
+            //   '客户9',
+            //   '客户10'
+            // ],
             triggerEvent: true //让x轴可以点击
           }
         ],
@@ -332,30 +428,38 @@ export default {
             type: 'value'
           }
         ],
-        series: [
-          {
-            name: '延期',
-            type: 'bar',
-            stack: '广告',
-            data: [120, 132, 101, 134, 90, 230, 210, 210, 210, 210],
-            nodeClick: 'link'
-          },
-          {
-            name: '审核中',
-            type: 'bar',
-            stack: '广告',
-            data: [220, 182, 191, 234, 290, 330, 310, 210, 210, 210]
-          },
-          {
-            name: '执行中',
-            type: 'bar',
-            stack: '广告',
-            data: [150, 232, 201, 154, 190, 330, 410, 210, 210, 210]
-          }
-        ]
+        series: clientStatusData
+        // [
+        //   {
+        //     name: '延期',
+        //     type: 'bar',
+        //     stack: '广告',
+        //     data: [120, 132, 101, 134, 90],
+        //     nodeClick: 'link'
+        //   },
+        //   {
+        //     name: '审核中',
+        //     type: 'bar',
+        //     stack: '广告',
+        //     data: [220, 182, 191, 234, 290],
+        //     nodeClick: 'link'
+        //   },
+        //   {
+        //     name: '执行中',
+        //     type: 'bar',
+        //     stack: '广告',
+        //     data: [150, 232, 201, 154, 190],
+        //     nodeClick: 'link'
+        //   }
+        // ]
       }),
         myChart.on('click', function(params) {
-          console.log(params)
+          // console.log(params)
+          let name = params.name
+          that.$router.push({
+            path: '/home/components/project',
+            query: { name: name }
+          })
         })
     }
   },

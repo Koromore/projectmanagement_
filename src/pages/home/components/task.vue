@@ -134,23 +134,18 @@
             </template>
           </el-table-column>
           <el-table-column prop="faTaskName" label="父任务"></el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
                 type="info"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-                v-if="scope.row.status != 3 && scope.row.status != 5"
+                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
               >反馈</el-button>
               <el-button
                 size="small"
-                v-if="scope.row.status == 2"
+                v-if="scope.row.isIgnore != true && scope.row.status == 2"
                 type="primary"
                 slot="reference"
                 @click="task_detail(scope.row)"
@@ -229,18 +224,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间">
-            <template slot="header">
-              完成时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="doUserName" label="下达人"></el-table-column>
           <el-table-column prop="result" label="成果">
             <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
@@ -252,18 +237,18 @@
             <template slot-scope="scope">
               <el-button
                 size="small"
-                v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
                 type="info"
                 slot="reference"
                 @click="join_redact(scope.row.proId,scope.row.taskId)"
               >忽略</el-button>
-              <el-button
+              <!-- <el-button
                 size="small"
                 v-if="scope.row.status == 2"
                 type="info"
                 slot="reference"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-              >反馈</el-button>
+              >反馈</el-button> -->
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
                 <el-button
                   size="small"
@@ -619,20 +604,20 @@ export default {
     },
     // 反馈按钮
     feedback(id, proName, taskName) {
-      console.log('反馈' + id)
+      // console.log('反馈' + id)
       this.drawer2 = true
       this.drawer2_task = proName + '-' + taskName
       this.taskFeedbackId = id
     },
     sponsor_achieve(e, task, state) {
-      console.log('我发起完成' + e)
+      // console.log('我发起完成' + e)
       if (state == 4) {
         this.drawer3 = true
         this.drawer3_task = task
       }
     },
     join_redact(proId, taskId) {
-      console.log('我参与忽略' + taskId)
+      // console.log('我参与忽略' + taskId)
       this.$alert('是否忽略此任务', '提示', {
         confirmButtonText: '确定',
         callback: action => {
@@ -647,7 +632,7 @@ export default {
       })
     },
     join_achieve(e, task, state) {
-      console.log('我参与完成' + e)
+      // console.log('我参与完成' + e)
       if (state == 4) {
         this.drawer3 = true
         this.drawer3_task = task
@@ -666,10 +651,11 @@ export default {
       this.statusListValue = taskData.status.toString()
       this.getTaskShow(taskData.taskId)
     },
-    // 修改执行人
+    // 修改执行人按钮
     changeDoUserName(e, id) {
       this.changeDoUserNameShow = e
-      this.getNextuserList(id)
+      // console.log(id)
+      // this.getNextuserList(id)
     },
     // 获取执行人下属
     getNextuserList(id) {
@@ -693,7 +679,6 @@ export default {
             nextuser.push(nextuserData)
           }
         }
-
         this.nextuserList = nextuser
       }
     },
@@ -701,10 +686,10 @@ export default {
     changeDoUserNameAffirm(data) {
       // console.log(data)
       let nextuserValue = this.nextuserValue
-      data.doUserId = nextuserValue
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {
+        data.doUserId = nextuserValue
         this.$axios
           .post('/pmbs/api/task/save', data)
           .then(this.changeDoUserNameAffirmSuss)
@@ -859,11 +844,11 @@ export default {
         let element = listProFileResult[i]
         if (element.localPath == data.path) {
           listProFileResult.splice(i, 1)
-          console.log('删除')
+          // console.log('删除')
         }
       }
       this.listProFileResult = listProFileResult
-      console.log(this.listProFileResult)
+      // console.log(this.listProFileResult)
     },
     // 上传回调
     handleSuccessResult(res, file, fileList) {
@@ -884,7 +869,7 @@ export default {
         }
         listProFileResult.push(listProFileResultData)
         this.listProFileResult = listProFileResult
-        console.log(this.listProFileResult)
+        // console.log(this.listProFileResult)
       }
     },
     // 修改任务详情

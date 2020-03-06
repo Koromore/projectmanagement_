@@ -82,6 +82,7 @@
             <el-select
               v-model="new_project.managerId"
               filterable
+              clearable 
               placeholder="请选择"
               class="userList"
             >
@@ -118,7 +119,7 @@
             >{{tag}}</el-tag>
           </el-col>
           <el-col :span="9" :offset="6">
-            <el-select v-model="add_list" filterable placeholder="请选择">
+            <el-select v-model="add_list" filterable clearable placeholder="请选择">
               <el-option
                 v-for="item in userList"
                 :key="item.index"
@@ -309,7 +310,7 @@ export default {
     },
     getData(data) {
       this.drawer = true
-      console.log(data)
+      // console.log(data)
       // 获取部门列表
       this.getDeptList()
       // 获取用户列表
@@ -353,22 +354,22 @@ export default {
     },
     // 删除
     handleRemove(file) {
-      console.log(file)
+      // console.log(file)
       let data = file.response.data
       let listProFile = this.listProFile
       for (let i = 0; i < listProFile.length; i++) {
         let element = listProFile[i]
         if (element.localPath == data.path) {
           listProFile.splice(i, 1)
-          console.log('删除')
+          // console.log('删除')
         }
       }
       this.listProFile = listProFile
-      console.log(this.listProFile)
+      // console.log(this.listProFile)
     },
     // 预览
     handlePictureCardPreview(file) {
-      console.log(file)
+      // console.log(file)
       this.dialogImageUrl = file.url
       this.dialogVisible = true
     },
@@ -596,7 +597,7 @@ export default {
         changeId = department
         data.department = changeId // '参与部门ID',
       }
-      console.log(data)
+      // console.log(data)
       if (
         data.proName == '' ||
         this.new_project.business_type == [] ||
@@ -614,7 +615,7 @@ export default {
     },
     // 新增项目回调
     addProjectSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         this.messageWin('项目添加成功')
         this.drawer = false
@@ -716,7 +717,7 @@ export default {
   margin-right: 5px;
 }
 .el-main {
-  min-width: 1020px;
+  min-width: 1080px;
 }
 .home .add_box {
   /* height: 985px; */

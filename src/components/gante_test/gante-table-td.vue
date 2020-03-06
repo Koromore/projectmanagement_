@@ -203,10 +203,10 @@ export default {
   cursor: default;
 }
 .state_color1[title = "state_text"] {
-  color: rgb(236, 185, 21);
+  color: rgb(1, 176, 114);
 }
 .state_color2[title = "state_text"] {
-  color: rgb(1, 176, 114);
+  color: rgb(236, 185, 21);
 }
 .state_color3[title = "state_text"] {
   color: rgb(172, 171, 171);
