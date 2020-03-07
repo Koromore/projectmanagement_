@@ -63,7 +63,12 @@
           </el-col>
           <el-col :span="6" class="title">预计时间</el-col>
           <el-col :span="13" class="presetTime">
-            <el-date-picker v-model="new_project.presetTime" type="date" placeholder="选择日期"></el-date-picker>
+            <el-date-picker
+              v-model="new_project.presetTime"
+              type="date"
+              placeholder="选择日期"
+              :picker-options="pickerOptions"
+            ></el-date-picker>
           </el-col>
           <el-col :span="6" class="title">需求</el-col>
           <el-col :span="13">
@@ -82,7 +87,7 @@
             <el-select
               v-model="new_project.managerId"
               filterable
-              clearable 
+              clearable
               placeholder="请选择"
               class="userList"
             >
@@ -193,7 +198,7 @@ export default {
       userList: [], // 用户列表
       radio2: '1', // 项目经理,执行部门 选择
       proId: '', // 项目id
-      status: 1,// 项目状态
+      status: 1, // 项目状态
       // 新增
       new_project: {
         new_name: '', // 任务名称
@@ -205,6 +210,12 @@ export default {
         managerId: '', // 项目经理ID
         checkList: [], // 执行部门
         dynamicTags: [] // 知晓人
+      },
+      // 禁止选择当前时间之前的时间
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 8.64e7
+        }
       },
       // 知晓人
       add_list: '',
@@ -544,8 +555,6 @@ export default {
           }
           this.new_project.dynamicTags = knowUserListName
         }
-
-        
       }
     },
     // 新增项目

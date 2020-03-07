@@ -1,286 +1,6 @@
 <template>
-  <div class="task" :style="project_style">
-    <el-row>
-      <el-col :span="24" class="top">
-        <el-col :span="5" class>
-          <el-col :span="4" class="title">客户</el-col>
-          <el-col :span="20">
-            <el-select v-model="clientId" clearable placeholder="请选择" size="small">
-              <el-option
-                v-for="item in clientIdList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
-          </el-col>
-        </el-col>
-        <el-col :span="6" class="tab tab1">
-          <el-button-group>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(1,22)"
-              :class="[tab1_act=='1' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(2,18)"
-              :class="[tab1_act=='2' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(3,17)"
-              :class="[tab1_act=='3' ? 'act' : '']"
-              style="border-left: 0;"
-            >数字营销</el-button>
-          </el-button-group>
-        </el-col>
-        <el-col :span="4" class="tab tab2">
-          <el-button-group>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab2_change(1,1)"
-              :class="[tab2_act=='1' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab2_change(2,0)"
-              :class="[tab2_act=='2' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-          </el-button-group>
-        </el-col>
-        <el-col :span="8" class="tab tab3">
-          <el-button-group>
-            <el-tooltip class="item" effect="dark" content="新任务" placement="bottom">
-              <el-button
-                type="primary"
-                size="small"
-                @click="tab3_change(1)"
-              >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="延时" placement="bottom">
-              <el-button
-                type="danger"
-                size="small"
-                @click="tab3_change(4)"
-              >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
-              <el-button
-                type="warning"
-                size="small"
-                @click="tab3_change(2)"
-              >&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
-              <el-button
-                type="success"
-                size="small"
-                @click="tab3_change(1)"
-              >&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-          </el-button-group>
-        </el-col>
-      </el-col>
-      <!--  -->
-      <el-col :span="24" class="tabs">
-        <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">我发起</div>
-        <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
-      </el-col>
-      <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-show="table_show">
-        <el-table
-          v-loading="loading"
-          ref="filterTable"
-          :data="tasklist"
-          style="width: 100%"
-          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{'height': '57px','text_aling':'left'}"
-        >
-          <el-table-column
-            prop="proName"
-            label="所属项目"
-            column-key="name"
-            :filters="filtratePro"
-            :filter-method="filterName"
-          ></el-table-column>
-          <el-table-column
-            prop="deptName"
-            label="部门"
-            :filters="filtrateDep"
-            :filter-method="filterDepartment"
-          ></el-table-column>
-          <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
-          </el-table-column>
-          <el-table-column prop="status" label="执行状态">
-            <template slot-scope="scope">
-              <span v-if="scope.row.status == 1" class="state_color1">进行中</span>
-              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="faTaskName" label="父任务"></el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
-            <template slot-scope="scope">
-              <el-button
-                size="small"
-                type="info"
-                @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-                v-if="scope.row.status != 3 && scope.row.status != 5"
-              >反馈</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.status == 2"
-                type="primary"
-                slot="reference"
-                @click="task_detail(scope.row)"
-              >完成</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 分页 -->
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="initiateTaskListTota"
-          @current-change="initiateTaskList"
-        ></el-pagination>
-      </el-col>
-      <!--  -->
-      <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-show="!table_show">
-        <el-table
-          v-loading="loading"
-          ref="filterTable"
-          :data="tasklist_"
-          style="width: 100%"
-          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{'height': '57px'}"
-          align="left"
-        >
-          <el-table-column prop="deptName" label="部门"></el-table-column>
-          <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
-          </el-table-column>
-          <el-table-column prop="status" label="状态">
-            <template slot-scope="scope">
-              <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
-              <span v-else-if="scope.row.status == 1" class="state_color1">进行中</span>
-              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
-              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="doUserName" label="执行人" width="180">
-            <template slot-scope="scope">
-              <div v-show="changeDoUserNameShow != scope.$index">
-                {{scope.row.doUserName}}
-                <el-link
-                  type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.doUserId)"
-                  v-show="scope.row.status == 1 || scope.row.status == 4"
-                >更换</el-link>
-              </div>
-              <div v-show="changeDoUserNameShow == scope.$index">
-                <el-select
-                  v-model="nextuserValue"
-                  filterable
-                  placeholder="请选择"
-                  size="mini"
-                  clearable
-                  style="width:99px;"
-                >
-                  <el-option
-                    v-for="item in nextuserList"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  ></el-option>
-                </el-select>
-                <el-button
-                  slot="append"
-                  type="primary"
-                  size="mini"
-                  @click="changeDoUserNameAffirm(scope.row)"
-                >确认</el-button>
-              </div>
-            </template>
-          </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间">
-            <template slot="header">
-              完成时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="doUserName" label="下达人"></el-table-column>
-          <el-table-column prop="result" label="成果">
-            <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
-              <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <div>策划方案</div>
-            </div>
-          </el-table-column>
-          <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
-            <template slot-scope="scope">
-              <el-button
-                size="small"
-                v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                type="info"
-                slot="reference"
-                @click="join_redact(scope.row.proId,scope.row.taskId)"
-              >忽略</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.status == 2"
-                type="info"
-                slot="reference"
-                @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-              >反馈</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
-                <el-button
-                  size="small"
-                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
-                  type="primary"
-                  slot="reference"
-                >完成</el-button>
-              </el-popconfirm>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 分页 -->
-        <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="participateTaskListTota"
-          @current-change="participateTaskList"
-        ></el-pagination>
-      </el-col>
-      <!-- 抽屉 -->
-      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
+  <div class="taskDetail">
+      <el-drawer title="任务" :visible.sync="drawer" :with-header="false">
         <el-scrollbar style="height: 100%">
           <el-row class="task_details">
             <el-col :span="6" class="title">执行部门：</el-col>
@@ -352,9 +72,7 @@
               <el-upload
                 action="/pmbs/file/upload?upType=1&demandType=1"
                 list-type="picture-card"
-                :on-preview="handlePictureCardPreviewResult"
-                :on-remove="handleRemoveResult"
-                :on-success="handleSuccessResult"
+                
               >
                 <i class="el-icon-plus"></i>
               </el-upload>
@@ -388,38 +106,7 @@
         </el-row>
       </el-drawer>
       <!-- 抽屉-反馈 -->
-      <el-drawer title="任务" :visible.sync="drawer2" :with-header="false">
-        <el-row class="feedback">
-          <el-col :span="24">
-            <el-col :span="24" class="title">{{drawer2_task}}</el-col>
-            <el-col :span="6" class="title">反馈</el-col>
-            <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
-            </el-col>
-          </el-col>
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary" @click="taskFeedback">提交</el-button>
-          </el-col>
-        </el-row>
-      </el-drawer>
       <!-- 抽屉 -->
-      <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
-        <el-row class="feedback">
-          <el-col :span="24">
-            <el-col :span="24" class="title">{{drawer3_task}}</el-col>
-            <el-col :span="6" class="title">延期原因</el-col>
-            <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
-            </el-col>
-          </el-col>
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
-          </el-col>
-        </el-row>
-      </el-drawer>
-    </el-row>
   </div>
 </template>
 <script>
@@ -435,7 +122,7 @@ export default {
       isUsual: '', // 专项-1/日常-0
       status: '', // 任务状态
       // 抽屉控制
-      drawer1: false,
+      drawer: true,
       drawer2: false,
       drawer3: false,
       drawer2_task: '',
@@ -445,7 +132,6 @@ export default {
       nextuserList: [], // 下属信息
       nextuserValue: '', // 修改后执行人
       loginState: true, // 避免多次点击
-      project_style: '',
       // 筛选目录
       filtratePro: [], // 通过项目筛选
       filtrateDep: [], // 通过部门筛选
@@ -495,41 +181,7 @@ export default {
     }
   },
   // 侦听器
-  watch: {
-    // 如果 `question` 发生改变，这个函数就会运行
-    // 用户选择侦听
-    clientId: function(newQuestion, oldQuestion) {
-      // clientId: '', // 用户ID
-      // serviceId: '', // 业务ID
-      // isUsual: '', // 专项-1/日常-0
-      // status: '', // 任务状态
-      this.findTaskList()
-    },
-    // 业务类型侦听
-    serviceId: function(newQuestion, oldQuestion) {
-      // clientId: '', // 用户ID
-      // serviceId: '', // 业务ID
-      // isUsual: '', // 专项-1/日常-0
-      // status: '', // 任务状态
-      this.findTaskList()
-    },
-    // 专项/日常侦听
-    isUsual: function(newQuestion, oldQuestion) {
-      // clientId: '', // 用户ID
-      // serviceId: '', // 业务ID
-      // isUsual: '', // 专项-1/日常-0
-      // status: '', // 任务状态
-      this.findTaskList()
-    },
-    // 任务状态侦听
-    status: function(newQuestion, oldQuestion) {
-      // clientId: '', // 用户ID
-      // serviceId: '', // 业务ID
-      // isUsual: '', // 专项-1/日常-0
-      // status: '', // 任务状态
-      this.findTaskList()
-    }
-  },
+  watch: {},
   // 方法
   methods: {
     // 获取浏览器宽高
@@ -537,7 +189,6 @@ export default {
       let winWidth = window.innerWidth
       let winHeight = window.innerHeight
       let height = winHeight - 75
-      // this.project_style = 'height:' + height + 'px;'
     },
     // 获取新建项目分类
     getAllClientAndBusiness() {
@@ -565,87 +216,6 @@ export default {
       }
       // console.log(res)
     },
-    // 选项卡
-    table_tab(e) {
-      if (e == 1) {
-        this.tabs_activity = 1
-        this.table_show = true
-      } else if (e == 2) {
-        this.tabs_activity = 2
-        this.table_show = false
-      }
-    },
-    //
-    tab1_change(e, id) {
-      // console.log(e)
-      let tab1_act = this.tab1_act
-      if (tab1_act == e) {
-        this.tab1_act = ''
-        this.serviceId = ''
-      } else if (e == 1) {
-        this.tab1_act = 1
-        this.serviceId = id
-      } else if (e == 2) {
-        this.tab1_act = 2
-        this.serviceId = id
-      } else if (e == 3) {
-        this.tab1_act = 3
-        this.serviceId = id
-      }
-    },
-    //
-    tab2_change(e, id) {
-      // console.log(e)
-      let tab2_act = this.tab2_act
-      if (tab2_act == e) {
-        this.tab2_act = ''
-        this.isUsual = ''
-      } else if (e == 1) {
-        this.tab2_act = 1
-        this.isUsual = id
-      } else if (e == 2) {
-        this.tab2_act = 2
-        this.isUsual = id
-      }
-    },
-    //
-    tab3_change(id) {
-      let status = this.status
-      if (status == id) {
-        this.status = ''
-      } else {
-        this.status = id
-      }
-    },
-    // 反馈按钮
-    feedback(id, proName, taskName) {
-      console.log('反馈' + id)
-      this.drawer2 = true
-      this.drawer2_task = proName + '-' + taskName
-      this.taskFeedbackId = id
-    },
-    sponsor_achieve(e, task, state) {
-      console.log('我发起完成' + e)
-      if (state == 4) {
-        this.drawer3 = true
-        this.drawer3_task = task
-      }
-    },
-    join_redact(proId, taskId) {
-      console.log('我参与忽略' + taskId)
-      this.$alert('是否忽略此任务', '提示', {
-        confirmButtonText: '确定',
-        callback: action => {
-          let data = {
-            // proId: proId,
-            taskId: taskId,
-            isIgnore: 1,
-            taskfileList: {}
-          }
-          this.taskSave(data)
-        }
-      })
-    },
     join_achieve(e, task, state) {
       console.log('我参与完成' + e)
       if (state == 4) {
@@ -665,58 +235,6 @@ export default {
       this.drawer1 = true
       this.statusListValue = taskData.status.toString()
       this.getTaskShow(taskData.taskId)
-    },
-    // 修改执行人
-    changeDoUserName(e, id) {
-      this.changeDoUserNameShow = e
-      this.getNextuserList(id)
-    },
-    // 获取执行人下属
-    getNextuserList(id) {
-      let data = `?userId=${id}`
-      this.$axios
-        .post('/pmbs/api/user/nextuser' + data)
-        .then(this.getNextuserListSuss)
-    },
-    getNextuserListSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        // console.log(data)
-        let nextuser = []
-        if (data != null) {
-          for (let i = 0; i < data.length; i++) {
-            let element = data[i]
-            let nextuserData = {
-              value: element.userId,
-              label: element.realName
-            }
-            nextuser.push(nextuserData)
-          }
-        }
-
-        this.nextuserList = nextuser
-      }
-    },
-    // 确认修改
-    changeDoUserNameAffirm(data) {
-      // console.log(data)
-      let nextuserValue = this.nextuserValue
-      data.doUserId = nextuserValue
-      if (nextuserValue == '') {
-        this.changeDoUserNameShow = 'true'
-      } else {
-        this.$axios
-          .post('/pmbs/api/task/save', data)
-          .then(this.changeDoUserNameAffirmSuss)
-      }
-    },
-    changeDoUserNameAffirmSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        this.messageWin('执行人修改成功')
-        this.getTasklist()
-        this.changeDoUserNameShow = 'true'
-      }
     },
     // 查询任务列表
     findTaskList() {
@@ -748,92 +266,6 @@ export default {
     unique(arr) {
       return Array.from(new Set(arr))
     },
-    // 获取任务列表
-    getTasklist() {
-      // console.log("123")
-      let data0 = {
-        type: 0,
-        task: {
-          initUserId: 128
-        },
-        pageNum: 1
-      }
-      let data1 = {
-        type: 1,
-        task: {
-          initUserId: 128
-        },
-        pageNum: 1
-      }
-      this.getTasklistAjax(data0)
-      this.getTasklistAjax_(data1)
-    },
-    // 获取我发起任务列表
-    getTasklistAjax(data0) {
-      this.loading = true
-      this.$axios
-        .post('/pmbs/api/task/listAjax', data0)
-        .then(this.getTasklistAjaxSuss)
-    },
-    // 获取我发起任务列表回调
-    getTasklistAjaxSuss(res) {
-      this.loading = false
-      if (res.status == 200) {
-        let data = res.data.items
-        this.tasklist = data
-        this.initiateTaskListTota = res.data.totalRows // 我发起任务列表总页数
-        // console.log(this.initiateTaskListTota)
-        // let filtrateProList_ = []
-        // let filtrateDepList_ = []
-        // for (let i = 0; i < data.length; i++) {
-        //   let element = data[i]
-        //   filtrateProList_.push(element.proName)
-        //   filtrateDepList_.push(element.deptName)
-        // }
-        // // console.log(filtrateProList)
-        // // console.log(filtrateDepList)
-        // let filtratePro = [] // 通过项目筛选
-        // let filtrateDep = [] // 通过部门筛选
-        // let filtrateProList = this.unique(filtrateProList_)
-        // let filtrateDepList = this.unique(filtrateDepList_)
-        // for (let i = 0; i < filtrateProList.length; i++) {
-        //   let element = filtrateProList[i];
-        //   let filtrateProData = {
-        //     text: element,
-        //     value: element
-        //   }
-        //   filtratePro.push(filtrateProData)
-        // }
-        // for (let i = 0; i < filtrateDepList.length; i++) {
-        //   let element = filtrateDepList[i];
-        //   let filtrateDepData = {
-        //     text: element,
-        //     value: element
-        //   }
-        //   filtrateDepList.push(filtrateDepData)
-        // }
-        // this.filtratePro = filtratePro
-        // this.filtrateDep = filtrateDep
-      }
-      // console.log(res)
-    },
-    // 获取我参与任务列表
-    getTasklistAjax_(data1) {
-      this.loading = true
-      this.$axios
-        .post('/pmbs/api/task/listAjax', data1)
-        .then(this.getTasklistAjax_Suss)
-    },
-    // 获取我参与任务列表回调
-    getTasklistAjax_Suss(res) {
-      this.loading = false
-      if (res.status == 200) {
-        let data = res.data.items
-        this.tasklist_ = data
-        this.participateTaskListTota = res.data.totalRows // 我参与任务列表总页数
-      }
-      // console.log(res)
-    },
     // 获取任务详情
     getTaskShow(id) {
       let data = `?id=${id}`
@@ -864,12 +296,6 @@ export default {
       }
       this.listProFileResult = listProFileResult
       console.log(this.listProFileResult)
-    },
-    // 预览
-    handlePictureCardPreviewResult(file) {
-      // console.log(file)
-      this.dialogImageUrlResult = file.url
-      this.dialogVisibleResult = true
     },
     // 上传回调
     handleSuccessResult(res, file, fileList) {
@@ -948,14 +374,6 @@ export default {
         // console.log(this.projectListJoin)
       }
     },
-    // 获取任务详情回调
-    taskDeleteSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        let data = res.data
-        // this.taskData = data
-      }
-    },
     // 取消按钮
     cancel() {
       this.drawer1 = false
@@ -985,106 +403,6 @@ export default {
 }
 </script>
 <style scoped>
-/* .project {
-  background: red;
-} */
-.task .top {
-  height: 36px;
-  line-height: 36px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-}
-.task .top .title {
-  height: 36px;
-  line-height: 36px;
-  text-align: center;
-}
-.task .top .tab1 .el-button--primary.is-plain {
-  border-color: #ddd;
-}
-.task .top .tab2 .el-button--primary.is-plain {
-  border-color: #ddd;
-}
-.task .top .tab1 >>> .el-button,
-.task .top .tab2 >>> .el-button {
-  background: #fff;
-  color: black;
-}
-.task .top .tab1 >>> .el-button:hover,
-.task .top .tab2 >>> .el-button:hover {
-  background: #409eff;
-  color: white;
-  border: 1px solid #409eff;
-}
-.task .top .tab1 >>> .el-button.act,
-.task .top .tab2 >>> .el-button.act {
-  background: #409eff;
-  color: white;
-  border: 1px solid #409eff;
-}
-.task .top .tab3 >>> .el-button {
-  width: 80px;
-}
-.el-button + .el-button {
-  margin: 0;
-}
-.task .tabs {
-  font-weight: 700;
-  font-size: 16px;
-  box-sizing: border-box;
-  padding: 13px 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-}
-.task .tabs div {
-  height: 32px;
-  line-height: 32px;
-  color: rgba(164, 167, 170, 1);
-  box-sizing: border-box;
-  padding-bottom: 13px;
-  cursor: pointer;
-}
-.task .tabs div:nth-of-type(2) {
-  margin-left: 32px;
-}
-.task .tabs .act {
-  border-bottom: 2px solid black;
-  color: black;
-}
-.task .table .title,
-.task .table .list {
-  width: 100%;
-  height: 48px;
-  font-size: 14px;
-  box-sizing: border-box;
-  padding-left: 36px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-}
-.task .table .list:hover {
-  background: #f7f7f7;
-}
-.task .table .title {
-  font-weight: bold;
-  background: rgb(236, 235, 235);
-}
-.task .table .title .el-icon-sort {
-  font-size: 18px;
-}
-.task .table .title div {
-  height: 48px;
-  line-height: 48px;
-}
-
-.task .table .list {
-  border-bottom: 1px solid rgb(187, 187, 187);
-}
 .state_color1 {
   color: rgb(1, 176, 114);
 }
@@ -1109,7 +427,7 @@ export default {
 .state_color4 >>> input {
   color: rgb(255, 0, 0);
 }
-.task .task_details {
+.taskDetail .task_details {
   height: 100%;
   padding: 36px 36px 108px 36px;
   display: flex;
@@ -1118,46 +436,46 @@ export default {
   align-content: space-between;
   align-items: flex-start;
 }
-.task .task_details > .el-col {
+.taskDetail .task_details > .el-col {
   margin-bottom: 18px;
 }
-.task .task_details .title {
+.taskDetail .task_details .title {
   text-align: right;
   box-sizing: border-box;
   padding-right: 18px;
 }
-.task .task_details .smname {
+.taskDetail .task_details .smname {
   width: 72px;
   text-align: center;
   font-size: 13px;
   color: rgb(162, 162, 162);
 }
-.task .task_details .suggest {
+.taskDetail .task_details .suggest {
   height: 108px;
 }
-/* .task .task_details .suggest .el-scrollbar{
+/* .taskDetail .task_details .suggest .el-scrollbar{
   height: 100%;
   overflow-x: scroll;
 } */
-.task .task_details .suggest .suggest_list {
+.taskDetail .task_details .suggest .suggest_list {
   height: 48px;
   margin-bottom: 12px;
 }
-.task .task_details .suggest .suggest_list .pop,
-.task .task_details .suggest .suggest_list .time {
+.taskDetail .task_details .suggest .suggest_list .pop,
+.taskDetail .task_details .suggest .suggest_list .time {
   height: 24px;
   line-height: 24px;
   font-size: 14px;
   color: rgb(162, 162, 162);
 }
-.task .task_details .suggest .suggest_list .pop {
+.taskDetail .task_details .suggest .suggest_list .pop {
   text-align: right;
 }
-.task .task_details .suggest .suggest_list .content {
+.taskDetail .task_details .suggest .suggest_list .content {
   color: #000;
   font-size: 16px;
 }
-.task .batton_pa {
+.taskDetail .batton_pa {
   width: 100%;
   padding: 36px;
   background: white;
@@ -1165,42 +483,25 @@ export default {
   bottom: 0;
   left: 0;
 }
-.task .task_details >>> .el-select input {
+.taskDetail .task_details >>> .el-select input {
   width: 81px;
   border: none;
   font-size: 16px;
   padding-left: 0;
 }
-.task .batton {
+.taskDetail .batton {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
 }
-.task .batton button {
+.taskDetail .batton button {
   width: 36%;
 }
-.feedback {
+.taskDetail >>> .el-drawer__body {
   height: 100%;
-  padding: 36px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: flex-start;
-  align-content: space-between;
 }
-.feedback .title:nth-of-type(1) {
-  font-weight: 600;
-  margin-bottom: 36px;
-}
-.feedback .title {
-  font-size: 18px;
-  margin-bottom: 13px;
-}
-/* .task >>> .el-drawer__body {
-  height: 100%;
-} */
-.task >>> .el-scrollbar__wrap {
+.taskDetail >>> .el-scrollbar__wrap {
   overflow-x: hidden;
 }
 </style>

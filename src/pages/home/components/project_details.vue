@@ -104,18 +104,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间">
-            <template slot="header">
-              预计时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间">
-            <template slot="header">
-              完成时间
-              <i class="el-icon-sort"></i>
-            </template>
-          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="overDesc" label="成果">
             <div
@@ -150,26 +140,37 @@
           </el-table-column>
           <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
             <template slot-scope="scope">
-              <el-button
-                size="small"
-                v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                type="info"
-                slot="reference"
-                @click="redact(scope.row.taskId)"
-              >忽略</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.status == 2"
-                type="info"
-                @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-              >反馈</el-button>
-              <el-button
-                size="small"
-                v-if="scope.row.status != 3"
-                type="primary"
-                slot="reference"
-                @click="task_detail(scope.row)"
-              >完成</el-button>
+              <div v-if="userId == scope.row.initUserId">
+                <el-button
+                  size="small"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                  type="info"
+                  @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
+                >反馈</el-button>
+                <el-button
+                  size="small"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 2"
+                  type="primary"
+                  slot="reference"
+                  @click="task_detail(scope.row)"
+                >完成</el-button>
+              </div>
+              <div v-else-if="userId == scope.row.doUserId">
+                <el-button
+                  size="small"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                  type="info"
+                  slot="reference"
+                  @click="redact(scope.row.taskId)"
+                >忽略</el-button>
+                <el-button
+                  size="small"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                  type="primary"
+                  slot="reference"
+                  @click="task_detail(scope.row)"
+                >完成</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -290,7 +291,12 @@
             </el-col>
             <el-col :span="6" class="title">预计时间</el-col>
             <el-col :span="13" class="presetTime">
-              <el-date-picker v-model="new_task.presetTime" type="date" placeholder="选择日期"></el-date-picker>
+              <el-date-picker
+                v-model="new_task.presetTime"
+                type="date"
+                placeholder="选择日期"
+                :picker-options="pickerOptions"
+              ></el-date-picker>
             </el-col>
             <el-col :span="6" class="title">任务类型</el-col>
             <el-col :span="13" class="task_type">
@@ -409,9 +415,10 @@
               <el-select
                 v-model="statusListValue"
                 size="mini"
-                :class="{'state_color1': statusListValue == 1,
-                  'state_color2': statusListValue == 2}"
+                :class="{'state_color1': taskData.status == 1,
+                  'state_color2': taskData.status == 2}"
                 placeholder="请选择"
+                v-if="taskData.status==1"
               >
                 <el-option
                   v-for="item in statusList"
@@ -420,6 +427,10 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
+              <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
+              <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
+              <span v-else-if="taskData.status==4" class="state_color4">延期</span>
+              <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
             </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
             <el-col :span="18">{{taskData.expertTime}}</el-col>
@@ -507,6 +518,7 @@ export default {
   name: 'project_details',
   data() {
     return {
+      userId: 128, // 用户ID
       loading: false,
       proId: '', // 项目ID
       taskId: '', // 任务ID
@@ -540,6 +552,12 @@ export default {
         presetTime: '',
         task_type: '',
         remark: ''
+      },
+      // 禁止选择当前时间之前的时间
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() < Date.now() - 8.64e7
+        }
       },
       records_list: [
         {
@@ -750,7 +768,7 @@ export default {
     gantt(e) {
       let proId = this.$route.query.id
       let type = this.$route.query.type
-      this.$router.push({ path: '/gantti', query: { id: proId,type:type } })
+      this.$router.push({ path: '/gantti', query: { id: proId, type: type } })
     },
     sousuoShow(e) {
       this.sousuo_show = !this.sousuo_show
@@ -871,9 +889,9 @@ export default {
       this.type = type
       // console.log(id)
       if (type == 0) {
-        this.getProjectOfTask(proId,sousuo)
+        this.getProjectOfTask(proId, sousuo)
       } else if (type == 1) {
-        this.getProjectOfUserTask(proId,sousuo)
+        this.getProjectOfUserTask(proId, sousuo)
       }
       this.getProjectShowDetail(proId)
     },
@@ -892,12 +910,12 @@ export default {
       }
     },
     // 获取项目详情-我发起
-    getProjectOfTask(proId,sousuo) {
+    getProjectOfTask(proId, sousuo) {
       this.loading = true
       let data = ''
       if (sousuo != undefined) {
         data = `?proId=${proId}&taskName=${sousuo}`
-      }else{
+      } else {
         data = `?proId=${proId}`
       }
       this.$axios
@@ -924,13 +942,13 @@ export default {
       }
     },
     // 获取项目详情-我参与
-    getProjectOfUserTask(proId,sousuo) {
+    getProjectOfUserTask(proId, sousuo) {
       this.loading = true
       // let data = `?proId=${proId}&taskName=${sousuo}`
       let data = ''
       if (sousuo != undefined) {
         data = `?proId=${proId}&taskName=${sousuo}`
-      }else{
+      } else {
         data = `?proId=${proId}`
       }
       this.$axios
@@ -1172,7 +1190,7 @@ export default {
       }
     },
     // 抽屉取消按钮
-    empty(){
+    empty() {
       this.drawer3 = false
       this.drawer4 = false
       this.feedbackContent = ''

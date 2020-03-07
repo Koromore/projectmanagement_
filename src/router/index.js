@@ -5,6 +5,7 @@ import store from '../store/index'
 import Login from '@/pages/login/login'
 import Home from '@/pages/home/home'
 import Gantti from '@/pages/gantti/gantti'
+import TaskDetail from '@/pages/template/taskDetail'
 
 Vue.prototype.$axios = axios;
 Vue.use(Router)
@@ -93,10 +94,15 @@ const router = new Router({
 			path: '/gantti',
 			name: "gantti",
 			component: Gantti
+		},
+		{
+			path: '/taskDetail',
+			name: "taskDetail",
+			component: TaskDetail
 		}
 	]
 })
-
+// TaskDetail
 // 页面刷新时，重新赋值 更新vuex内部值
 try {
 	if (window.localStorage.getItem('username')) {

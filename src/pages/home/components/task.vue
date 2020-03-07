@@ -279,7 +279,36 @@
             <el-col :span="6" class="title">任务类型：</el-col>
             <el-col :span="18">{{taskData.typeName}}</el-col>
             <el-col :span="6" class="title">执行人：</el-col>
-            <el-col :span="18">{{taskData.doUserName}}</el-col>
+            <el-col :span="18">
+              <div>
+                {{taskData.doUserName}}
+                <el-link
+                  type="primary"
+                  @click="changeDoUserName()"
+                >更换</el-link>
+                <el-select
+                  v-model="nextuserValue"
+                  filterable
+                  placeholder="请选择"
+                  size="mini"
+                  clearable
+                  style="width:99px;"
+                >
+                  <el-option
+                    v-for="item in nextuserList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+                <el-button
+                  slot="append"
+                  type="primary"
+                  size="mini"
+                  @click="changeDoUserNameAffirm()"
+                >确认</el-button>
+              </div>
+            </el-col>
             <el-col :span="6" class="title">状态：</el-col>
             <el-col :span="18">
               <el-select
@@ -288,6 +317,7 @@
                 :class="{'state_color1': statusListValue == 1,
                   'state_color2': statusListValue == 2}"
                 placeholder="请选择"
+                v-if="taskData.status==1"
               >
                 <el-option
                   v-for="item in statusList"
@@ -296,6 +326,10 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
+              <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
+              <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
+              <span v-else-if="taskData.status==4" class="state_color4">延期</span>
+              <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
             </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
             <el-col :span="18">{{taskData.expertTime}}</el-col>
@@ -655,7 +689,7 @@ export default {
     changeDoUserName(e, id) {
       this.changeDoUserNameShow = e
       // console.log(id)
-      // this.getNextuserList(id)
+      this.getNextuserList(id)
     },
     // 获取执行人下属
     getNextuserList(id) {

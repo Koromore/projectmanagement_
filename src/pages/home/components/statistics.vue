@@ -466,7 +466,6 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-
     this.getStatisticsData()
   }
 }
