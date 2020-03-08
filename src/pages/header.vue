@@ -8,11 +8,11 @@
             <i class="el-icon-folder-add"></i>
             创建
           </div>
-          <el-col :span="8">
+          <!-- <el-col :span="8">
             <el-badge :value="3" class="item">
               <i class="el-icon-bell"></i>
             </el-badge>
-          </el-col>
+          </el-col> -->
           <!-- 头像 -->
           <div class="portrait">张三</div>
           <el-dropdown trigger="hover">

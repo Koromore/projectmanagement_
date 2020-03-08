@@ -4,7 +4,7 @@
       <el-col :span="24" class="top">
         <el-col :span="4" class>
           项目管理 /
-          <span class="project_name">皓影赠礼</span>
+          <span class="project_name">{{proName}}</span>
         </el-col>
       </el-col>
       <el-col :span="6" class="tabs">
@@ -29,7 +29,7 @@
         <el-col :span="24" v-show="!sousuo_show">
           <i @click="addtask" class="el-icon-circle-plus-outline"></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
-          <i @click="drawer2 = true" class="el-icon-time"></i>
+          <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
           <i @click="sousuoShow" class="el-icon-search"></i>
         </el-col>
         <el-col :span="24" class="sousuo" v-show="sousuo_show">
@@ -75,8 +75,8 @@
                 {{scope.row.doUserName}}
                 <el-link
                   type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.doUserId)"
-                  v-show="scope.row.status == 1 || scope.row.status == 4"
+                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-show="scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -219,7 +219,10 @@
           </el-col>-->
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
-            <div v-for="item in projectShowDetail.listProFile" :key="item.index">
+            <div v-for="item in projectShowDetail.listProFile" :key="item.index" class="fileList_">
+              <div class="shade" @click="download(item)">
+                <i class="el-icon-download"></i>
+              </div>
               <img
                 v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                 src="static/images/document/word.png"
@@ -521,6 +524,7 @@ export default {
       userId: 128, // 用户ID
       loading: false,
       proId: '', // 项目ID
+      proName: '', // 项目NAME
       taskId: '', // 任务ID
       type: '', // 项目类型 0我发起 1我参与
       loginState: true, // 避免多次点击
@@ -907,6 +911,7 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         this.projectShowDetail = res.data.data
+        this.proName = res.data.data.proName
       }
     },
     // 获取项目详情-我发起
@@ -914,9 +919,9 @@ export default {
       this.loading = true
       let data = ''
       if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}`
+        data = `?proId=${proId}&taskName=${sousuo}&userId=128`
       } else {
-        data = `?proId=${proId}`
+        data = `?proId=${proId}&userId=128`
       }
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
@@ -925,11 +930,11 @@ export default {
     // 获取项目详情-我发起回调
     getProjectOfTaskSuss(res) {
       // console.log(res)
+      this.loading = false
       if (res.status == 200) {
         let taskList = res.data.data
         this.taskList = taskList
         let faTaskList = []
-        // console.log(taskList)
         for (let i = 0; i < taskList.length; i++) {
           let element = taskList[i]
           let faTaskListData = {}
@@ -938,18 +943,17 @@ export default {
           faTaskList.push(faTaskListData)
         }
         this.faTaskList = faTaskList
-        this.loading = false
+        
       }
     },
     // 获取项目详情-我参与
     getProjectOfUserTask(proId, sousuo) {
       this.loading = true
-      // let data = `?proId=${proId}&taskName=${sousuo}`
       let data = ''
       if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}`
+        data = `?proId=${proId}&taskName=${sousuo}&userId=128`
       } else {
-        data = `?proId=${proId}`
+        data = `?proId=${proId}&userId=128`
       }
       this.$axios
         .post('/pmbs/api/project/projectOfUserTask' + data)
@@ -957,12 +961,10 @@ export default {
     },
     // 获取项目详情-我参与回调
     getProjectOfUserTaskSuss(res) {
-      // console.log(res)
+      this.loading = false
       if (res.status == 200) {
-        this.loading = false
         let taskList = res.data.data
         this.taskList = taskList
-        // console.log(taskList)
       }
     },
     // 部门列表获取
@@ -1017,7 +1019,7 @@ export default {
       let data = {
         createTime: createTime, // 创建时间
         deptId: department, // '所属部门id',
-        doUserId: doUserId, // '参与人id',
+        doUserId: 128, //doUserId, // '参与人id',
         expertTime: expertTime, // '预计时间',
         faTask: this.faTask, // '父任务id',
         initUserId: 128, //'发起人id',
@@ -1143,31 +1145,23 @@ export default {
       }
     },
     // 修改执行人
-    changeDoUserName(e, id) {
+    changeDoUserName(e, list) {
       this.changeDoUserNameShow = e
-      this.getNextuserList(id)
+      this.getNextuserList(list)
     },
     // 获取执行人下属
-    getNextuserList(id) {
-      let data = `?userId=${id}`
-      this.$axios
-        .post('/pmbs/api/user/nextuser' + data)
-        .then(this.getNextuserListSuss)
-    },
-    getNextuserListSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        let nextuser = []
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          let nextuserData = {
-            value: element.userId,
-            label: element.realName
-          }
-          nextuser.push(nextuserData)
+    getNextuserList(list) {
+      let data = list
+      let nextuser = []
+      for (let i = 0; i < data.length; i++) {
+        let element = data[i]
+        let nextuserData = {
+          value: element.userId,
+          label: element.realName
         }
-        this.nextuserList = nextuser
+        nextuser.push(nextuserData)
       }
+      this.nextuserList = nextuser
     },
     // 确认修改
     changeDoUserNameAffirm(data) {
@@ -1195,6 +1189,16 @@ export default {
       this.drawer4 = false
       this.feedbackContent = ''
       this.result = ''
+    },
+    //  [download 下载附件]
+
+    download(row) {
+      let localPath = row.localPath
+      // console.log("123")
+      let a = document.createElement('a')
+      a.download = ''
+      a.setAttribute('href', 'http://218.106.254.122:8083/pmbs/' + localPath)
+      a.click()
     },
     // 消息提示
     messageWin(message) {
@@ -1382,6 +1386,8 @@ export default {
   color: rgb(16, 16, 16);
 }
 .project_details .table2 .need .fileList {
+  width: 64px;
+  height: 76px;
   text-align: center;
   display: flex;
   flex-wrap: wrap;
@@ -1390,6 +1396,30 @@ export default {
 }
 .project_details .table2 .need .fileList img {
   width: 49px;
+}
+.project_details .table2 .need .fileList_ {
+  position: relative;
+}
+.project_details .table2 .need .fileList_:hover .shade {
+  display: flex;
+}
+.project_details .table2 .need .fileList_ .shade {
+  cursor:pointer;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: black;
+  opacity: 0.5;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+}
+.project_details .table2 .need .fileList_ .shade i {
+  color: white;
+  font-size: 32px;
 }
 .state_color1 {
   color: rgb(1, 176, 114);

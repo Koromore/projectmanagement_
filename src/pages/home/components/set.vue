@@ -40,7 +40,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
-            :total="businessPage.pageRows"
+            :total="businessPage.totalRows"
             @current-change="businessListPage"
           ></el-pagination>
         </el-col>
@@ -48,6 +48,7 @@
       <!-- 客户 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
         <el-table
+          v-loading="loading"
           ref="filterTable"
           :data="clientList"
           style="width: 100%"
@@ -57,19 +58,15 @@
           <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column prop="businessList" label="业务">
             <template slot-scope="scope">
-              <span
-                v-for="(items, index) in scope.row.businessList"
-                :key="index"
-              ><span v-if="index != 0">、</span>{{items.businessName}}</span>
+              <span v-for="(items, index) in scope.row.businessList" :key="index">
+                <span v-if="index != 0">、</span>
+                {{items.businessName}}
+              </span>
             </template>
           </el-table-column>
           <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-button
-                size="small"
-                type="info"
-                @click="client_change(scope.row)"
-              >修改</el-button>
+              <el-button size="small" type="info" @click="client_change(scope.row)">修改</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
                 <el-button size="small" type="primary" slot="reference">删除</el-button>
               </el-popconfirm>
@@ -81,7 +78,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
-            :total="clientPage.pageRows"
+            :total="clientPage.totalRows"
             @current-change="clientListPage"
           ></el-pagination>
         </el-col>
@@ -153,7 +150,7 @@ export default {
       // 选中的业务类型
       businessListCheck: [],
       businessPage: {}, // 业务分页信息
-      clientPage: {}, // 客户分页信息
+      clientPage: {} // 客户分页信息
     }
   },
   // 方法
@@ -243,7 +240,7 @@ export default {
 
       let businessListCheck = []
       for (let i = 0; i < data.businessList.length; i++) {
-        let element = data.businessList[i];
+        let element = data.businessList[i]
         businessListCheck.push(element.businessId)
       }
       this.businessListCheck = businessListCheck
@@ -261,25 +258,34 @@ export default {
           businessId: this.transferId, // 业务类型id
           businessName: this.new_name // 业务类型名称
         }
-        this.businessSave(data)
+        if (data.businessName == '') {
+          this.messageError('信息不能为空')
+        } else {
+          this.businessSave(data)
+        }
       } else if (tabs_activity == 2) {
         // 客户新增/修改
         let businessList = []
         let businessListData = this.businessList
+        // console.log(businessListData)
         let businessListCheck = this.businessListCheck
         let businessListCheckValue = []
         for (let i = 0; i < businessListCheck.length; i++) {
           let elementi = businessListCheck[i]
           let data = {}
-          data.businessId = elementi
+          // data.businessId = elementi
           for (let j = 0; j < businessListData.length; j++) {
             let elementj = businessListData[j]
             if (elementi == businessListData[j].businessId) {
               businessListCheckValue.push(businessListData[j].businessName)
+              data.businessId = elementi
               data.businessName = businessListData[j].businessName
             }
           }
-          businessList.push(data)
+          // console.log(data)
+          if (data.businessId) {
+            businessList.push(data)
+          }
         }
         // console.log(businessList)
         // console.log(businessListCheckValue)
@@ -289,26 +295,24 @@ export default {
           clientName: this.new_name, // 客户名称
           businessList: businessList // 包含的业务类型
         }
-        // console.log(data)
-        this.clientSave(data)
+        // console.log(data.businessList)
+        if (data.clientName == '' || data.businessList.length == 0) {
+          this.messageError('信息不能为空')
+        } else {
+          this.clientSave(data)
+        }
       }
     },
     // 业务类型新增/修改
     businessSave(res) {
       let data = res
-      console.log(data)
-      if (data.businessName == '') {
-        let message = '请信息填写完整！'
-        this.messageError(message)
-      } else {
-        this.$axios
-          .post('/pmbs/api/business/save', data)
-          .then(this.businessSaveSuss)
-      }
+      this.loading = true
+      this.$axios
+        .post('/pmbs/api/business/save', data)
+        .then(this.businessSaveSuss)
     },
     // 业务类型新增/修改回调
     businessSaveSuss(res) {
-      // console.log(res)
       if (res.status == 200) {
         // 获取业务类型列表
         this.getBusinessListAjax()
@@ -318,18 +322,14 @@ export default {
         this.transferId = ''
         this.new_name = ''
         this.drawer = false
+        this.loading = false
       }
     },
     // 客户新增/修改
     clientSave(res) {
       let data = res
-      // console.log(data)
-      if (data.clientName == '' || data.businessList.businessId == '') {
-        let message = '请信息填写完整！'
-        this.messageError(message)
-      } else {
-        this.$axios.post('/pmbs/client/save', data).then(this.clientSaveSuss)
-      }
+      this.loading = true
+      this.$axios.post('/pmbs/client/save', data).then(this.clientSaveSuss)
     },
     // 客户新增/修改回调
     clientSaveSuss(res) {
@@ -344,6 +344,7 @@ export default {
         this.new_name = ''
         this.businessListCheck = []
         this.drawer = false
+        this.loading = false
       }
     },
     // 删除按钮
@@ -378,11 +379,9 @@ export default {
     },
     // 客户删除请求发送
     clientDelete(res) {
-      // /client/{id}/delete
       let data = {
         clientId: res
       }
-      // console.log(data)
       this.$axios.post('/pmbs/client/delete', data).then(this.clientDeleteSuss)
     },
     // 客户删除请求回调
@@ -512,7 +511,7 @@ export default {
 .set .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
-.set .table .page{
+.set .table .page {
   text-align: center;
 }
 .set .add_box {

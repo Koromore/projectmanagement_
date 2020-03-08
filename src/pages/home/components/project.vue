@@ -6,7 +6,7 @@
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
-            <el-select v-model="clientId" clearable placeholder="请选择" size="small">
+            <el-select v-model="clientId" clearable placeholder="全部" size="small">
               <el-option
                 v-for="item in clientIdList"
                 :key="item.value"

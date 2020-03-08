@@ -5,7 +5,7 @@
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
-            <el-select v-model="clientId" clearable placeholder="请选择" size="small">
+            <el-select v-model="clientId" clearable placeholder="全部" size="small">
               <el-option
                 v-for="item in clientIdList"
                 :key="item.value"
@@ -195,8 +195,8 @@
                 {{scope.row.doUserName}}
                 <el-link
                   type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.doUserId)"
-                  v-show="scope.row.status == 1 || scope.row.status == 4"
+                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -248,7 +248,7 @@
                 type="info"
                 slot="reference"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-              >反馈</el-button> -->
+              >反馈</el-button>-->
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
                 <el-button
                   size="small"
@@ -282,10 +282,7 @@
             <el-col :span="18">
               <div>
                 {{taskData.doUserName}}
-                <el-link
-                  type="primary"
-                  @click="changeDoUserName()"
-                >更换</el-link>
+                <el-link type="primary" @click="changeDoUserName()">更换</el-link>
                 <el-select
                   v-model="nextuserValue"
                   filterable
@@ -651,10 +648,16 @@ export default {
       }
     },
     join_redact(proId, taskId) {
-      // console.log('我参与忽略' + taskId)
-      this.$alert('是否忽略此任务', '提示', {
-        confirmButtonText: '确定',
-        callback: action => {
+      this.$confirm('是否忽略此任务', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
+      })
+        .then(() => {
+          // this.$message({
+          //   type: 'info',
+          //   message: '保存修改'
+          // });
           let data = {
             // proId: proId,
             taskId: taskId,
@@ -662,8 +665,13 @@ export default {
             taskfileList: {}
           }
           this.taskSave(data)
-        }
-      })
+        })
+        .catch(action => {
+          this.$message({
+            type: 'info',
+            message: '放弃'
+          })
+        })
     },
     join_achieve(e, task, state) {
       // console.log('我参与完成' + e)
@@ -686,35 +694,27 @@ export default {
       this.getTaskShow(taskData.taskId)
     },
     // 修改执行人按钮
-    changeDoUserName(e, id) {
+    changeDoUserName(e, list) {
       this.changeDoUserNameShow = e
       // console.log(id)
-      this.getNextuserList(id)
+      this.getNextuserList(list)
     },
     // 获取执行人下属
-    getNextuserList(id) {
-      let data = `?userId=${id}`
-      this.$axios
-        .post('/pmbs/api/user/nextuser' + data)
-        .then(this.getNextuserListSuss)
-    },
-    getNextuserListSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        // console.log(data)
-        let nextuser = []
-        if (data != null) {
-          for (let i = 0; i < data.length; i++) {
-            let element = data[i]
-            let nextuserData = {
-              value: element.userId,
-              label: element.realName
-            }
-            nextuser.push(nextuserData)
+    getNextuserList(list) {
+      let data = list
+      // console.log(data)
+      let nextuser = []
+      if (data != null) {
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          let nextuserData = {
+            value: element.userId,
+            label: element.realName
           }
+          nextuser.push(nextuserData)
         }
-        this.nextuserList = nextuser
       }
+      this.nextuserList = nextuser
     },
     // 确认修改
     changeDoUserNameAffirm(data) {
@@ -1038,7 +1038,7 @@ export default {
       this.getTasklistAjax_(data1)
     },
     // 抽屉取消按钮
-    empty(){
+    empty() {
       this.drawer3 = false
       this.drawer2 = false
       this.feedbackContent = ''
@@ -1063,18 +1063,18 @@ export default {
       // 错误提示
       this.$message.error(message)
     },
-    MessageBox() {
-      this.$alert('这是一段内容', '标题名称', {
-        confirmButtonText: '确定',
-        callback: action => {
-          this.join_redact()
-          // this.$message({
-          //   type: 'info',
-          //   message: `action: ${ action }`
-          // });
-        }
-      })
-    },
+    // MessageBox() {
+    //   this.$alert('这是一段内容', '标题名称', {
+    //     confirmButtonText: '确定',
+    //     callback: action => {
+    //       this.join_redact()
+    //       // this.$message({
+    //       //   type: 'info',
+    //       //   message: `action: ${ action }`
+    //       // });
+    //     }
+    //   })
+    // },
     test() {
       console.log('打印测试')
     }
@@ -1188,7 +1188,7 @@ export default {
 .task .table .list {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
-.task .table .page{
+.task .table .page {
   text-align: center;
 }
 .state_color1 {

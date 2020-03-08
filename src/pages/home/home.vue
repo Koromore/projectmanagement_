@@ -42,7 +42,11 @@
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
           <el-col :span="24">
-            <el-col :span="6" class="title title1">创建项目</el-col>
+            <el-col :span="6" class="title title1">
+              <span v-if="this.new_project.new_name == ''">创建项目</span>
+              <span v-else>编辑项目</span>
+              
+            </el-col>
           </el-col>
           <el-col :span="6" class="title">名称</el-col>
           <el-col :span="13">
@@ -318,6 +322,23 @@ export default {
       // 获取新建项目分类
       this.getAllClientAndBusiness()
       // this.$refs.router.getProjectList()
+      // new_project: {
+      //   new_name: '', // 任务名称
+      //   business_type: [], // 分类 客户-类型
+      //   radio1: '0', // 专项，日常
+      //   presetTime: '', // 预计时间
+      //   remark: '', // 需求
+      //   manager: '', // 项目经理
+      //   managerId: '', // 项目经理ID
+      //   checkList: [], // 执行部门
+      //   dynamicTags: [] // 知晓人
+      // },
+      // 点击新建项目时置空信息
+      this.new_project.new_name = '' // 任务名称
+      this.new_project.business_type = [] // 知晓人
+      this.new_project.presetTime = '' // 预计时间
+      this.new_project.remark = '' // 需求
+      this.new_project.dynamicTags = [] // 知晓人
     },
     getData(data) {
       this.drawer = true
@@ -612,7 +633,7 @@ export default {
         this.new_project.business_type == [] ||
         data.expertTime == '' ||
         data.remark == '' ||
-        data.listProFile.length == 0 ||
+        // data.listProFile.length == 0 ||
         changeId == ''
       ) {
         this.messageError('信息不能为空')
