@@ -340,7 +340,7 @@
             </el-col>
 
             <el-col :span="12" :offset="7" class="batton">
-              <el-button size="small" type="info">取消</el-button>
+              <el-button size="small" type="info" @click="empty">取消</el-button>
               <el-button size="small" type="primary" @click="putIn">提交</el-button>
             </el-col>
           </el-row>
@@ -1249,6 +1249,14 @@ export default {
       this.drawer4 = false
       this.feedbackContent = ''
       this.result = ''
+      this.new_task.faTask = ''
+      this.new_task.department = ''
+      this.new_task.new_name = ''
+      this.new_task.presetTime = ''
+      this.task_type_value = ''
+      this.new_task.remark = ''
+      this.file_list = []
+      this.listProFileResult = []
     },
     //  [download 下载附件]
 
