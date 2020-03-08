@@ -3,8 +3,8 @@
     <el-row>
       <el-col :span="24" class="top">
         <el-col :span="4" class>
-          项目管理 /
-          <span class="project_name">{{proName}}</span>
+          <el-link @click="toProject()">项目管理</el-link>
+          <span class="project_name">/ {{proName}}</span>
         </el-col>
       </el-col>
       <el-col :span="6" class="tabs">
@@ -76,7 +76,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4"
+                  v-show="scope.row.listOaUser != null && scope.row.initUserId == userId && scope.row.status == 1 || scope.row.status == 4"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -257,8 +257,8 @@
             <el-col :span="24">
               <el-col :span="6" class="title title1">创建任务</el-col>
             </el-col>
-            <el-col :span="6" class="title">父任务</el-col>
-            <el-col :span="13">
+            <el-col :span="6" class="title" v-if="projectShowDetail.manager != userId">父任务</el-col>
+            <el-col :span="13" v-if="projectShowDetail.manager != userId">
               <!-- <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input> -->
               <el-select
                 v-model="new_task.faTask"
@@ -412,7 +412,30 @@
             <el-col :span="6" class="title">任务类型：</el-col>
             <el-col :span="18">{{taskData.typeName}}</el-col>
             <el-col :span="6" class="title">执行人：</el-col>
-            <el-col :span="18">{{taskData.doUserName}}</el-col>
+            <el-col :span="18">
+              <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
+              <el-select
+                v-if="changeNameShow"
+                v-model="taskData.doUserId"
+                filterable
+                placeholder="请选择"
+                size="mini"
+                clearable
+                style="width:99px;"
+              >
+                <el-option
+                  v-for="item in taskData.listOaUser"
+                  :key="item.userId"
+                  :label="item.realName"
+                  :value="item.userId"
+                ></el-option>
+              </el-select>
+              <el-link
+                type="primary"
+                @click="changeName()"
+                v-show="taskData.listOaUser != null && taskData.initUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >更换</el-link>
+            </el-col>
             <el-col :span="6" class="title">状态：</el-col>
             <el-col :span="18">
               <el-select
@@ -521,7 +544,8 @@ export default {
   name: 'project_details',
   data() {
     return {
-      userId: 128, // 用户ID
+      // userId: this.$store.state.user.userId,
+      userId: this.$store.state.user.userId, // 用户ID
       loading: false,
       proId: '', // 项目ID
       proName: '', // 项目NAME
@@ -639,7 +663,19 @@ export default {
       // 更换执行人
       changeDoUserNameShow: 'true',
       nextuserList: [], // 下属信息
-      nextuserValue: '' // 修改后执行人
+      nextuserValue: '', // 修改后执行人
+      // 详情内更换执行人
+      changeNameShow: false,
+      userValue: '' // 修改后执行人
+    }
+  },
+  // 侦听器
+  watch: {
+    // 如果 `checkListDept` 发生改变，这个函数就会运行
+    drawer5: function(newQuestion, oldQuestion) {
+      if (this.drawer5 == false) {
+        this.changeNameShow = false
+      }
     }
   },
   // 方法
@@ -800,9 +836,10 @@ export default {
     getTaskDetailSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        this.taskData = res.data
+        this.taskData = res.data.data
         // console.log(this.projectListJoin)
         this.suggest_list = res.data.feedbackList
+        // this.userValue = res.data.data.doUserName
       }
     },
     // 上传附件
@@ -874,7 +911,7 @@ export default {
           proId: this.proId, // 项目ID
           taskId: this.taskId, // 任务ID
           fileId: '', // 文档ID
-          updateUserId: 128, // 上传人ID
+          updateUserId: this.userId, // 上传人ID
           fileName: resData.fileName, //'文档名称',
           isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
           localPath: resData.path, //'本地路径',
@@ -918,10 +955,11 @@ export default {
     getProjectOfTask(proId, sousuo) {
       this.loading = true
       let data = ''
+      let userId = this.userId
       if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}&userId=128`
+        data = `?proId=${proId}&taskName=${sousuo}&userId=${userId}`
       } else {
-        data = `?proId=${proId}&userId=128`
+        data = `?proId=${proId}&userId=${userId}`
       }
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
@@ -934,26 +972,17 @@ export default {
       if (res.status == 200) {
         let taskList = res.data.data
         this.taskList = taskList
-        let faTaskList = []
-        for (let i = 0; i < taskList.length; i++) {
-          let element = taskList[i]
-          let faTaskListData = {}
-          faTaskListData.value = element.taskId
-          faTaskListData.label = element.taskName
-          faTaskList.push(faTaskListData)
-        }
-        this.faTaskList = faTaskList
-        
       }
     },
     // 获取项目详情-我参与
     getProjectOfUserTask(proId, sousuo) {
       this.loading = true
       let data = ''
+      let userId = this.userId
       if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}&userId=128`
+        data = `?proId=${proId}&taskName=${sousuo}&userId=${userId}`
       } else {
-        data = `?proId=${proId}&userId=128`
+        data = `?proId=${proId}&userId=${userId}`
       }
       this.$axios
         .post('/pmbs/api/project/projectOfUserTask' + data)
@@ -995,6 +1024,32 @@ export default {
         // console.log(deptList)
       }
     },
+    // 父任务列表获取
+    getParentTask() {
+      let userId = this.userId
+      let proId = this.$route.query.id
+      let depId = this.$store.state.user.deptId
+      let data = `?userId=${userId}&proId=${proId}&depId=${depId}`
+      this.$axios
+        .post('/pmbs/api/task/findParentTask' + data)
+        .then(this.getParentTaskSuss)
+    },
+    // 父任务列表获取回调
+    getParentTaskSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        let data = res.data
+        let faTaskList = []
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          let faTaskListData = {}
+          faTaskListData.value = element.taskId
+          faTaskListData.label = element.taskName
+          faTaskList.push(faTaskListData)
+        }
+        this.faTaskList = faTaskList
+      }
+    },
     // 新增任务提交按钮
     putIn() {
       // 预计时间
@@ -1019,10 +1074,10 @@ export default {
       let data = {
         createTime: createTime, // 创建时间
         deptId: department, // '所属部门id',
-        doUserId: 128, //doUserId, // '参与人id',
+        doUserId: doUserId, // '参与人id',
         expertTime: expertTime, // '预计时间',
         faTask: this.faTask, // '父任务id',
-        initUserId: 128, //'发起人id',
+        initUserId: this.userId, //'发起人id',
         proFileList: this.listProFileResult, // 上传文档列表
         proId: this.proId, // '所属项目id',
         remark: this.new_task.remark, // '需求',
@@ -1047,7 +1102,7 @@ export default {
             localPath: element.localPath,
             proId: element.proId,
             taskId: element.taskId,
-            updateUserId: 128
+            updateUserId: this.userId
           }
           taskfileList.push(taskfileListData)
         }
@@ -1060,6 +1115,7 @@ export default {
         taskId: this.taskId, // 任务id
         status: this.statusListValue, // 状态
         overDesc: this.result, // 完成结果
+        doUserId: this.taskData.doUserId, // 执行人更改
         taskfileList: taskfileList // 上传文档列表
       }
       if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
@@ -1097,7 +1153,7 @@ export default {
         // deleteFlag: true,
         feedback: this.feedbackContent, // 反馈内容
         // feedbackId: 0,
-        initUserId: 128, // 反馈人ID
+        initUserId: this.userId, // 反馈人ID
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
@@ -1183,6 +1239,10 @@ export default {
         this.changeDoUserNameShow = 'true'
       }
     },
+    // 详情内修改执行人
+    changeName() {
+      this.changeNameShow = true
+    },
     // 抽屉取消按钮
     empty() {
       this.drawer3 = false
@@ -1199,6 +1259,10 @@ export default {
       a.download = ''
       a.setAttribute('href', 'http://218.106.254.122:8083/pmbs/' + localPath)
       a.click()
+    },
+    // 跳转项目管理界面
+    toProject() {
+      this.$router.push({ path: '/home/components/project' })
     },
     // 消息提示
     messageWin(message) {
@@ -1226,6 +1290,7 @@ export default {
     // 获取页面传参
     this.getParams()
     this.upload()
+    this.getParentTask()
   }
 }
 </script>
@@ -1244,7 +1309,11 @@ export default {
   font-size: 13px;
 }
 .project_details .top .project_name {
+  display: inline-block;
   font-weight: 700;
+  font-size: 14px;
+  height: 19px;
+  line-height: 19px;
 }
 .project_details .top .tab {
   height: 26px;
@@ -1404,7 +1473,7 @@ export default {
   display: flex;
 }
 .project_details .table2 .need .fileList_ .shade {
-  cursor:pointer;
+  cursor: pointer;
   position: absolute;
   top: 0;
   left: 0;

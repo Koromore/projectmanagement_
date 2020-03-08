@@ -151,7 +151,7 @@ export default {
       //             remember:this.form.remember?'yes':'no'
       //         }
       //         //每次登陆后就设置 isLogin
-              window.sessionStorage.setItem('isLogin','success');
+      //         window.sessionStorage.setItem('isLogin','success');
 
       //         console.log(res.data.admin_typeid);
       //         if(res.data.user_id == '1'){

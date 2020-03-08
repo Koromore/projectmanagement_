@@ -103,7 +103,7 @@
         <el-table
           v-loading="loading"
           ref="filterTable"
-          :data="projectListOriginate"
+          :data="currentData"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
@@ -173,6 +173,18 @@
           :total="initiateProjectListTota"
           @current-change="initiateProjectList"
         ></el-pagination>-->
+        <div class="paging">
+          <div class="block">
+            <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="pageNum"
+              layout="total, prev, pager, next"
+              :total="totalnum"
+              background
+            ></el-pagination>
+          </div>
+        </div>
       </el-col>
       <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="!table_show">
@@ -255,18 +267,18 @@
             <el-col :span="13" :offset="6" v-show="new_project.radio2 == 1">
               <el-input placeholder="请输入内容" v-model="new_project.manager" clearable></el-input>
               <el-select
-              v-model="new_project.managerId"
-              filterable
-              placeholder="请选择"
-              class="userList"
-            >
-              <el-option
-                v-for="item in userList"
-                :key="item.index"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
+                v-model="new_project.managerId"
+                filterable
+                placeholder="请选择"
+                class="userList"
+              >
+                <el-option
+                  v-for="item in userList"
+                  :key="item.index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
             </el-col>
             <el-col :span="17" :offset="6" v-show="new_project.radio2 == 2">
               <el-checkbox-group v-model="new_project.checkList" class="check_box">
@@ -415,6 +427,7 @@ export default {
   name: 'project',
   data() {
     return {
+      userId: this.$store.state.user.userId,
       proId: '', // 项目ID
       loading: false, // 表格loading
       // 查询条件
@@ -560,7 +573,11 @@ export default {
       dialogImageUrl: '',
       dialogVisible: false,
       disabled: false,
-      result: '' // 延迟原因内容
+      result: '', // 延迟原因内容
+      // 分页
+      pageNum: 1, //默认页码
+      totalnum: 0, //总页码
+      currentData: [] //当前渲染的数据
     }
   },
   // 侦听器
@@ -694,6 +711,8 @@ export default {
         let clientIdList = []
         // console.log(data)
         // let business_type_list = []
+        let name = this.$route.query.name
+        let clientId = ''
         // 循环提取名称和ID
         for (let i = 0; i < data.length; i++) {
           let element = data[i]
@@ -702,8 +721,18 @@ export default {
             label: element.clientName
           }
           clientIdList.push(clientIdListData)
+
+          if (element.clientName == name) {
+            clientId = element.clientId
+          }
         }
         this.clientIdList = clientIdList
+        this.clientId = clientId
+        // let name = this.$route.query.name
+        // for (let i = 0; i < array.length; i++) {
+        //   const element = array[i];
+
+        // }
       }
       // console.log(res)
     },
@@ -927,7 +956,7 @@ export default {
       let taskId = checkListTask.join(',')
       let data = {
         feedback: this.feedbackContent, // 反馈内容
-        initUserId: 128, // 反馈人ID
+        initUserId: this.userId, // 反馈人ID
         proId: this.proId, // 反馈项目ID
         moreTaskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
@@ -975,6 +1004,7 @@ export default {
     },
     findProjectList() {
       // clientId serviceId isUsual status
+      let userId = this.userId
       let clientId = this.clientId
       let serviceId = this.serviceId
       let isUsual = this.isUsual
@@ -996,16 +1026,16 @@ export default {
       if (status == '') {
         statusData = ''
       }
-      let data = `?inituserid=128${clientIdData}${serviceIdData}${isUsualData}${statusData}`
+      let data = `?inituserid=${userId}${clientIdData}${serviceIdData}${isUsualData}${statusData}`
       this.getProjectListAjax(data)
       this.getProjectUserjoinproject(data)
     },
     // 获取项目列表
     getProjectList() {
-      let name = this.$route.query.name
       // console.log(name)
-      let data0 = `?inituserid=128`
-      let data1 = `?inituserid=128`
+      let userId = this.userId
+      let data0 = `?inituserid=${userId}`
+      let data1 = `?inituserid=${userId}`
       this.getProjectListAjax(data0)
       this.getProjectUserjoinproject(data1)
       // console.log('获取项目列表')
@@ -1033,7 +1063,12 @@ export default {
           }
         }
         // console.log(projectListOriginate)
+        
         this.projectListOriginate = projectListOriginate
+
+        this.totalnum = this.projectListOriginate.length;
+        var json = JSON.parse(JSON.stringify(this.projectListOriginate)); //拷贝数据 避免影响原始数据
+        this.currentData = json.splice((this.pageNum-1)*10,(this.pageNum-1)*10+10);
       }
     },
     // 项目管理-我参与获取
@@ -1051,6 +1086,23 @@ export default {
         this.projectListJoin = projectListJoin
       }
     },
+    // 分页
+    handleSizeChange() {},
+    //下一页
+    handleCurrentChange(page) {
+      this.pageNum = page
+      console.log(page)
+
+      this.totalnum = this.projectListOriginate.length
+
+      var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
+
+      this.currentData = json.splice((this.pageNum - 1) * 10, (this.pageNum - 1) * 10 + 10)
+
+      console.log(this.currentData)
+    },
+
+    
     // 任务反馈
     // putTaskFeedback() {
     //   let data = {
@@ -1072,7 +1124,7 @@ export default {
     //   this.getUserJoinProjectAjax(page)
     // },
     // 抽屉取消按钮
-    empty(){
+    empty() {
       this.drawer3 = false
       this.drawer2 = false
       this.feedbackContent = ''

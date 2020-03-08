@@ -371,6 +371,14 @@ export default {
       let myChart = this.$echarts.init(document.getElementById('client_state'))
       let clientNameData = this.clientNameData
       let clientStatusData = this.clientStatusData
+      clientStatusData[0].barWidth = 81
+      // barWidth: 81
+      let percent = 0
+      if (clientNameData.length <=5) {
+        percent = 100
+      } else if(clientNameData.length > 5){
+        percent = 5/clientNameData.length * 100
+      }
       // console.log(clientNameData)
       // 绘制图表
       myChart.setOption({
@@ -401,12 +409,13 @@ export default {
         grid: {
           left: '3%',
           right: '4%',
-          bottom: '3%',
+          bottom: '10%',
           containLabel: true
         },
         xAxis: [
           {
             type: 'category',
+            clientNameData,
             data: clientNameData,
             // [
             //   '客户1',
@@ -414,11 +423,21 @@ export default {
             //   '客户3',
             //   '客户4',
             //   '客户5',
-            //   '客户6',
-            //   '客户7',
-            //   '客户8',
-            //   '客户9',
-            //   '客户10'
+            //   '客户1',
+            //   '客户2',
+            //   '客户3',
+            //   '客户4',
+            //   '客户5',
+            //   '客户1',
+            //   '客户2',
+            //   '客户3',
+            //   '客户4',
+            //   '客户5',
+            //   '客户1',
+            //   '客户2',
+            //   '客户3',
+            //   '客户4',
+            //   '客户5'
             // ],
             triggerEvent: true //让x轴可以点击
           }
@@ -428,27 +447,51 @@ export default {
             type: 'value'
           }
         ],
+
+        dataZoom: [
+          {
+            show: true,
+            realtime: true,
+            start: 0,
+            end: percent
+          },
+          {
+            type: 'inside',
+            realtime: true,
+            start: 0,
+            end: percent
+          }
+          // ,
+          // {
+          //   type: 'inside',
+          //   yAxisIndex: [0],
+          //   start: 0,
+          //   end: 36
+          // }
+        ],
+        //clientStatusData
         series: clientStatusData
         // [
         //   {
         //     name: '延期',
         //     type: 'bar',
         //     stack: '广告',
-        //     data: [120, 132, 101, 134, 90],
-        //     nodeClick: 'link'
+        //     data: [120, 132, 101, 134, 90, 120, 132, 101, 134, 90,120, 132, 101, 134, 90, 120, 132, 101, 134, 90],
+        //     nodeClick: 'link',
+        //     barWidth: 81
         //   },
         //   {
         //     name: '审核中',
         //     type: 'bar',
         //     stack: '广告',
-        //     data: [220, 182, 191, 234, 290],
+        //     data: [220, 182, 191, 234, 290, 120, 132, 101, 134, 90,120, 132, 101, 134, 90, 120, 132, 101, 134, 90],
         //     nodeClick: 'link'
         //   },
         //   {
         //     name: '执行中',
         //     type: 'bar',
         //     stack: '广告',
-        //     data: [150, 232, 201, 154, 190],
+        //     data: [150, 232, 201, 154, 190, 120, 132, 101, 134, 90,120, 132, 101, 134, 90, 120, 132, 101, 134, 90],
         //     nodeClick: 'link'
         //   }
         // ]

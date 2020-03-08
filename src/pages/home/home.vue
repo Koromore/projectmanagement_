@@ -45,7 +45,6 @@
             <el-col :span="6" class="title title1">
               <span v-if="this.new_project.new_name == ''">创建项目</span>
               <span v-else>编辑项目</span>
-              
             </el-col>
           </el-col>
           <el-col :span="6" class="title">名称</el-col>
@@ -84,8 +83,8 @@
             ></el-input>
           </el-col>
           <el-col :span="18" :offset="6">
-            <el-radio v-model="radio2" label="1">项目经理</el-radio>
-            <el-radio v-model="radio2" label="2">执行部门</el-radio>
+            <el-radio v-model="radio2" label="1" :disabled="disabled1">项目经理</el-radio>
+            <el-radio v-model="radio2" label="2" :disabled="disabled2">执行部门</el-radio>
           </el-col>
           <el-col :span="13" :offset="6" v-show="radio2 == 1">
             <el-select
@@ -164,7 +163,7 @@
       </el-scrollbar>
       <el-row class="batton_pa">
         <el-col :span="12" :offset="7" class="batton">
-          <el-button size="small" type="info" @click="drawer = false">取消</el-button>
+          <el-button size="small" type="info" @click="empty()">取消</el-button>
           <el-button size="small" type="primary" @click="addProject">提交</el-button>
         </el-col>
       </el-row>
@@ -201,6 +200,8 @@ export default {
       deptList: [], // 部门列表
       userList: [], // 用户列表
       radio2: '1', // 项目经理,执行部门 选择
+      disabled1: false,
+      disabled2: false,
       proId: '', // 项目id
       status: 1, // 项目状态
       // 新增
@@ -339,6 +340,8 @@ export default {
       this.new_project.presetTime = '' // 预计时间
       this.new_project.remark = '' // 需求
       this.new_project.dynamicTags = [] // 知晓人
+      this.disabled1 = false
+      this.disabled2 = false
     },
     getData(data) {
       this.drawer = true
@@ -510,6 +513,7 @@ export default {
           business_type_list.push(business_type)
         }
         this.business_type_list = business_type_list
+        // console.log(this.business_type_list)
       }
       // console.log(res)
     },
@@ -522,7 +526,7 @@ export default {
     },
     // 获取我发起项目下所有任务回调
     getProjectShowDetailSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
         this.proId = data.proId
@@ -530,6 +534,8 @@ export default {
         this.new_project.new_name = data.proName
         this.new_project.business_type[0] = data.clientId
         this.new_project.business_type[1] = data.serviceId
+        console.log(this.new_project.business_type)
+        console.log(this.business_type_list)
         // this.new_project.radio1 = data.isUsual
         if (data.isUsual == false) {
           this.new_project.radio1 = '0'
@@ -540,9 +546,11 @@ export default {
         this.new_project.remark = data.remark
         if (data.manager != null) {
           this.radio2 = '1'
+          this.disabled2 = true
           this.new_project.managerId = data.manager
         } else if (data.department != null) {
           this.radio2 = '2'
+          this.disabled1 = true
           let department = data.department.split(',')
           let checkList = []
           for (let i = 0; i < department.length; i++) {
@@ -580,6 +588,7 @@ export default {
     },
     // 新增项目
     addProject() {
+      let userId = this.$store.state.user.userId
       // 创建时间
       let createTime = new Date()
       // 用户列表
@@ -608,7 +617,7 @@ export default {
       let data = {
         proId: this.proId, // 项目id
         createTime: createTime, // 创建时间
-        initUserId: 128, //'发起人id',
+        initUserId: userId, //'发起人id',
         status: this.status, // 状态
         proName: this.new_project.new_name, // '项目名称',
         clientId: this.new_project.business_type[0], // '所属客户ID',
@@ -633,7 +642,6 @@ export default {
         this.new_project.business_type == [] ||
         data.expertTime == '' ||
         data.remark == '' ||
-        // data.listProFile.length == 0 ||
         changeId == ''
       ) {
         this.messageError('信息不能为空')
@@ -651,15 +659,8 @@ export default {
         this.drawer = false
         this.radio2 = 1
         // 重置信息
-        this.new_project.new_name = ''
-        this.new_project.business_type = []
-        this.new_project.radio1 = '0'
-        this.new_project.presetTime = ''
-        this.new_project.remark = ''
-        this.listProFile = []
-        this.file_list = []
-        this.new_project.dynamicTags = []
 
+        this.empty()
         // this.$refs[projeck].getProjectList()
       }
     },
@@ -678,7 +679,22 @@ export default {
       //   console.log(this.projectListJoin)
       // }/api/project/feedbackDetail
     },
-
+    // 抽屉取消按钮
+    // 清空内容
+    empty() {
+      this.drawer = false
+      this.new_project.new_name = '' // 任务名称
+      this.new_project.business_type = [] // 类型
+      this.new_project.presetTime = '' // 预计时间
+      this.new_project.remark = '' // 需求
+      this.new_project.dynamicTags = [] // 知晓人
+      this.new_project.managerId = '' // 项目经理
+      this.new_project.checkList = [] // 执行部门
+      this.add_list = ''
+      this.listProFile = []
+      this.file_list = []
+      this.new_project.radio1 = '0'
+    },
     // 消息提示
     messageWin(message) {
       // 成功提示

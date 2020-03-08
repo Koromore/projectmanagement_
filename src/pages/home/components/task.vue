@@ -141,7 +141,7 @@
                 size="small"
                 type="info"
                 @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
               >反馈</el-button>
               <el-button
                 size="small"
@@ -274,17 +274,17 @@
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
         <el-scrollbar style="height: 100%">
           <el-row class="task_details">
+            <el-col :span="24" class="title">{{taskData.proName}}-{{taskData.taskName}}</el-col>
             <el-col :span="6" class="title">执行部门：</el-col>
             <el-col :span="18">{{taskData.deptName}}</el-col>
             <el-col :span="6" class="title">任务类型：</el-col>
             <el-col :span="18">{{taskData.typeName}}</el-col>
             <el-col :span="6" class="title">执行人：</el-col>
             <el-col :span="18">
-              <div>
-                {{taskData.doUserName}}
-                <el-link type="primary" @click="changeDoUserName()">更换</el-link>
-                <el-select
-                  v-model="nextuserValue"
+              <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
+              <el-select
+                  v-if="changeNameShow"
+                  v-model="taskData.doUserId"
                   filterable
                   placeholder="请选择"
                   size="mini"
@@ -292,19 +292,17 @@
                   style="width:99px;"
                 >
                   <el-option
-                    v-for="item in nextuserList"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
+                    v-for="item in taskData.listOaUser"
+                    :key="item.userId"
+                    :label="item.realName"
+                    :value="item.userId"
                   ></el-option>
                 </el-select>
-                <el-button
-                  slot="append"
+                <el-link
                   type="primary"
-                  size="mini"
-                  @click="changeDoUserNameAffirm()"
-                >确认</el-button>
-              </div>
+                  @click="changeName()"
+                  v-show="taskData.listOaUser != null && taskData.initUserId == userId && taskData.status == 1 || taskData.status == 4"
+                >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
             <el-col :span="18">
@@ -446,6 +444,7 @@ export default {
   name: 'task',
   data() {
     return {
+      userId: this.$store.state.user.userId,
       loading: false,
       // 查询条件
       clientIdList: [], // 用户列表
@@ -507,7 +506,10 @@ export default {
       dialogVisibleResult: false,
       disabledResult: false,
       uploadUrl: '',
-      listProFileResult: [] // 上传文件信息列表
+      listProFileResult: [], // 上传文件信息列表
+      // 详情内更换执行人
+      changeNameShow: false,
+      userValue: '' // 修改后执行人
     }
   },
   // 侦听器
@@ -544,6 +546,11 @@ export default {
       // isUsual: '', // 专项-1/日常-0
       // status: '', // 任务状态
       this.findTaskList()
+    },
+    drawer1: function(newQuestion, oldQuestion) {
+      if (this.drawer5 == false) {
+        this.changeNameShow = false
+      }
     }
   },
   // 方法
@@ -739,13 +746,14 @@ export default {
     },
     // 查询任务列表
     findTaskList() {
+      // let userId = this.$store.state.user.userId
       let data0 = {
         type: 0,
         clientId: this.clientId,
         serviceId: this.serviceId,
         isUsual: this.isUsual,
         task: {
-          initUserId: 128,
+          initUserId: this.userId,
           status: this.status
         },
         pageNum: 1
@@ -756,7 +764,7 @@ export default {
         serviceId: this.serviceId,
         isUsual: this.isUsual,
         task: {
-          initUserId: 128,
+          initUserId: this.userId,
           status: this.status
         },
         pageNum: 1
@@ -773,14 +781,14 @@ export default {
       let data0 = {
         type: 0,
         task: {
-          initUserId: 128
+          initUserId: this.userId
         },
         pageNum: 1
       }
       let data1 = {
         type: 1,
         task: {
-          initUserId: 128
+          initUserId: this.userId
         },
         pageNum: 1
       }
@@ -862,7 +870,7 @@ export default {
     getTaskShowSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        let data = res.data
+        let data = res.data.data
         this.taskData = data
         this.suggest_list = data.feedbackList
       }
@@ -895,7 +903,7 @@ export default {
           proId: this.taskData.proId, // 项目ID
           taskId: this.taskData.taskId, // 任务ID
           fileId: '', // 文档ID
-          updateUserId: 128, // 上传人ID
+          updateUserId: this.userId, // 上传人ID
           fileName: resData.fileName, //'文档名称',
           isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
           localPath: resData.path, //'本地路径',
@@ -922,7 +930,7 @@ export default {
             localPath: element.localPath,
             proId: element.proId,
             taskId: element.taskId,
-            updateUserId: 128
+            updateUserId: this.userId
           }
           taskfileList.push(taskfileListData)
         }
@@ -934,6 +942,7 @@ export default {
         proId: taskData.proId, // '所属项目id',
         taskId: taskData.taskId, // 任务id
         status: this.statusListValue, // 状态
+        doUserId: this.taskData.doUserId, // 执行人修改
         overDesc: this.result, // 完成结果
         taskfileList: taskfileList // 上传文档列表
       }
@@ -983,7 +992,7 @@ export default {
         // deleteFlag: true,
         feedback: this.feedbackContent, // 反馈内容
         // feedbackId: 0,
-        initUserId: 128, // 反馈人ID
+        initUserId: this.userId, // 反馈人ID
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
@@ -1015,7 +1024,7 @@ export default {
         serviceId: this.serviceId,
         isUsual: this.isUsual,
         task: {
-          initUserId: 128,
+          initUserId: this.userId,
           status: this.status
         },
         pageNum: page
@@ -1030,12 +1039,16 @@ export default {
         serviceId: this.serviceId,
         isUsual: this.isUsual,
         task: {
-          initUserId: 128,
+          initUserId: this.userId,
           status: this.status
         },
         pageNum: page
       }
       this.getTasklistAjax_(data1)
+    },
+    // 详情内修改执行人
+    changeName() {
+      this.changeNameShow = true
     },
     // 抽屉取消按钮
     empty() {
@@ -1231,6 +1244,13 @@ export default {
   text-align: right;
   box-sizing: border-box;
   padding-right: 18px;
+}
+.task .task_details .title:nth-of-type(1) {
+  text-align: left;
+  box-sizing: border-box;
+  padding-left: 18px;
+  font-weight: 600;
+  font-size: 18px;
 }
 .task .task_details .smname {
   width: 72px;

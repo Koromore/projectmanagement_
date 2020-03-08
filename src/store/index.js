@@ -7,48 +7,66 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-    state:{
-        username: '',  //姓名
-        jobnumber: '',  //工号
-        password: '',   //密码
-        remember:false,   //是否记住密码
-        isLogin:'error', //是否登陆
-
-        refresh: 0 // 是否刷新页面
+    state: {
+        user: { userId: 128, deptId: 64 }, //员工信息
+        token: '', //登录令牌
+        userSign: '', //用户信息带参
+        isLogin: 'success', //'error', //是否登陆
+        isRouterAlive: true, // 控制页面刷新
     },
-    action:{
+    action: {
 
     },
-    mutations:{
-        //第一个参数默认是state 第二个是传递过来的参数
-        //登录模块
-        login(state,data){
-            state.username = data.username;
-            state.jobnumber = data.number;
-            state.password = data.password;
-            state.remember = data.remember;
+    mutations: {
+        /**
+         * [reload 控制页面刷新]
+         */
+        beginReload(state) {
+            // this.$store.commit('beginReload');
 
-            //全局vuex 登陆状态
+            //         this.$nextTick(()=>{
+            //             this.$store.commit('endReload');
+            //         })
+            state.isRouterAlive = false;
+        },
+        /**
+         * [endReload 恢复页面]
+         */
+        endReload(state) {
+            state.isRouterAlive = true;
+        },
+        //登录
+        login(state, data) {
+            // state.user = data.user;
+            // state.token = data.token;
+            // state.userSign = data.userSign;
             state.isLogin = window.sessionStorage.getItem('isLogin') || 'error';
+            // localStorage.user = JSON.stringify(data.user);
+            // localStorage.token = data.token;
+            // localStorage.userSign = data.userSign;
+
+        },
+        /**
+         * [clearToken 清除token信息]
+         */
+        clearToken(state, data) {
+            console.log('拦截错误信息,应该跳登录了');
+            // window.sessionStorage.setItem('isLogin','error');
+            // state.isLogin = 'error';
+            // localStorage.removeItem('user');
+            // localStorage.removeItem('token');
+            // localStorage.removeItem('userSign');
+            // window.location.replace('http://guoxin.insun-china.com/hrm');
+
         },
         //退出登录
-        logout(state,data){
-            window.sessionStorage.setItem('isLogin','error');
+        logout(state, data) {
+            window.sessionStorage.setItem('isLogin', 'error');
             state.isLogin = 'error';
-        },
-        changePassword(state,data){
-            if(data.remember=='yes'){
-                state.password = data.password;
-                try {
-                    localStorage.password = data.password;
-                } catch (err) {
-                    console.log(err);
-                }
-            }
+            //清空 localStorage 的值
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('userSign');
         }
-        // ,
-        // refreshChange(state, num){
-        //     state.refresh = num
-        // }
     }
 })
