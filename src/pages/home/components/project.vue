@@ -174,16 +174,16 @@
           @current-change="initiateProjectList"
         ></el-pagination>-->
         <div class="paging">
-          <div class="block">
-            <el-pagination
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-              :current-page="pageNum"
-              layout="total, prev, pager, next"
-              :total="totalnum"
-              background
-            ></el-pagination>
-          </div>
+          <!-- <div class="block"> -->
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="pageNum"
+            layout="total, prev, pager, next"
+            :total="totalnum"
+            background
+          ></el-pagination>
+          <!-- </div> -->
         </div>
       </el-col>
       <!-- 我参与 -->
@@ -221,6 +221,16 @@
           :total="participateProjectListTota"
           @current-change="participateProjectList"
         ></el-pagination>-->
+        <div class="paging">
+          <el-pagination
+            @size-change="handleSizeChange_"
+            @current-change="handleCurrentChange_"
+            :current-page="pageNum_"
+            layout="total, prev, pager, next"
+            :total="totalnum_"
+            background
+          ></el-pagination>
+        </div>
       </el-col>
 
       <!-- 抽屉 -->
@@ -574,10 +584,14 @@ export default {
       dialogVisible: false,
       disabled: false,
       result: '', // 延迟原因内容
-      // 分页
+      // 我发起分页
       pageNum: 1, //默认页码
       totalnum: 0, //总页码
-      currentData: [] //当前渲染的数据
+      currentData: [], //当前渲染的数据
+      // 我参与分页
+      pageNum_: 1, //默认页码
+      totalnum_: 0, //总页码
+      currentData_: [] //当前渲染的数据
     }
   },
   // 侦听器
@@ -961,9 +975,13 @@ export default {
         moreTaskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
-      this.$axios
-        .post('/pmbs/api/project/projectFeedback', data)
-        .then(this.projectFeedbackSuss)
+      if (data.feedback == '' || data.moreTaskId == '') {
+        this.messageError('信息不能为空')
+      } else {
+        this.$axios
+          .post('/pmbs/api/project/projectFeedback', data)
+          .then(this.projectFeedbackSuss)
+      }
     },
     // 项目反馈-任务批量反馈回调
     projectFeedbackSuss(res) {
@@ -1063,12 +1081,15 @@ export default {
           }
         }
         // console.log(projectListOriginate)
-        
+
         this.projectListOriginate = projectListOriginate
 
-        this.totalnum = this.projectListOriginate.length;
-        var json = JSON.parse(JSON.stringify(this.projectListOriginate)); //拷贝数据 避免影响原始数据
-        this.currentData = json.splice((this.pageNum-1)*10,(this.pageNum-1)*10+10);
+        this.totalnum = this.projectListOriginate.length
+        var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
+        this.currentData = json.splice(
+          (this.pageNum - 1) * 10,
+          (this.pageNum - 1) * 10 + 10
+        )
       }
     },
     // 项目管理-我参与获取
@@ -1084,6 +1105,13 @@ export default {
       if (res.status == 200) {
         let projectListJoin = res.data.data
         this.projectListJoin = projectListJoin
+
+        this.totalnum_ = this.projectListJoin.length
+        var json = JSON.parse(JSON.stringify(this.projectListJoin)) //拷贝数据 避免影响原始数据
+        this.currentData_ = json.splice(
+          (this.pageNum - 1) * 10,
+          (this.pageNum - 1) * 10 + 10
+        )
       }
     },
     // 分页
@@ -1097,12 +1125,33 @@ export default {
 
       var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
 
-      this.currentData = json.splice((this.pageNum - 1) * 10, (this.pageNum - 1) * 10 + 10)
+      this.currentData = json.splice(
+        (this.pageNum - 1) * 10,
+        (this.pageNum - 1) * 10 + 10
+      )
 
       console.log(this.currentData)
     },
 
-    
+    // 分页
+    handleSizeChange_() {},
+    //下一页
+    handleCurrentChange_(page) {
+      this.pageNum_ = page
+      console.log(page)
+
+      this.totalnum_ = this.projectListOriginate.length
+
+      var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
+
+      this.currentData_ = json.splice(
+        (this.pageNum - 1) * 10,
+        (this.pageNum - 1) * 10 + 10
+      )
+
+      console.log(this.currentData_)
+    },
+
     // 任务反馈
     // putTaskFeedback() {
     //   let data = {
@@ -1376,5 +1425,8 @@ export default {
 }
 .pointer {
   cursor: pointer;
+}
+.paging {
+  text-align: center;
 }
 </style>

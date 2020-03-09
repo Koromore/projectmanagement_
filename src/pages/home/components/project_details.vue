@@ -76,8 +76,9 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.listOaUser != null && scope.row.initUserId == userId && scope.row.status == 1 || scope.row.status == 4"
+                  v-show="scope.row.listOaUser != null && scope.row.doUserId == userId && scope.row.status == 1 || scope.row.status == 4"
                 >更换</el-link>
+                <!-- doUserId -->
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
                 <el-select
@@ -433,7 +434,7 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.listOaUser != null && taskData.initUserId == userId && taskData.status == 1 || taskData.status == 4"
+                v-show="taskData.listOaUser != null && taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -444,7 +445,7 @@
                 :class="{'state_color1': taskData.status == 1,
                   'state_color2': taskData.status == 2}"
                 placeholder="请选择"
-                v-if="taskData.status==1"
+                v-if="taskData.status==1 && taskData.doUserId == userId"
               >
                 <el-option
                   v-for="item in statusList"
@@ -453,6 +454,7 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
+              <span v-else-if="taskData.status==1 && taskData.doUserId != userId" class="state_color1">执行中</span>
               <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
               <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
               <span v-else-if="taskData.status==4" class="state_color4">延期</span>
@@ -495,7 +497,7 @@
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">完成结果：</el-col>
             <el-col :span="18">
-              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result"></el-input>
+              <el-input type="textarea" :rows="3" placeholder="请输入内容" :disabled="resultBan" v-model="result"></el-input>
             </el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18">
@@ -504,6 +506,7 @@
                 list-type="picture-card"
                 :on-remove="handleRemoveResult"
                 :on-success="handleSuccessResult"
+                :disabled="updateBan"
               >
                 <i class="el-icon-plus"></i>
               </el-upload>
@@ -529,7 +532,7 @@
             </el-col>
           </el-row>
         </el-scrollbar>
-        <el-row class="batton_pa">
+        <el-row class="batton_pa" v-show="batton_pa">
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info">取消</el-button>
             <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
@@ -639,13 +642,16 @@ export default {
       // 反馈信息
       feedbackContent: '', // 任务反馈内容
       taskFeedbackId: '', // 反馈任务的ID
-      result: '', // 完成结果
+      
       // 项目类型选择
       task_type: [],
       task_type_value: '',
 
       // 任务详情
       taskData: {},
+      batton_pa: true, // 是否显示完成按钮
+      result: '', // 完成结果
+      resultBan: false, // 完成成果禁止输入
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
@@ -655,6 +661,7 @@ export default {
       suggest_list: [], // 任务反馈意见列表
       file_list: [],
       // 上传文档
+      updateBan: false, // 上传文档禁止
       dialogImageUrlResult: '',
       dialogVisibleResult: false,
       disabledResult: false,
@@ -819,6 +826,22 @@ export default {
       this.getParams(this.sousuo_input)
     },
     task_detail(taskData) {
+      let userId = this.userId
+      if (userId == taskData.initUserId) {
+        // 我发起
+        this.resultBan = true
+        this.updateBan = true
+        this.batton_pa = true
+        console.log('我发起')
+      } else if(userId == taskData.doUserId) {
+        // 我参与
+        this.resultBan = false
+        this.updateBan = false
+        this.batton_pa = true
+        console.log('我参与')
+      }else{
+        this.batton_pa = false
+      }
       this.drawer5 = true
       // console.log(taskData)
       this.taskId = taskData.taskId
@@ -1157,9 +1180,13 @@ export default {
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
-      this.$axios
-        .post('/pmbs/api/project/taskfeedback', data)
-        .then(this.taskFeedbackSuss)
+      if (data.feedback == '') {
+        this.messageError('信息不能为空')
+      } else {
+        this.$axios
+          .post('/pmbs/api/project/taskfeedback', data)
+          .then(this.taskFeedbackSuss)
+      }
     },
     // 任务反馈回调
     taskFeedbackSuss(res) {

@@ -4,10 +4,6 @@
     <el-container style="height: 100vh; padding-top: 75px;">
       <!-- 左菜单栏 start -->
       <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
-        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')">
-          <i class="el-icon-pie-chart"></i>
-          统计
-        </div>
         <div
           :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
           @click="change_show(2,'project')"
@@ -22,6 +18,10 @@
         <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4,'document')">
           <i class="el-icon-folder-opened"></i>
           文档管理
+        </div>
+        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')">
+          <i class="el-icon-pie-chart"></i>
+          统计
         </div>
         <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5,'set')">
           <i class="el-icon-setting"></i>
@@ -183,7 +183,7 @@ export default {
   data() {
     return {
       home_style: '',
-      show_acti: 1,
+      show_acti: 2,
       drawer: false,
       restaurants: [
         { value: '测试1', deptId: 'id1' },
@@ -249,7 +249,8 @@ export default {
         this.new_project.manager = ''
         this.new_project.managerId = ''
       }
-    }
+    },
+    '$route':'router_url'
   },
   // 方法
   methods: {

@@ -121,7 +121,7 @@
             :filter-method="filterDepartment"
           ></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
+            <el-link slot-scope="scope" @click="task_detail(scope.row,0)">{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="执行状态">
             <template slot-scope="scope">
@@ -148,7 +148,7 @@
                 v-if="scope.row.isIgnore != true && scope.row.status == 2"
                 type="primary"
                 slot="reference"
-                @click="task_detail(scope.row)"
+                @click="task_detail(scope.row,0)"
               >完成</el-button>
             </template>
           </el-table-column>
@@ -177,7 +177,7 @@
         >
           <el-table-column prop="deptName" label="部门"></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
+            <el-link slot-scope="scope" @click="task_detail(scope.row,1)">{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
@@ -196,7 +196,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -237,26 +237,18 @@
             <template slot-scope="scope">
               <el-button
                 size="small"
-                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 type="info"
                 slot="reference"
                 @click="join_redact(scope.row.proId,scope.row.taskId)"
               >忽略</el-button>
-              <!-- <el-button
+              <el-button
                 size="small"
-                v-if="scope.row.status == 2"
-                type="info"
+                v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                type="primary"
                 slot="reference"
-                @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
-              >反馈</el-button>-->
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="task_detail(scope.row)">
-                <el-button
-                  size="small"
-                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
-                  type="primary"
-                  slot="reference"
-                >完成</el-button>
-              </el-popconfirm>
+                @click="task_detail(scope.row,1)"
+              >完成</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -283,26 +275,27 @@
             <el-col :span="18">
               <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
               <el-select
-                  v-if="changeNameShow"
-                  v-model="taskData.doUserId"
-                  filterable
-                  placeholder="请选择"
-                  size="mini"
-                  clearable
-                  style="width:99px;"
-                >
-                  <el-option
-                    v-for="item in taskData.listOaUser"
-                    :key="item.userId"
-                    :label="item.realName"
-                    :value="item.userId"
-                  ></el-option>
-                </el-select>
-                <el-link
-                  type="primary"
-                  @click="changeName()"
-                  v-show="taskData.listOaUser != null && taskData.initUserId == userId && taskData.status == 1 || taskData.status == 4"
-                >更换</el-link>
+                v-if="changeNameShow"
+                v-model="taskData.doUserId"
+                filterable
+                placeholder="请选择"
+                size="mini"
+                clearable
+                style="width:99px;"
+              >
+                <el-option
+                  v-for="item in taskData.listOaUser"
+                  :key="item.userId"
+                  :label="item.realName"
+                  :value="item.userId"
+                ></el-option>
+              </el-select>
+              <el-link
+                type="primary"
+                @click="changeName()"
+                v-show="taskData.listOaUser != null && taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >更换</el-link>
+              <!-- scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4 -->
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
             <el-col :span="18">
@@ -312,7 +305,7 @@
                 :class="{'state_color1': statusListValue == 1,
                   'state_color2': statusListValue == 2}"
                 placeholder="请选择"
-                v-if="taskData.status==1"
+                v-if="taskData.status==1 && taskData.doUserId == userId"
               >
                 <el-option
                   v-for="item in statusList"
@@ -321,6 +314,10 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
+              <span
+                v-else-if="taskData.status==1 && taskData.doUserId != userId"
+                class="state_color1"
+              >执行中</span>
               <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
               <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
               <span v-else-if="taskData.status==4" class="state_color4">延期</span>
@@ -333,7 +330,7 @@
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">{{taskData.remark}}</el-col>
             <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18">
+            <el-col :span="18" class="proFileList">
               <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
                 <img
                   v-if="item.suffix == 'doc' || item.suffix == 'docx'"
@@ -363,7 +360,13 @@
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">完成结果：</el-col>
             <el-col :span="18">
-              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
+              <el-input
+                type="textarea"
+                :disabled="resultBan"
+                :rows="3"
+                placeholder="请输入内容"
+                v-model="result"
+              >完成结果：描述</el-input>
             </el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18">
@@ -372,6 +375,7 @@
                 list-type="picture-card"
                 :on-remove="handleRemoveResult"
                 :on-success="handleSuccessResult"
+                :disabled="updateBan"
               >
                 <i class="el-icon-plus"></i>
               </el-upload>
@@ -427,7 +431,7 @@
             <el-col :span="24" class="title">{{drawer3_task}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="cause"></el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -473,7 +477,9 @@ export default {
       participateTaskListTota: 0, // 我参与任务列表总页数
       // 1审核中 2执行中 3已完成 4延期
       tableData2: [],
-      result: '',
+      result: '', // 完成成果
+      resultBan: false, // 完成成果禁止输入
+      cause: '', // 延期原因
       tabs_activity: 1,
       table_show: true,
       // 项目类型1选择
@@ -502,6 +508,7 @@ export default {
       suggest_list: [], // 任务反馈意见列表
       file_list: '',
       // 上传文档
+      updateBan: false, // 上传文档禁止
       dialogImageUrlResult: '',
       dialogVisibleResult: false,
       disabledResult: false,
@@ -694,8 +701,19 @@ export default {
     filterDepartment(value, row) {
       return row.department === value
     },
-    task_detail(taskData) {
+    task_detail(taskData, type) {
       // console.log(taskData)
+      if (type == 0) {
+        this.resultBan = true
+        this.updateBan = true
+      } else if (type == 1 && taskData.isIgnore != true && taskData.status == 1) {
+        this.resultBan = false
+        this.updateBan = false
+      }else{
+        this.resultBan = true
+        this.updateBan = true
+      }
+
       this.drawer1 = true
       this.statusListValue = taskData.status.toString()
       this.getTaskShow(taskData.taskId)
@@ -996,9 +1014,13 @@ export default {
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
-      this.$axios
-        .post('/pmbs/api/project/taskfeedback', data)
-        .then(this.taskFeedbackSuss)
+      if (data.feedback == '') {
+        this.messageError('信息不能为空')
+      } else {
+        this.$axios
+          .post('/pmbs/api/project/taskfeedback', data)
+          .then(this.taskFeedbackSuss)
+      }
     },
     // 任务反馈回调
     taskFeedbackSuss(res) {
@@ -1251,6 +1273,12 @@ export default {
   padding-left: 18px;
   font-weight: 600;
   font-size: 18px;
+}
+.task .task_details .proFileList{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 .task .task_details .smname {
   width: 72px;

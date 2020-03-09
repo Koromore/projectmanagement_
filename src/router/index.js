@@ -80,7 +80,7 @@ const router = new Router({
                 path: '/home',
                 name: 'home',
                 component: Home,
-                redirect: '/home/components/statistics',
+                redirect: '/home/components/project',
                 component: resolve => require(['@/pages/home/home'], resolve),
                 meta: {
                     requireAuth: true,
