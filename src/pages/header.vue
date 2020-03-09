@@ -3,29 +3,31 @@
     <el-row>
       <el-header style="height: 75px;">
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
-        <div  class="header-right">
-          <div class="add_du"  @click="add_box">
+        <div class="header-right">
+          <div class="add_du" @click="add_box">
             <i class="el-icon-folder-add"></i>
             创建
           </div>
-            <!-- <el-badge :value="3" class="item">
-              <i class="el-icon-bell"></i>
-            </el-badge> -->
+          <!-- <el-badge :value="3" class="item">
+            <i class="el-icon-bell"></i>
+          </el-badge> -->
           <!-- 头像 -->
-          <div class="portrait">
-            <img style="width:100%;height:100%;" :src="this.$store.state.user.headPortrait" alt="">
+          <div class="usual">
+            <div class="portrait">
+              <img style="width:100%;height:100%;" :src="this.$store.state.user.headPortrait" alt />
+            </div>
+            <el-dropdown trigger="hover">
+              <span class="el-dropdown-link" style="color:#fff;">
+                {{this.$store.state.user.realName}}
+                <i class="el-icon-caret-bottom el-icon--right"></i>
+              </span>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item class="clearfix">
+                  <span @click="logout">退出</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
           </div>
-          <el-dropdown trigger="hover">
-            <span class="el-dropdown-link" style="color:#fff;">
-              {{this.$store.state.user.realName}}
-              <i class="el-icon-caret-bottom el-icon--right"></i>
-            </span>
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item class="clearfix">
-                <span @click="logout">退出</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
         </div>
       </el-header>
     </el-row>
@@ -71,7 +73,7 @@ export default {
   float: left;
 }
 .header-right {
-  width: 340px;
+  width: 281px;
   float: right;
   color: #555555;
   font-size: 18px;
@@ -164,5 +166,12 @@ export default {
   border-radius: 50%;
   /*background: white;*/
   overflow: hidden;
+}
+.usual {
+  width: 121px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
 </style>

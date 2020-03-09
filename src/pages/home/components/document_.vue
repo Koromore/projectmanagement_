@@ -61,7 +61,7 @@
             </el-button-group>
           </el-col>
           <el-col :span="8" class="tab tab3">
-            <el-input @keyup.enter.native="searchHandle" placeholder="搜索" size="small" v-model="name" class="sousuo">
+            <el-input placeholder="搜索" size="small" v-model="name" class="sousuo">
               <el-button @click="searchHandle" slot="append" size="small" icon="el-icon-search"></el-button>
             </el-input>
           </el-col>
@@ -128,7 +128,7 @@
         <el-table-column prop="realName" label="更新人" width="180"></el-table-column>
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status!=3 && scope.row.status!=5" @click="upload2(scope.$index, scope.row)" size="mini" icon="el-icon-upload2"></el-button>
+            <el-button @click="upload2(scope.$index, scope.row)" size="mini" icon="el-icon-upload2"></el-button>
             <el-button @click="download(scope.row)" size="mini" icon="el-icon-download"></el-button>
             <el-button
               @click="enterDetail(scope.$index, scope.row)"
@@ -311,7 +311,7 @@
       </el-row>
     </el-drawer>
     <!-- 重新上传弹框 -->
-    <el-dialog :close="fileClose" title="修改附件" :visible.sync="dialogFileVisible">
+    <el-dialog title="修改附件" :visible.sync="dialogFileVisible">
       <div>
         <el-upload
           :action="uploadUrl"
@@ -387,10 +387,6 @@ export default {
     }
   },
   methods: {
-    fileClose(){
-      //监听重新上传弹框关闭 清空数据
-      this.listProFile = [];
-    },
     getAllClientAndBusiness() {
       this.$axios
         .post('/pmbs/client/getAllClientAndBusiness')
@@ -680,7 +676,7 @@ export default {
       let localPath = row.localPath
       let a = document.createElement('a')
       a.download = ''
-      a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
+      a.setAttribute('href', 'http://218.106.254.122:8083/pmbs/' + localPath)
       a.click()
     },
     /**

@@ -2,10 +2,10 @@
   <div class="project_details" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <el-col :span="4" class>
-          <el-link @click="toProject()">项目管理</el-link>
-          <span class="project_name">/ {{proName}}</span>
-        </el-col>
+        <!-- <el-col :span="6" class> -->
+        <el-link @click="toProject()">项目管理</el-link>
+        <span class="project_name">/ {{proName}}</span>
+        <!-- </el-col> -->
       </el-col>
       <el-col :span="6" class="tabs">
         <el-button-group>
@@ -27,7 +27,11 @@
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i @click="addtask" class="el-icon-circle-plus-outline" v-if="projectShowDetail.status != 3"></i>
+          <i
+            @click="addtask"
+            class="el-icon-circle-plus-outline"
+            v-if="projectShowDetail.status != 3"
+          ></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
           <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
           <i @click="sousuoShow" class="el-icon-search"></i>
@@ -136,7 +140,7 @@
                 srcset
               />
               <img v-else src="static/images/document/other.png" width="24" alt srcset />
-              <div>{{scope.row.taskfileList[0].fileName}}</div>
+              <div class="filenametext">{{scope.row.taskfileList[0].fileName}}</div>
             </div>
           </el-table-column>
           <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
@@ -144,7 +148,7 @@
               <div v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
-                  v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 2 || scope.row.status == 4"
                   type="info"
                   @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 >反馈</el-button>
@@ -455,7 +459,10 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
-              <span v-else-if="taskData.status==1 && taskData.doUserId != userId" class="state_color1">执行中</span>
+              <span
+                v-else-if="taskData.status==1 && taskData.doUserId != userId"
+                class="state_color1"
+              >执行中</span>
               <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
               <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
               <span v-else-if="taskData.status==4" class="state_color4">延期</span>
@@ -498,7 +505,13 @@
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">完成结果：</el-col>
             <el-col :span="18">
-              <el-input type="textarea" :rows="3" placeholder="请输入内容" :disabled="resultBan" v-model="result"></el-input>
+              <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入内容"
+                :disabled="resultBan"
+                v-model="result"
+              ></el-input>
             </el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18">
@@ -644,7 +657,7 @@ export default {
       // 反馈信息
       feedbackContent: '', // 任务反馈内容
       taskFeedbackId: '', // 反馈任务的ID
-      
+
       // 项目类型选择
       task_type: [],
       task_type_value: '',
@@ -835,13 +848,13 @@ export default {
         this.updateBan = true
         this.batton_pa = true
         console.log('我发起')
-      } else if(userId == taskData.doUserId) {
+      } else if (userId == taskData.doUserId) {
         // 我参与
         this.resultBan = false
         this.updateBan = false
         this.batton_pa = true
         console.log('我参与')
-      }else{
+      } else {
         this.batton_pa = false
       }
       this.drawer5 = true
@@ -1076,7 +1089,7 @@ export default {
         this.faTaskList = faTaskList
         if (faTaskList.length == 0) {
           this.faTaskDisabled = true
-        }else{
+        } else {
           this.faTaskDisabled = false
         }
       }
@@ -1342,10 +1355,10 @@ export default {
   background: red;
 } */
 .project_details .top {
-  display: flex;
+  /* display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; */
   margin-bottom: 24px;
 }
 .project_details .top {
@@ -1498,7 +1511,7 @@ export default {
   color: rgb(16, 16, 16);
 }
 .project_details .table2 .need .fileList {
-  /* width: 64px; */
+  width: 100%;
   height: 76px;
   text-align: center;
   display: flex;
@@ -1722,5 +1735,10 @@ export default {
 }
 .project_details >>> .el-scrollbar__wrap {
   overflow-x: hidden;
+}
+.filenametext {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

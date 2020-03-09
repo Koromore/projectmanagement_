@@ -32,7 +32,7 @@
       <el-container>
         <!-- 内容 start -->
         <el-main>
-          <router-view @getData="getData" ref="project"></router-view>
+          <router-view @getData="getData" ref="project" :update="update"></router-view>
         </el-main>
         <!-- 内容 end -->
       </el-container>
@@ -232,7 +232,9 @@ export default {
       uploadUrl: '',
       file_list: [],
 
-      fileList: []
+      fileList: [],
+      // 新增项目时传值获取项目列表
+      update: 0
     }
   },
   // 侦听器
@@ -248,7 +250,7 @@ export default {
         this.new_project.managerId = ''
       }
     },
-    '$route':'router_url'
+    $route: 'router_url'
   },
   // 方法
   methods: {
@@ -324,6 +326,10 @@ export default {
       // this.$refs.router.getProjectList()
       // 新建项目
       this.typeName = '创建项目'
+      // this.$router.push({ path: '/home/components/project' })
+      // this.$router.replace('/home/components/project').catch(err => {
+      //   console.log(err)
+      // })
       // new_project: {
       //   new_name: '', // 任务名称
       //   business_type: [], // 分类 客户-类型
@@ -664,6 +670,8 @@ export default {
         // 重置信息
 
         this.empty()
+        let update = this.update
+        this.update = update++
         // this.$refs[projeck].getProjectList()
       }
     },

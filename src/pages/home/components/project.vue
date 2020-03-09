@@ -94,7 +94,7 @@
         </el-col>
         <!-- </div> -->
       </el-col>
-      <el-col :span="24" class="tabs">
+      <el-col :span="24" class="tabs" v-if="userId != 152">
         <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">我发起</div>
         <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
       </el-col>
@@ -435,6 +435,9 @@
 <script>
 export default {
   name: 'project',
+  props:{
+    update: Boolean
+  },
   data() {
     return {
       userId: this.$store.state.user.userId,
@@ -650,6 +653,11 @@ export default {
       // isUsual: '', // 专项-1/日常-0
       // status: '', // 任务状态
       this.findProjectList()
+    },
+    update: function (newQuestion, oldQuestion) {
+      // if (this.update) {
+        this.getProjectList()
+      // }
     }
   },
   // 方法
@@ -1074,7 +1082,7 @@ export default {
     },
     // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
-      console.log(res)
+      // console.log(res)
       this.loading = false
       if (res.status == 200) {
         let projectListOriginate = res.data.data
@@ -1099,7 +1107,7 @@ export default {
           (this.pageNum - 1) * 10,
           (this.pageNum - 1) * 10 + 10
         )
-        console.log(this.currentData)
+        // console.log(this.currentData)
       }
     },
     // 项目管理-我参与获取
