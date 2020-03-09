@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i @click="addtask" class="el-icon-circle-plus-outline"></i>
+          <i @click="addtask" class="el-icon-circle-plus-outline" v-if="projectShowDetail.status != 3"></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
           <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
           <i @click="sousuoShow" class="el-icon-search"></i>
