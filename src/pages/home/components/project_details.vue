@@ -258,8 +258,8 @@
             <el-col :span="24">
               <el-col :span="6" class="title title1">创建任务</el-col>
             </el-col>
-            <el-col :span="6" class="title" v-if="projectShowDetail.manager != userId">父任务</el-col>
-            <el-col :span="13" v-if="projectShowDetail.manager != userId">
+            <el-col :span="6" class="title">父任务</el-col>
+            <el-col :span="13">
               <!-- <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input> -->
               <el-select
                 v-model="new_task.faTask"
@@ -267,6 +267,7 @@
                 placeholder="请选择"
                 class="parent_task"
                 clearable
+                :disabled="faTaskDisabled"
               >
                 <el-option
                   v-for="item in faTaskList"
@@ -575,6 +576,7 @@ export default {
       table_show: true,
       // 父任务列表
       faTaskList: [],
+      faTaskDisabled: false, // 是否禁止
       // 新增
       new_task: {
         faTask: '',
@@ -859,9 +861,10 @@ export default {
     getTaskDetailSuss(res) {
       // console.log(res)
       if (res.status == 200) {
-        this.taskData = res.data.data
+        let data = res.data.data
+        this.taskData = data
         // console.log(this.projectListJoin)
-        this.suggest_list = res.data.feedbackList
+        this.suggest_list = data.feedbackList
         // this.userValue = res.data.data.doUserName
       }
     },
@@ -1071,6 +1074,11 @@ export default {
           faTaskList.push(faTaskListData)
         }
         this.faTaskList = faTaskList
+        if (faTaskList.length == 0) {
+          this.faTaskDisabled = true
+        }else{
+          this.faTaskDisabled = false
+        }
       }
     },
     // 新增任务提交按钮
@@ -1490,7 +1498,7 @@ export default {
   color: rgb(16, 16, 16);
 }
 .project_details .table2 .need .fileList {
-  width: 64px;
+  /* width: 64px; */
   height: 76px;
   text-align: center;
   display: flex;

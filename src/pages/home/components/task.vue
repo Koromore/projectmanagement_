@@ -148,7 +148,7 @@
                 v-if="scope.row.isIgnore != true && scope.row.status == 2"
                 type="primary"
                 slot="reference"
-                @click="task_detail(scope.row,0)"
+                @click="sponsor_achieve(scope.row.taskId)"
               >完成</el-button>
             </template>
           </el-table-column>
@@ -654,12 +654,37 @@ export default {
       this.drawer2_task = proName + '-' + taskName
       this.taskFeedbackId = id
     },
-    sponsor_achieve(e, task, state) {
+    sponsor_achieve(taskId) {
       // console.log('我发起完成' + e)
-      if (state == 4) {
-        this.drawer3 = true
-        this.drawer3_task = task
-      }
+      // if (state == 4) {
+      //   this.drawer3 = true
+      //   this.drawer3_task = task
+      // }
+      this.$confirm('是否确认此操作？', '确认信息', {
+          distinguishCancelAndClose: true,
+          confirmButtonText: '确认',
+          cancelButtonText: '取消'
+        })
+          .then(() => {
+            // this.$message({
+            //   type: 'info',
+            //   message: '保存修改'
+            // });
+            let data = {
+            proId: '',
+            taskId: taskId,
+            status: 3,
+            taskfileList: []
+          }
+          // console.log(data)
+          this.taskSave(data)
+          })
+          .catch(action => {
+            this.$message({
+              type: 'info',
+              message: '已取消'
+            })
+          })
     },
     join_redact(proId, taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {

@@ -191,7 +191,7 @@
         <el-table
           v-loading="loading"
           ref="filterTable"
-          :data="projectListJoin"
+          :data="currentData_"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
@@ -420,7 +420,7 @@
             <el-col :span="24" class="title">{{drawer3_name}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result">反馈反馈反馈反馈反馈</el-input>
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="delayReason">反馈反馈反馈反馈反馈</el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -583,7 +583,7 @@ export default {
       dialogImageUrl: '',
       dialogVisible: false,
       disabled: false,
-      result: '', // 延迟原因内容
+      delayReason: '', // 延迟原因内容
       // 我发起分页
       pageNum: 1, //默认页码
       totalnum: 0, //总页码
@@ -871,7 +871,9 @@ export default {
       this.drawer1 = true
       this.drawer1_name = name
       this.proId = id
-      this.getProjectTaskListInit(id)
+      let userId = this.userId
+      let data = `?proId=${id}&userId=${userId}`
+      this.getProjectTaskListInit(data)
     },
     aredact(id) {
       // console.log('编辑' + id)
@@ -925,8 +927,8 @@ export default {
       this.delProject(id)
     },
     // 获取我发起项目下所有任务
-    getProjectTaskListInit(id) {
-      let data = `?proId=${id}`
+    getProjectTaskListInit(data) {
+      // let data = `?proId=${id}`
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
         .then(this.getProjectTaskListInitSuss)
@@ -1064,21 +1066,28 @@ export default {
       this.$axios
         .post('/pmbs/api/project/listAjax' + data0)
         .then(this.getProjectListAjaxSuss)
+        // .catch(function(err) {
+        //   // console.log('failed', err)
+        //   // this.loading = false
+        //   console.log('请求超时')
+        // })
     },
     // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
+      console.log(res)
       this.loading = false
       if (res.status == 200) {
         let projectListOriginate = res.data.data
         for (let i = 0; i < projectListOriginate.length; i++) {
-          const element = projectListOriginate[i]
-          element.unfintask = 0
+          let element = projectListOriginate[i]
+          let unfintask = 0
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
-            if (element_.status != 3) {
-              element.unfintask++
+            if (element_.status != 3 && element_.isIgnore != true) {
+              element.unfintask ++
             }
           }
+          projectListOriginate[i].unfintask = unfintask
         }
         // console.log(projectListOriginate)
 
@@ -1090,6 +1099,7 @@ export default {
           (this.pageNum - 1) * 10,
           (this.pageNum - 1) * 10 + 10
         )
+        console.log(this.currentData)
       }
     },
     // 项目管理-我参与获取

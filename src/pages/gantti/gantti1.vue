@@ -18,15 +18,8 @@
           </svg>
         </el-col>
 
-        <el-col v-if="taskList && projectShowDetail" :span="22" :offset="2" class="title">皓影赠礼</el-col>
-        <el-col v-if="taskList && projectShowDetail" :span="20" :offset="2" class="gantt_time"></el-col>
-        <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2" >
-        <el-alert
-          title="暂无数据..."
-          type="success"
-          :closable="false">
-        </el-alert>
-        </el-col>
+        <el-col :span="22" :offset="2" class="title">皓影赠礼</el-col>
+        <el-col :span="20" :offset="2" class="gantt_time"></el-col>
       </el-col>
     </el-row>
   </div>

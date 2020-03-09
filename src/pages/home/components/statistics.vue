@@ -519,4 +519,7 @@ export default {
   box-sizing: border-box;
   border: 1px solid rgb(211, 211, 211);
 }
+.statistics .gantt_box:nth-of-type(3) {
+  margin-bottom: 0;
+}
 </style>

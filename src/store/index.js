@@ -8,10 +8,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        user: { userId: 128, deptId: 64 }, //员工信息
+        user: {}, //{ userId: 128, deptId: 64 }, //员工信息
         token: '', //登录令牌
         userSign: '', //用户信息带参
-        isLogin: 'success', //'error', //是否登陆
+        isLogin: 'error', //'error', //是否登陆
         isRouterAlive: true, // 控制页面刷新
     },
     action: {
@@ -37,13 +37,13 @@ export default new Vuex.Store({
         },
         //登录
         login(state, data) {
-            // state.user = data.user;
-            // state.token = data.token;
-            // state.userSign = data.userSign;
+            state.user = data.user;
+            state.token = data.token;
+            state.userSign = data.userSign;
             state.isLogin = window.sessionStorage.getItem('isLogin') || 'error';
-            // localStorage.user = JSON.stringify(data.user);
-            // localStorage.token = data.token;
-            // localStorage.userSign = data.userSign;
+            localStorage.user = JSON.stringify(data.user);
+            localStorage.token = data.token;
+            localStorage.userSign = data.userSign;
 
         },
         /**

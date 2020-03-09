@@ -3,21 +3,21 @@
     <el-row>
       <el-header style="height: 75px;">
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
-        <div  class="header-right">
-          <div class="add_du"  @click="add_box">
+        <div :span="3" class="header-right">
+          <div class="add_du" @click="add_box">
             <i class="el-icon-folder-add"></i>
             创建
           </div>
-            <!-- <el-badge :value="3" class="item">
+          <!-- <el-col :span="8">
+            <el-badge :value="3" class="item">
               <i class="el-icon-bell"></i>
-            </el-badge> -->
+            </el-badge>
+          </el-col> -->
           <!-- 头像 -->
-          <div class="portrait">
-            <img style="width:100%;height:100%;" :src="this.$store.state.user.headPortrait" alt="">
-          </div>
+          <div class="portrait">张三</div>
           <el-dropdown trigger="hover">
-            <span class="el-dropdown-link" style="color:#fff;">
-              {{this.$store.state.user.realName}}
+            <span class="el-dropdown-link">
+              <!-- {{this.$store.state.username}} -->
               <i class="el-icon-caret-bottom el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
@@ -71,7 +71,7 @@ export default {
   float: left;
 }
 .header-right {
-  width: 340px;
+  width: 240px;
   float: right;
   color: #555555;
   font-size: 18px;
@@ -82,6 +82,7 @@ export default {
   justify-content: space-between;
 }
 .header-right .add_du {
+  width: 100px;
   color: white;
   font-size: 16px;
 }
@@ -162,7 +163,6 @@ export default {
   font-size: 16px;
   text-align: center;
   border-radius: 50%;
-  /*background: white;*/
-  overflow: hidden;
+  background: white;
 }
 </style>

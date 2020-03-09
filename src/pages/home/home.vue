@@ -42,10 +42,7 @@
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
           <el-col :span="24">
-            <el-col :span="6" class="title title1">
-              <span v-if="this.new_project.new_name == ''">创建项目</span>
-              <span v-else>编辑项目</span>
-            </el-col>
+            <el-col :span="6" class="title title1">{{typeName}}</el-col>
           </el-col>
           <el-col :span="6" class="title">名称</el-col>
           <el-col :span="13">
@@ -182,6 +179,7 @@ export default {
   },
   data() {
     return {
+      typeName: '', // 创建项目/编辑项目
       home_style: '',
       show_acti: 2,
       drawer: false,
@@ -324,6 +322,8 @@ export default {
       // 获取新建项目分类
       this.getAllClientAndBusiness()
       // this.$refs.router.getProjectList()
+      // 新建项目
+      this.typeName = '创建项目'
       // new_project: {
       //   new_name: '', // 任务名称
       //   business_type: [], // 分类 客户-类型
@@ -355,6 +355,8 @@ export default {
       this.getAllClientAndBusiness()
       // 获取项目详情
       this.getProjectShowDetail(data)
+      // 编辑项目
+      this.typeName = '编辑项目'
     },
     // 获取判断路由地址
     router_url() {
