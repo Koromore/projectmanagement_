@@ -153,7 +153,7 @@
                 type="info"
                 slot="reference"
                 v-if="scope.row.status == 1 || scope.row.status == 4"
-                @click="aredact(scope.row.proId,scope.row.proName)"
+                @click="aredact(scope.row)"
               >编辑</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.proId)">
                 <el-button
@@ -420,7 +420,12 @@
             <el-col :span="24" class="title">{{drawer3_name}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="delayReason">反馈反馈反馈反馈反馈</el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="delayReason"
+              >反馈反馈反馈反馈反馈</el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -435,8 +440,8 @@
 <script>
 export default {
   name: 'project',
-  props:{
-    update: Boolean
+  props: {
+    update: Number
   },
   data() {
     return {
@@ -654,10 +659,8 @@ export default {
       // status: '', // 任务状态
       this.findProjectList()
     },
-    update: function (newQuestion, oldQuestion) {
-      // if (this.update) {
-        this.getProjectList()
-      // }
+    update: function(newQuestion, oldQuestion) {
+      this.getProjectList()
     }
   },
   // 方法
@@ -883,7 +886,7 @@ export default {
       let data = `?proId=${id}&userId=${userId}`
       this.getProjectTaskListInit(data)
     },
-    aredact(id) {
+    aredact(proDetail) {
       // console.log('编辑' + id)
       // this.drawer2 = true
       // this.getProjectShowDetail(id)
@@ -894,7 +897,7 @@ export default {
       // 获取新建项目分类
       // this.getAllClientAndBusiness()
       // 向父组件传值
-      this.$emit('getData', id)
+      this.$emit('getData', proDetail)
       // this.$emit('getShopCode',value)
     },
     achieve(proId, name, state) {
@@ -1074,11 +1077,11 @@ export default {
       this.$axios
         .post('/pmbs/api/project/listAjax' + data0)
         .then(this.getProjectListAjaxSuss)
-        // .catch(function(err) {
-        //   // console.log('failed', err)
-        //   // this.loading = false
-        //   console.log('请求超时')
-        // })
+      // .catch(function(err) {
+      //   // console.log('failed', err)
+      //   // this.loading = false
+      //   console.log('请求超时')
+      // })
     },
     // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
@@ -1092,7 +1095,7 @@ export default {
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
             if (element_.status != 3 && element_.isIgnore != true) {
-              element.unfintask ++
+              unfintask++
             }
           }
           projectListOriginate[i].unfintask = unfintask

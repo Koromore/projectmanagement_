@@ -93,7 +93,7 @@
         </el-col>
       </el-col>
       <!--  -->
-      <el-col :span="24" class="tabs">
+      <el-col :span="24" class="tabs" v-if="userId != 152">
         <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">我发起</div>
         <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
       </el-col>
@@ -148,7 +148,7 @@
                 v-if="scope.row.isIgnore != true && scope.row.status == 2"
                 type="primary"
                 slot="reference"
-                @click="sponsor_achieve(scope.row.taskId)"
+                @click="sponsor_achieve(scope.row.proId,scope.row.taskId)"
               >完成</el-button>
             </template>
           </el-table-column>
@@ -226,7 +226,7 @@
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
           <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
-          <el-table-column prop="doUserName" label="下达人"></el-table-column>
+          <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="result" label="成果">
             <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
               <img src="static/images/document/ppt.png" width="24" alt srcset />
@@ -262,15 +262,30 @@
           ></el-pagination>
         </el-col>
       </el-col>
-      <!-- 抽屉 -->
+      <!-- 任务详情抽屉 start -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
         <el-scrollbar style="height: 100%">
-          <el-row class="task_details">
+          <el-row class="task_details" v-loading="drawerLoading">
             <el-col :span="24" class="title">{{taskData.proName}}-{{taskData.taskName}}</el-col>
             <el-col :span="6" class="title">执行部门：</el-col>
             <el-col :span="18">{{taskData.deptName}}</el-col>
             <el-col :span="6" class="title">任务类型：</el-col>
-            <el-col :span="18">{{taskData.typeName}}</el-col>
+            <el-col :span="18">
+              <!-- {{taskData.typeName}} -->
+              <template
+                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >
+                <el-select v-model="taskData.typeId" placeholder="请选择任务类型" size="mini">
+                  <el-option
+                    v-for="item in task_type"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+              </template>
+              <template v-else>{{taskData.typeName}}</template>
+            </el-col>
             <el-col :span="6" class="title">执行人：</el-col>
             <el-col :span="18">
               <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
@@ -324,64 +339,151 @@
               <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
             </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
-            <el-col :span="18">{{taskData.expertTime}}</el-col>
+            <el-col :span="18">
+              <template
+                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >
+                <el-date-picker
+                  v-model="taskData.expertTime"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions"
+                  size="mini"
+                ></el-date-picker>
+              </template>
+              <template v-else>{{taskData.expertTime}}</template>
+            </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime}}</el-col>
+            <el-col :span="18">
+              <template
+                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >
+                <el-date-picker
+                  v-model="taskData.overTime"
+                  type="date"
+                  placeholder="选择日期"
+                  :picker-options="pickerOptions"
+                  size="mini"
+                ></el-date-picker>
+              </template>
+              <template v-else>{{taskData.overTime}}</template>
+            </el-col>
             <el-col :span="6" class="title">需求：</el-col>
-            <el-col :span="18">{{taskData.remark}}</el-col>
+            <el-col :span="18">
+              <template
+                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >
+                <el-input
+                  type="textarea"
+                  :autosize="{ minRows: 1, maxRows: 9}"
+                  placeholder="请输入内容"
+                  v-model="taskData.remark"
+                ></el-input>
+              </template>
+              <template v-else>{{taskData.remark}}</template>
+            </el-col>
             <el-col :span="6" class="title">附件：</el-col>
             <el-col :span="18" class="proFileList">
-              <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
-                <img
-                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
-                  src="static/images/document/word.png"
-                  width="24"
-                  alt
-                  srcset
-                />
-                <img
-                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
-                  src="static/images/document/excle.png"
-                  width="24"
-                  alt
-                  srcset
-                />
-                <img
-                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
-                  src="static/images/document/ppt.png"
-                  width="24"
-                  alt
-                  srcset
-                />
-                <img v-else src="static/images/document/other.png" width="24" alt srcset />
-                <div>{{item.fileName}}</div>
-              </div>
+              <template
+                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              >
+                <el-upload
+                  :action="uploadUrl"
+                  :on-remove="handleRemove"
+                  :on-success="handleSuccess"
+                  :file-list="fileList0"
+                  class="elementUpload"
+                >
+                  <el-button size="mini" type="primary">点击上传附件</el-button>
+                </el-upload>
+              </template>
+              <template v-else>
+                <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+                  <img
+                    v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                    src="static/images/document/word.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img
+                    v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                    src="static/images/document/excle.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img
+                    v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                    src="static/images/document/ppt.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                  <div>{{item.fileName}}</div>
+                </div>
+              </template>
             </el-col>
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">完成结果：</el-col>
-            <el-col :span="18">
-              <el-input
-                type="textarea"
-                :disabled="resultBan"
-                :rows="3"
-                placeholder="请输入内容"
-                v-model="result"
-              >完成结果：描述</el-input>
+            <el-col :span="18" class>
+              <template
+                v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
+              >
+                <el-input
+                  type="textarea"
+                  :rows="3"
+                  placeholder="请输入内容"
+                  :disabled="resultBan"
+                  v-model="taskData.overDesc"
+                ></el-input>
+              </template>
+              <template v-else>{{taskData.overDesc}}</template>
             </el-col>
             <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18">
-              <el-upload
-                action="/pmbs/file/upload?upType=1&demandType=1"
-                list-type="picture-card"
-                :on-remove="handleRemoveResult"
-                :on-success="handleSuccessResult"
-                :disabled="updateBan"
+            <el-col :span="18" class="proFileList">
+              <template
+                v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
               >
-                <i class="el-icon-plus"></i>
-              </el-upload>
-              <el-dialog :visible.sync="dialogVisibleResult" class="upload_list">
-                <img width="100%" :src="dialogImageUrlResult" alt />
-              </el-dialog>
+                <el-upload
+                  action="/pmbs/file/upload?upType=1&demandType=1"
+                  :on-remove="handleRemoveResult"
+                  :on-success="handleSuccessResult"
+                  :disabled="updateBan"
+                  :fileList="fileList1"
+                  class="elementUpload"
+                >
+                  <el-button size="mini" type="primary">点击上传文档</el-button>
+                </el-upload>
+              </template>
+              <template v-else>
+                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index">
+                  <img
+                    v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                    src="static/images/document/word.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img
+                    v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                    src="static/images/document/excle.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img
+                    v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                    src="static/images/document/ppt.png"
+                    width="24"
+                    alt
+                    srcset
+                  />
+                  <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                  <div>{{item.fileName}}</div>
+                </div>
+              </template>
             </el-col>
             <el-divider content-position="right"></el-divider>
             <el-col :span="6" class="title">反馈意见：</el-col>
@@ -390,7 +492,7 @@
                 <el-col
                   :span="23"
                   class="suggest_list"
-                  v-for="item in suggest_list"
+                  v-for="item in taskData.feedbackList"
                   :key="item.index"
                 >
                   <el-col :span="12" class="time">{{item.updateTime}}</el-col>
@@ -402,12 +504,18 @@
           </el-row>
         </el-scrollbar>
         <el-row class="batton_pa">
-          <el-col :span="12" :offset="7" class="batton">
+          <el-col
+            :span="12"
+            :offset="7"
+            class="batton"
+            v-if="taskData.status != 3 && taskData.status != 5"
+          >
             <el-button size="small" type="info" @click="cancel">取消</el-button>
             <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
           </el-col>
         </el-row>
       </el-drawer>
+      <!-- 任务详情抽屉 end -->
       <!-- 抽屉-反馈 -->
       <el-drawer title="任务" :visible.sync="drawer2" :with-header="false">
         <el-row class="feedback">
@@ -450,6 +558,10 @@ export default {
     return {
       userId: this.$store.state.user.userId,
       loading: false,
+      drawerLoading: false,
+      // 项目类型选择
+      task_type: [],
+      task_type_value: '',
       // 查询条件
       clientIdList: [], // 用户列表
       clientId: '', // 用户ID
@@ -489,12 +601,15 @@ export default {
       suggest_list: [],
       // 状态列表
       statusList: [
-        { value: '1', label: '执行中' },
-        { value: '2', label: '完成' }
+        { value: 1, label: '执行中' },
+        { value: 2, label: '完成' }
       ],
       statusListValue: '',
       // 任务详情
       taskData: {},
+      // 禁止选择当前时间之前的时间
+      proExpertTime: '',
+      pickerOptions: {},
       // 反馈任务ID
       taskFeedbackId: '',
       // 反馈内容
@@ -506,7 +621,7 @@ export default {
       uploadUrl: '',
       listProFile: [], // 上传文件信息列表
       suggest_list: [], // 任务反馈意见列表
-      file_list: '',
+      fileList0: [],
       // 上传文档
       updateBan: false, // 上传文档禁止
       dialogImageUrlResult: '',
@@ -514,6 +629,7 @@ export default {
       disabledResult: false,
       uploadUrl: '',
       listProFileResult: [], // 上传文件信息列表
+      fileList1: [],
       // 详情内更换执行人
       changeNameShow: false,
       userValue: '' // 修改后执行人
@@ -562,6 +678,17 @@ export default {
   },
   // 方法
   methods: {
+    pickerOptionsTime() {
+      let expertTime = this.proExpertTime
+      this.pickerOptions = {
+        disabledDate(time) {
+          return (
+            time.getTime() < Date.now() - 8.64e7 ||
+            time.getTime() > new Date(expertTime).getTime()
+          )
+        }
+      }
+    },
     // 获取浏览器宽高
     widthheight() {
       let winWidth = window.innerWidth
@@ -654,37 +781,28 @@ export default {
       this.drawer2_task = proName + '-' + taskName
       this.taskFeedbackId = id
     },
-    sponsor_achieve(taskId) {
-      // console.log('我发起完成' + e)
-      // if (state == 4) {
-      //   this.drawer3 = true
-      //   this.drawer3_task = task
-      // }
+    sponsor_achieve(proId, taskId) {
       this.$confirm('是否确认此操作？', '确认信息', {
-          distinguishCancelAndClose: true,
-          confirmButtonText: '确认',
-          cancelButtonText: '取消'
-        })
-          .then(() => {
-            // this.$message({
-            //   type: 'info',
-            //   message: '保存修改'
-            // });
-            let data = {
-            proId: '',
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
+      })
+        .then(() => {
+          let data = {
+            proId: proId,
             taskId: taskId,
             status: 3,
+            proFileList: [],
             taskfileList: []
           }
-          // console.log(data)
           this.taskSave(data)
+        })
+        .catch(action => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
           })
-          .catch(action => {
-            this.$message({
-              type: 'info',
-              message: '已取消'
-            })
-          })
+        })
     },
     join_redact(proId, taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
@@ -727,21 +845,97 @@ export default {
       return row.department === value
     },
     task_detail(taskData, type) {
+      let userId = this.userId
       // console.log(taskData)
-      if (type == 0) {
-        this.resultBan = true
-        this.updateBan = true
-      } else if (type == 1 && taskData.isIgnore != true && taskData.status == 1) {
-        this.resultBan = false
-        this.updateBan = false
-      }else{
-        this.resultBan = true
-        this.updateBan = true
-      }
+      // if (type == 0) {
+      //   this.resultBan = true
+      //   this.updateBan = true
+      // } else if (
+      //   type == 1 &&
+      //   taskData.isIgnore != true &&
+      //   taskData.status == 1
+      // ) {
+      //   this.resultBan = false
+      //   this.updateBan = false
+      // } else {
+      //   this.resultBan = true
+      //   this.updateBan = true
+      // }
 
       this.drawer1 = true
-      this.statusListValue = taskData.status.toString()
-      this.getTaskShow(taskData.taskId)
+      // this.statusListValue = taskData.status.toString()
+      this.getDepTypeList()
+      let data = `?userId=${userId}&id=${taskData.taskId}`
+      this.getTaskDetail(data)
+    },
+    // 任务类型获取
+    getDepTypeList() {
+      let data = {}
+      this.$axios
+        .post('/pmbs/api/depType/listAjax', data)
+        .then(this.getDepTypeListSuss)
+    },
+    // 任务类型获取回调
+    getDepTypeListSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        // this.projectListJoin = res.data.data
+        let data = res.data.items
+        let task_type = []
+        let task_type_data = {}
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          task_type_data = {
+            value: element.typeId,
+            label: element.typeName
+          }
+          task_type.push(task_type_data)
+        }
+        this.task_type = task_type
+        // console.log(this.task_type)
+        // console.log(data)
+      }
+    },
+    // 获取任务详情
+    getTaskDetail(data) {
+      this.drawerLoading = true
+      this.$axios
+        .post('/pmbs/api/task/show' + data)
+        .then(this.getTaskDetailSuss)
+    },
+    // 获取任务详情回调
+    getTaskDetailSuss(res) {
+      // console.log(res)
+      this.drawerLoading = false
+      if (res.status == 200) {
+        let data = res.data.data
+        this.taskData = data
+        this.listProFile = data.proFileList
+        this.listProFileResult = data.taskfileList
+        this.statusListValue = data.status
+        let fileList0 = []
+        for (let i = 0; i < data.proFileList.length; i++) {
+          let element = data.proFileList[i]
+          let fileList0Data = {
+            fileId: element.fileId,
+            name: element.fileName
+          }
+          fileList0.push(fileList0Data)
+        }
+        this.fileList0 = fileList0
+        let fileList1 = []
+        for (let i = 0; i < data.taskfileList.length; i++) {
+          let element = data.taskfileList[i]
+          let fileList1Data = {
+            fileId: element.fileId,
+            name: element.fileName
+          }
+          fileList1.push(fileList1Data)
+        }
+        this.fileList1 = fileList1
+        // console.log(data)
+      }
+      // console.log(this.taskData)
     },
     // 修改执行人按钮
     changeDoUserName(e, list) {
@@ -904,37 +1098,55 @@ export default {
       }
       // console.log(res)
     },
-    // 获取任务详情
-    getTaskShow(id) {
-      let data = `?id=${id}`
-      this.$axios.post('/pmbs/api/task/show' + data).then(this.getTaskShowSuss)
+
+    ///////// 任务需求附件上传 start /////////
+    upload() {
+      let upType = 1
+      let demandType = 0
+      let uploadUrl = `
+      /pmbs/file/upload?upType=${upType}&demandType=${demandType}
+      `
+      this.uploadUrl = uploadUrl
     },
-    // 获取任务详情回调
-    getTaskShowSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        let data = res.data.data
-        this.taskData = data
-        this.suggest_list = data.feedbackList
+    // 上传回调
+    handleSuccess(res, file, fileList) {
+      // console.log('上传附件成功')
+      if (res.errcode == 0) {
+        let resData = res.data
+        let listProFile = this.listProFile
+        // console.log(listProFile)
+        let listProFileData = {
+          proId: this.taskData.proId, // 项目ID
+          taskId: this.taskData.taskId, // 任务ID
+          fileId: '', // 文档ID
+          fileName: resData.fileName, //'附件名称',
+          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
+          localPath: resData.path, //'本地路径',
+          suffix: resData.fileType //'文档后缀'
+        }
+        listProFile.push(listProFileData)
+        this.listProFile = listProFile
+        console.log(this.listProFile)
       }
-      // console.log(this.taskData)
     },
-    // 上传文档
     // 删除
-    handleRemoveResult(file) {
+    handleRemove(file) {
       // console.log(file)
-      let data = file.response.data
-      let listProFileResult = this.listProFileResult
-      for (let i = 0; i < listProFileResult.length; i++) {
-        let element = listProFileResult[i]
-        if (element.localPath == data.path) {
-          listProFileResult.splice(i, 1)
+      let data = file
+      let listProFile = this.listProFile
+      for (let i = 0; i < listProFile.length; i++) {
+        let element = listProFile[i]
+        if (element.fileId == data.fileId) {
+          listProFile[i].deleteFlag = true
           // console.log('删除')
         }
       }
-      this.listProFileResult = listProFileResult
-      // console.log(this.listProFileResult)
+      this.listProFile = listProFile
+      console.log(this.listProFile)
     },
+    ///////// 任务需求附件上传 end /////////
+
+    ///////// 任务成果附件上传 start /////////
     // 上传回调
     handleSuccessResult(res, file, fileList) {
       // console.log('上传附件成功')
@@ -948,7 +1160,6 @@ export default {
           fileId: '', // 文档ID
           updateUserId: this.userId, // 上传人ID
           fileName: resData.fileName, //'文档名称',
-          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
           localPath: resData.path, //'本地路径',
           suffix: resData.fileType //'文档后缀'
         }
@@ -957,44 +1168,40 @@ export default {
         // console.log(this.listProFileResult)
       }
     },
+    // 删除
+    handleRemoveResult(file) {
+      // console.log(file)
+      let data = file
+      let listProFileResult = this.listProFileResult
+      for (let i = 0; i < listProFileResult.length; i++) {
+        let element = listProFileResult[i]
+        if (element.fileId == data.fileId) {
+          listProFileResult[i].deleteFlag = true
+        }
+      }
+      this.listProFileResult = listProFileResult
+      // console.log(this.listProFileResult)
+    },
+    ///////// 任务成果附件上传 end /////////
+
+    ///////// 修改任务详情 start /////////
     // 修改任务详情
     changeTaskDeil() {
       // console.log('修改任务详情')
-      let taskData = this.taskData
-      let listProFileResult = this.listProFileResult
-      let taskfileList = []
-      if (listProFileResult.length == 0) {
-        for (let i = 0; i < taskData.taskfileList.length; i++) {
-          let element = taskData.taskfileList[i]
-          let taskfileListData = {
-            fileId: element.fileId,
-            fileName: element.fileName,
-            suffix: element.suffix,
-            localPath: element.localPath,
-            proId: element.proId,
-            taskId: element.taskId,
-            updateUserId: this.userId
-          }
-          taskfileList.push(taskfileListData)
-        }
-      } else {
-        taskfileList = listProFileResult
-      }
-
-      let data = {
-        proId: taskData.proId, // '所属项目id',
-        taskId: taskData.taskId, // 任务id
-        status: this.statusListValue, // 状态
-        doUserId: this.taskData.doUserId, // 执行人修改
-        overDesc: this.result, // 完成结果
-        taskfileList: taskfileList // 上传文档列表
-      }
-      if (taskData.taskfileList.length != 0 && listProFileResult.length != 0) {
-        data.oldFileId = fileId
-      }
-      this.taskSave(data)
+      // console.log('修改任务详情')
+      // listProFile
+      let taskData = this.taskData // 任务详情
+      let listProFile = this.listProFile // 需求文档
+      let listProFileResult = this.listProFileResult // 结果文档
+      let status = this.statusListValue
+      taskData.proFileList = listProFile
+      taskData.taskfileList = listProFileResult
+      taskData.status = status
+      // console.log(taskData.listProFile)
+      this.taskSave(taskData)
     },
-    // 任务新增/修改/完成
+    ///////// 修改任务详情 end /////////
+    ///////// 任务新增/修改/完成 start /////////
     taskSave(data) {
       // console.log(this.new_task.presetTime)
       // console.log(expertTime)
@@ -1015,6 +1222,7 @@ export default {
         // console.log(this.projectListJoin)
       }
     },
+    ///////// 任务新增/修改/完成 end /////////
     // 任务删除
     taskDelete(id) {
       let data = `?id=${id}`
@@ -1144,6 +1352,7 @@ export default {
     this.widthheight()
     this.getAllClientAndBusiness() // 获取客户和业务
     this.getTasklist() // 获取任务列表
+    this.upload() // 上传附件地址
   }
 }
 </script>
@@ -1299,11 +1508,11 @@ export default {
   font-weight: 600;
   font-size: 18px;
 }
-.task .task_details .proFileList{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
+.task .task_details .proFileList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 .task .task_details .smname {
   width: 72px;
@@ -1345,7 +1554,7 @@ export default {
   left: 0;
 }
 .task .task_details >>> .el-select input {
-  width: 81px;
+  width: 108px;
   border: none;
   font-size: 16px;
   padding-left: 0;
@@ -1381,5 +1590,8 @@ export default {
 } */
 .task >>> .el-scrollbar__wrap {
   overflow-x: hidden;
+}
+.task .elementUpload {
+  width: 100%;
 }
 </style>

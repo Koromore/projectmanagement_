@@ -13,7 +13,7 @@ Vue.use(Router)
 // 请求超时时间
 axios.defaults.timeout = 10000;
 
-// axios.defaults.baseURL =  process.env.API_ROOT;
+// axios.defaults.baseURL = process.env.API_ROOT;
 // post请求头
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
 

@@ -8,10 +8,15 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        user: {}, //{ userId: 128, deptId: 64 }, //员工信息
+        user: {}, // 员工信息
+        // user: { userId: 152 }, //员工信息
+        // user: { userId: 527, deptId: 91, realName: '付德全' }, //员工信息
+        // user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
+        // user: { userId: 6, deptId: 41, realName: '宋秀' }, //员工信息
+        // user: { userId: 266, deptId: 134, realName: '冯永强' }, //员工信息266
         token: '', //登录令牌
         userSign: '', //用户信息带参
-        isLogin: 'error', //'error', //是否登陆
+        isLogin: 'error', //error/success, //是否登陆
         isRouterAlive: true, // 控制页面刷新
     },
     action: {

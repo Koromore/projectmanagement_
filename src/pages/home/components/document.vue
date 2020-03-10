@@ -128,7 +128,7 @@
         <el-table-column prop="realName" label="更新人" width="180"></el-table-column>
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status!=3 && scope.row.status!=5" @click="upload2(scope.$index, scope.row)" size="mini" icon="el-icon-upload2"></el-button>
+            <el-button v-if="scope.row.status!=3 && scope.row.status!=5 && scope.row.initUserId == doUserId" @click="upload2(scope.$index, scope.row)" size="mini" icon="el-icon-upload2"></el-button>
             <el-button @click="download(scope.row)" size="mini" icon="el-icon-download"></el-button>
             <el-button
               @click="enterDetail(scope.$index, scope.row)"

@@ -105,6 +105,7 @@
                 :label="items.id"
                 v-for="items in deptList"
                 :key="items.index"
+                :disabled="checkListBan"
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
             <!-- {{new_project.checkList}} -->
@@ -115,7 +116,7 @@
           <!-- 知晓人编辑 -->
           <el-col :span="18" :offset="6" class="know_pop">
             <el-tag
-              :key="tag"
+              :key="tag.index"
               v-for="tag in new_project.dynamicTags"
               closable
               :disable-transitions="false"
@@ -142,13 +143,12 @@
           <el-col :span="13" :offset="6" class="upload">
             <el-upload
               :action="uploadUrl"
-              list-type="picture-card"
-              :on-preview="handlePictureCardPreview"
               :on-remove="handleRemove"
               :on-success="handleSuccess"
               :file-list="file_list"
             >
-              <i class="el-icon-plus"></i>
+              <!-- <i class="el-icon-plus"></i> -->
+              <el-button size="small" type="primary">点击上传</el-button>
             </el-upload>
             <el-dialog :visible.sync="dialogVisible" class="upload_list">
               <img width="100%" :src="dialogImageUrl" alt />
@@ -214,6 +214,7 @@ export default {
         checkList: [], // 执行部门
         dynamicTags: [] // 知晓人
       },
+      checkListBan: false, // 执行部门禁用
       // 禁止选择当前时间之前的时间
       pickerOptions: {
         disabledDate(time) {
@@ -231,7 +232,6 @@ export default {
       clientList: [],
       uploadUrl: '',
       file_list: [],
-
       fileList: [],
       // 新增项目时传值获取项目列表
       update: 0
@@ -317,12 +317,8 @@ export default {
       this.drawer = data
       // 获取客户列表
       // this.getClientListAjax()
-      // 获取部门列表
-      this.getDeptList()
-      // 获取用户列表
-      this.getListAjax()
       // 获取新建项目分类
-      this.getAllClientAndBusiness()
+      // this.getAllClientAndBusiness()
       // this.$refs.router.getProjectList()
       // 新建项目
       this.typeName = '创建项目'
@@ -345,24 +341,35 @@ export default {
       this.new_project.new_name = '' // 任务名称
       this.new_project.business_type = [] // 知晓人
       this.new_project.presetTime = '' // 预计时间
+      this.new_project.checkList = [] // 执行部门
       this.new_project.remark = '' // 需求
       this.new_project.dynamicTags = [] // 知晓人
       this.disabled1 = false
       this.disabled2 = false
+      this.file_list = []
+      this.listProFile = []
+      this.checkListBan = false
     },
     getData(data) {
-      this.drawer = true
-      // console.log(data)
-      // 获取部门列表
-      this.getDeptList()
-      // 获取用户列表
-      this.getListAjax()
       // 获取新建项目分类
-      this.getAllClientAndBusiness()
+      // this.getAllClientAndBusiness()
       // 获取项目详情
       this.getProjectShowDetail(data)
+      this.drawer = true
       // 编辑项目
       this.typeName = '编辑项目'
+      // this.file_list = [
+      //   {
+      //     name: 'food.jpeg',
+      //     url:
+      //       'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+      //   },
+      //   {
+      //     name: 'food2.jpeg',
+      //     url:
+      //       'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
+      //   }
+      // ]
     },
     // 获取判断路由地址
     router_url() {
@@ -398,17 +405,17 @@ export default {
     },
     // 删除
     handleRemove(file) {
-      // console.log(file)
-      let data = file.response.data
-      let listProFile = this.listProFile
-      for (let i = 0; i < listProFile.length; i++) {
-        let element = listProFile[i]
-        if (element.localPath == data.path) {
-          listProFile.splice(i, 1)
-          // console.log('删除')
-        }
-      }
-      this.listProFile = listProFile
+      console.log(file)
+      // let data = file.response.data
+      // let listProFile = this.listProFile
+      // for (let i = 0; i < listProFile.length; i++) {
+      //   let element = listProFile[i]
+      //   if (element.localPath == data.path) {
+      //     listProFile.splice(i, 1)
+      //     // console.log('删除')
+      //   }
+      // }
+      // this.listProFile = listProFile
       // console.log(this.listProFile)
     },
     // 预览
@@ -479,7 +486,6 @@ export default {
         for (let i = 0; i < data.length; i++) {
           let userListData = {}
           let element = data[i]
-
           userListData.value = element.userId
           userListData.label = `${element.deptName}-${element.realName}`
           userList.push(userListData)
@@ -527,73 +533,87 @@ export default {
       // console.log(res)
     },
     // 获取项目详情
-    getProjectShowDetail(id) {
-      let data = `?proId=${id}`
-      this.$axios
-        .post('/pmbs/api/project/showDetail' + data)
-        .then(this.getProjectShowDetailSuss)
-    },
+    // getProjectShowDetail(id) {
+    //   let data = `?proId=${id}`
+    //   this.$axios
+    //     .post('/pmbs/api/project/showDetail' + data)
+    //     .then(this.getProjectShowDetailSuss)
+    // },
     // 获取我发起项目下所有任务回调
-    getProjectShowDetailSuss(res) {
+    getProjectShowDetail(data) {
       // console.log(res)
-      if (res.status == 200) {
-        let data = res.data.data
-        this.proId = data.proId
-        this.status = data.status
-        this.new_project.new_name = data.proName
-        this.new_project.business_type[0] = data.clientId
-        this.new_project.business_type[1] = data.serviceId
-        console.log(this.new_project.business_type)
-        console.log(this.business_type_list)
-        // this.new_project.radio1 = data.isUsual
-        if (data.isUsual == false) {
-          this.new_project.radio1 = '0'
-        } else {
-          this.new_project.radio1 = '1'
-        }
-        this.new_project.presetTime = data.expertTime
-        this.new_project.remark = data.remark
-        if (data.manager != null) {
-          this.radio2 = '1'
-          this.disabled2 = true
-          this.new_project.managerId = data.manager
-        } else if (data.department != null) {
-          this.radio2 = '2'
-          this.disabled1 = true
-          let department = data.department.split(',')
-          let checkList = []
-          for (let i = 0; i < department.length; i++) {
-            let element = department[i]
-            let deparData = parseInt(element)
-            checkList.push(deparData)
-          }
-          this.new_project.checkList = checkList
-        }
-        if (data.knowUser != '') {
-          let knowUserListS = data.knowUser.split(',')
-          let knowUserList = []
-          for (let i = 0; i < knowUserListS.length; i++) {
-            let element = knowUserListS[i]
-            let knowUserListData = parseInt(element)
-            knowUserList.push(knowUserListData)
-          }
-          // 用户列表
-          let userList = this.userList
-          let knowUserListName = []
-          for (let i = 0; i < knowUserList.length; i++) {
-            let element = knowUserList[i]
-            let knowUserListData = ''
-            for (let j = 0; j < userList.length; j++) {
-              let element_ = userList[j]
-              if (element == element_.value) {
-                knowUserListData = element_.label
-              }
-            }
-            knowUserListName.push(knowUserListData)
-          }
-          this.new_project.dynamicTags = knowUserListName
-        }
+      // if (res.status == 200) {
+      // let data = data
+      console.log(data)
+      this.proId = data.proId
+      this.status = data.status
+      this.new_project.new_name = data.proName
+      this.new_project.business_type[0] = data.clientId
+      this.new_project.business_type[1] = data.serviceId
+      // console.log(this.new_project.business_type)
+      // console.log(this.business_type_list)
+      // this.new_project.radio1 = data.isUsual
+      if (data.isUsual == false) {
+        this.new_project.radio1 = '0'
+      } else {
+        this.new_project.radio1 = '1'
       }
+      this.new_project.presetTime = data.expertTime
+      this.new_project.remark = data.remark
+      if (data.manager != null) {
+        this.radio2 = '1'
+        this.disabled2 = true
+        this.new_project.managerId = data.manager
+      } else if (data.department != null) {
+        this.radio2 = '2'
+        this.disabled1 = true
+        let department = data.department.split(',')
+        let checkList = []
+        for (let i = 0; i < department.length; i++) {
+          let element = department[i]
+          let deparData = parseInt(element)
+          checkList.push(deparData)
+        }
+        this.new_project.checkList = checkList
+      }
+      this.checkListBan = true
+      if (data.knowUser != '') {
+        let knowUserListS = data.knowUser.split(',')
+        let knowUserList = []
+        for (let i = 0; i < knowUserListS.length; i++) {
+          let element = knowUserListS[i]
+          let knowUserListData = parseInt(element)
+          knowUserList.push(knowUserListData)
+        }
+        // 用户列表
+        let userList = this.userList
+        let knowUserListName = []
+        for (let i = 0; i < knowUserList.length; i++) {
+          let element = knowUserList[i]
+          let knowUserListData = ''
+          for (let j = 0; j < userList.length; j++) {
+            let element_ = userList[j]
+            if (element == element_.value) {
+              knowUserListData = element_.label
+            }
+          }
+          knowUserListName.push(knowUserListData)
+        }
+        this.new_project.dynamicTags = knowUserListName
+        let listProFile = data.listProFile
+        this.listProFile = listProFile
+        let file_list = []
+        for (let i = 0; i < listProFile.length; i++) {
+          let element = listProFile[i]
+          let data_ = {
+            name: element.fileName
+          }
+          file_list.push(data_)
+        }
+        this.file_list = file_list
+        // console.log(this.new_project.dynamicTags)
+      }
+      // }
     },
     // 新增项目
     addProject() {
@@ -671,7 +691,8 @@ export default {
 
         this.empty()
         let update = this.update
-        this.update = update++
+        this.update = update + 1
+        // console.log(this.update)
         // this.$refs[projeck].getProjectList()
       }
     },
@@ -733,7 +754,12 @@ export default {
     this.router_url()
     this.upload()
     // this.getProjectFeedbackDetail()
-
+    // 获取部门列表
+    this.getDeptList()
+    // 获取新建项目分类
+    this.getAllClientAndBusiness()
+    // 获取用户列表
+    this.getListAjax()
     // this.restaurants = this.loadAll()
   }
 }
@@ -812,7 +838,7 @@ export default {
 }
 .home .add_box .upload .text {
   width: 146px;
-  text-align: center;
+  text-align: left;
   color: rgba(0, 0, 0, 0.65);
 }
 .home .add_box .manager {
