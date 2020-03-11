@@ -18,7 +18,7 @@
           </svg>
         </el-col>
 
-        <el-col v-if="taskList && projectShowDetail" :span="22" :offset="2" class="title">皓影赠礼</el-col>
+        <el-col v-if="taskList && projectShowDetail" :span="22" :offset="2" class="title">{{projectShowDetail.proName}}</el-col>
         <el-col v-if="taskList && projectShowDetail" :span="20" :offset="2" class="gantt_time"></el-col>
         <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2" >
         <el-alert
@@ -43,6 +43,7 @@ export default {
   },
   data() {
     return {
+      userId: this.$store.state.user.userId, // 用户ID
       data: [],
       taskList: [], // 项目下的任务
       projectShowDetail: {} // 项目详情
@@ -79,9 +80,9 @@ export default {
       // this.type = type
       // console.log(id)
       if (type == 0) {
-        this.getProjectOfTask(proId, sousuo)
+        this.getProjectOfTask(proId)
       } else if (type == 1) {
-        this.getProjectOfUserTask(proId, sousuo)
+        this.getProjectOfUserTask(proId)
       }
       this.getProjectShowDetail(proId)
     },
@@ -102,12 +103,8 @@ export default {
     // 获取项目详情-我发起
     getProjectOfTask(proId, sousuo) {
       // this.loading = true
-      let data = ''
-      if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}`
-      } else {
-        data = `?proId=${proId}`
-      }
+      let userId = this.userId
+      let data = `?proId=${proId}&userId=${userId}`
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
         .then(this.getProjectOfTaskSuss)
@@ -123,12 +120,8 @@ export default {
     },
     // 获取项目详情-我参与
     getProjectOfUserTask(proId, sousuo) {
-      let data = ''
-      if (sousuo != undefined) {
-        data = `?proId=${proId}&taskName=${sousuo}`
-      } else {
-        data = `?proId=${proId}`
-      }
+      let userId = this.userId
+      let data = `?proId=${proId}&userId=${userId}`
       this.$axios
         .post('/pmbs/api/project/projectOfUserTask' + data)
         .then(this.getProjectOfUserTaskSuss)

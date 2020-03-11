@@ -2,10 +2,8 @@
   <div class="project_details" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <!-- <el-col :span="6" class> -->
         <el-link @click="toProject()">项目管理</el-link>
         <span class="project_name">/ {{proName}}</span>
-        <!-- </el-col> -->
       </el-col>
       <el-col :span="6" class="tabs">
         <el-button-group>
@@ -27,8 +25,7 @@
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i @click="addtask" class="el-icon-circle-plus-outline"></i>
-          <!-- v-if="projectShowDetail.status != 3" -->
+          <i @click="addtask" v-if="projectShowDetail.status != 3" class="el-icon-circle-plus-outline"></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
           <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
           <i @click="sousuoShow" class="el-icon-search"></i>
@@ -78,7 +75,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.listOaUser != null && scope.row.doUserId == userId && scope.row.status == 1 || scope.row.status == 4"
+                  v-show="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
                 <!-- doUserId -->
               </div>
@@ -164,7 +161,7 @@
                   v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
                   type="info"
                   slot="reference"
-                  @click="redact(scope.row.taskId)"
+                  @click="redact(scope.row.proId,scope.row.taskId)"
                 >忽略</el-button>
                 <el-button
                   size="small"
@@ -442,7 +439,7 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.listOaUser != null && taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+                v-show="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -487,20 +484,7 @@
               <template v-else>{{taskData.expertTime}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-date-picker
-                  v-model="taskData.overTime"
-                  type="date"
-                  placeholder="选择日期"
-                  :picker-options="pickerOptions"
-                  size="mini"
-                ></el-date-picker>
-              </template>
-              <template v-else>{{taskData.overTime}}</template>
-            </el-col>
+            <el-col :span="18">{{taskData.overTime}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -585,6 +569,7 @@
                   :on-success="handleSuccessResult"
                   :disabled="updateBan"
                   :fileList="fileList1"
+                  :limit="1"
                   class="elementUpload"
                 >
                   <el-button size="mini" type="primary">点击上传文档</el-button>
@@ -654,6 +639,7 @@ export default {
     return {
       // userId: this.$store.state.user.userId,
       userId: this.$store.state.user.userId, // 用户ID
+      deptId: this.$store.state.user.deptId, // 部门ID
       loading: false,
       drawerLoading: false,
       proId: '', // 项目ID
@@ -748,6 +734,7 @@ export default {
       uploadUrl: '',
       listProFileResult: [], // 上传文件信息列表
       fileList1: [],
+      oldFileId: '',
       // 更换执行人
       changeDoUserNameShow: 'true',
       nextuserList: [], // 下属信息
@@ -841,6 +828,7 @@ export default {
     },
     addtask() {
       this.drawer1 = true
+      this.taskData = {}
       // 任务类型获取
       this.getDepTypeList()
       // 部门列表获取
@@ -856,20 +844,34 @@ export default {
         this.table_show = false
       }
     },
-    redact(taskId) {
+    redact(proId, taskId) {
       // console.log('忽略' + taskId)
-      this.$alert('是否忽略此任务', '提示', {
-        confirmButtonText: '确定',
-        callback: action => {
+      this.$confirm('是否忽略此任务', '确认信息', {
+        distinguishCancelAndClose: true,
+        confirmButtonText: '确认',
+        cancelButtonText: '取消'
+      })
+        .then(() => {
+          // this.$message({
+          //   type: 'info',
+          //   message: '保存修改'
+          // });
           let data = {
-            // proId: proId,
+            proId: proId,
             taskId: taskId,
             isIgnore: 1,
-            taskfileList: {}
+            taskfileList: [],
+            proFileList: []
           }
+          data.isIgnore = true
           this.taskSave(data)
-        }
-      })
+        })
+        .catch(action => {
+          this.$message({
+            type: 'info',
+            message: '放弃'
+          })
+        })
     },
     feedback(id, pro, task) {
       // console.log(id)
@@ -920,21 +922,6 @@ export default {
     },
     task_detail(taskData) {
       let userId = this.userId
-      // if (userId == taskData.initUserId) {
-      //   // 我发起
-      //   this.resultBan = true
-      //   this.updateBan = true
-      //   this.batton_pa = true
-      //   // console.log('我发起')
-      // } else if (userId == taskData.doUserId) {
-      //   // 我参与
-      //   this.resultBan = false
-      //   this.updateBan = false
-      //   this.batton_pa = true
-      //   // console.log('我参与')
-      // } else {
-      //   this.batton_pa = false
-      // }
       this.drawer5 = true
       // console.log(taskData)
       this.taskId = taskData.taskId
@@ -953,7 +940,7 @@ export default {
     // 获取任务详情回调
     getTaskDetailSuss(res) {
       this.drawerLoading = false
-      // console.log(res)
+      console.log(res)
       if (res.status == 200) {
         let data = res.data.data
         this.taskData = data
@@ -999,18 +986,19 @@ export default {
         let listProFile = this.listProFile
         // console.log(listProFile)
         let listProFileData = {
-          proId: this.taskData.proId, // 项目ID
-          taskId: this.taskData.taskId, // 任务ID
+          proId: this.taskData.proId || '', // 项目ID
+          taskId: this.taskData.taskId || '', // 任务ID
           fileId: '', // 文档ID
           fileName: resData.fileName, //'附件名称',
           isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
-          ptId: this.taskData.taskId, //所属任务ID
+          deleteFlag: false, // 是否删除
+          ptId: this.taskData.taskId || '', //所属任务ID
           localPath: resData.path, //'本地路径',
           suffix: resData.fileType //'文档后缀'
         }
         listProFile.push(listProFileData)
         this.listProFile = listProFile
-        // console.log(this.listProFile)
+        console.log(this.listProFile)
       }
     },
     // 删除
@@ -1045,10 +1033,12 @@ export default {
           updateUserId: this.userId, // 上传人ID
           fileName: resData.fileName, //'文档名称',
           localPath: resData.path, //'本地路径',
-          suffix: resData.fileType //'文档后缀'
+          suffix: resData.fileType, //'文档后缀'
+          oldFileId: this.oldFileId // 原文档ID
         }
         listProFileResult.push(listProFileResultData)
         this.listProFileResult = listProFileResult
+        // this.updateBan = true
         // console.log(this.listProFileResult)
       }
     },
@@ -1057,13 +1047,18 @@ export default {
       // console.log(file)
       let data = file
       let listProFileResult = this.listProFileResult
-      for (let i = 0; i < listProFileResult.length; i++) {
-        let element = listProFileResult[i]
-        if (element.fileId == data.fileId) {
-          listProFileResult[i].deleteFlag = true
-        }
+      if (listProFileResult.fileId) {
+        this.oldFileId = listProFileResult.fileId
+      }else{
+        this.listProFileResult = []
       }
-      this.listProFileResult = listProFileResult
+      // for (let i = 0; i < listProFileResult.length; i++) {
+      //   let element = listProFileResult[i]
+      //   if (element.fileId == data.fileId) {
+      //     listProFileResult[i].deleteFlag = true
+      //   }
+      // }
+      // this.listProFileResult = listProFileResult
       // console.log(this.listProFileResult)
     },
     ///////// 任务成果附件上传 end /////////
@@ -1162,13 +1157,16 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        let deptId = this.deptId
         let deptList = []
         for (let i = 0; i < data.length; i++) {
-          let deptListData = {}
-          const element = data[i]
-          deptListData.id = element.deptId
-          deptListData.name = element.deptName
-          deptList.push(deptListData)
+          let element = data[i]
+          if (element.deptId != deptId) {
+            let deptListData = {}
+            deptListData.id = element.deptId
+            deptListData.name = element.deptName
+            deptList.push(deptListData)
+          }
         }
         this.deptList = deptList
         this.departmentList = data
@@ -1240,7 +1238,9 @@ export default {
         taskName: this.new_task.new_name, //'任务名',
         typeId: this.task_type_value //'任务类型id'
       }
+      // data.taskName[0].oldFileId = this.oldFileId
       this.taskSave(data)
+      this.drawer1 = true
     },
     ///////// 修改任务详情 start /////////
     changeTaskDeil() {
@@ -1270,7 +1270,7 @@ export default {
       if (res.status == 200) {
         // this.projectListJoin = res.data.data
         this.messageWin(res.data.msg)
-        
+
         this.result = ''
         this.listProFile = []
         this.listProFileResult = []
@@ -1362,6 +1362,7 @@ export default {
     changeDoUserNameAffirm(data) {
       // console.log(data)
       let nextuserValue = this.nextuserValue
+      data.proFileList = []
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {
@@ -1397,7 +1398,7 @@ export default {
       this.file_list = []
       this.listProFileResult = []
     },
-    sponsor_achieve(proId,taskId) {
+    sponsor_achieve(proId, taskId) {
       this.$confirm('是否确认此操作？', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
@@ -1509,6 +1510,7 @@ export default {
 }
 .project_details .detail_list i {
   font-size: 24px;
+  cursor:pointer;
 }
 .project_details .detail_list .sousuo {
   display: flex;
@@ -1614,7 +1616,7 @@ export default {
   line-height: 24px;
 }
 .project_details .table2 .need {
-  margin-top: 36px;
+  /* margin-top: 36px; */
   font-weight: 400;
   font-size: 16px;
   color: rgb(96, 94, 94);
@@ -1624,6 +1626,7 @@ export default {
   font-weight: 400;
   font-size: 20px;
   color: rgb(16, 16, 16);
+  margin-top: 24px;
 }
 .project_details .table2 .need .fileList {
   width: 100%;
@@ -1635,11 +1638,12 @@ export default {
   align-items: center;
 }
 .project_details .table2 .need .fileList img {
-  width: 49px;
+  width: 32px;
 }
 .project_details .table2 .need .fileList_ {
   position: relative;
   width: 64px;
+  font-size: 13px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1702,6 +1706,9 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   align-content: space-between; */
+}
+.project_details .add_box .parent_task {
+  width: 100%;
 }
 .project_details .add_box > .el-col {
   margin-bottom: 16px;
@@ -1790,7 +1797,6 @@ export default {
 .project_details .task_details .title:nth-of-type(1) {
   text-align: left;
   box-sizing: border-box;
-  padding-left: 18px;
   font-weight: 600;
   font-size: 18px;
 }
@@ -1870,5 +1876,8 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.elementUpload {
+  width: 100%;
 }
 </style>

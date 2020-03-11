@@ -150,7 +150,9 @@ export default {
       // 选中的业务类型
       businessListCheck: [],
       businessPage: {}, // 业务分页信息
-      clientPage: {} // 客户分页信息
+      clientPage: {}, // 客户分页信息
+      businessListPageNum: 1, // 业务列表分页
+      clientListPageNum: 1 // 客户列表分页
     }
   },
   // 方法
@@ -315,7 +317,10 @@ export default {
     businessSaveSuss(res) {
       if (res.status == 200) {
         // 获取业务类型列表
-        this.getBusinessListAjax()
+        let data = {
+          pageNum: this.businessListPageNum
+        }
+        this.getBusinessListAjax(data)
         // 新增/修改成功提示
         this.messageWin(res.data.msg)
         // 清空输入框（重置参数）
@@ -336,7 +341,10 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         // 获取客户列表
-        this.getClientListAjax()
+        let data = {
+          pageNum: this.clientListPageNum
+        }
+        this.getClientListAjax(data)
         // 新增/修改成功提示
         this.messageWin(res.data.msg)
         // 清空输入框（重置参数）
@@ -395,12 +403,14 @@ export default {
     },
     // 分页函数
     businessListPage(page) {
+      this.businessListPageNum = page
       let data = {
         pageNum: page
       }
       this.getBusinessListAjax(data)
     },
     clientListPage(page) {
+      this.clientListPageNum = page
       let data = {
         pageNum: page
       }

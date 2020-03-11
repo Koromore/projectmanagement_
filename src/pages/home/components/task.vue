@@ -175,7 +175,7 @@
           :row-style="{'height': '57px'}"
           align="left"
         >
-          <el-table-column prop="deptName" label="部门"></el-table-column>
+          <el-table-column prop="proName" label="所属项目"></el-table-column>
           <el-table-column prop="taskName" label="任务">
             <el-link slot-scope="scope" @click="task_detail(scope.row,1)">{{scope.row.taskName}}</el-link>
           </el-table-column>
@@ -196,7 +196,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-show="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -308,9 +308,8 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.listOaUser != null && taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+                v-show="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
-              <!-- scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status == 1 || scope.row.status == 4 -->
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
             <el-col :span="18">
@@ -354,20 +353,7 @@
               <template v-else>{{taskData.expertTime}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-date-picker
-                  v-model="taskData.overTime"
-                  type="date"
-                  placeholder="选择日期"
-                  :picker-options="pickerOptions"
-                  size="mini"
-                ></el-date-picker>
-              </template>
-              <template v-else>{{taskData.overTime}}</template>
-            </el-col>
+            <el-col :span="18">{{taskData.overTime}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -452,6 +438,7 @@
                   :on-success="handleSuccessResult"
                   :disabled="updateBan"
                   :fileList="fileList1"
+                  :limit="1"
                   class="elementUpload"
                 >
                   <el-button size="mini" type="primary">点击上传文档</el-button>
@@ -556,7 +543,8 @@ export default {
   name: 'task',
   data() {
     return {
-      userId: this.$store.state.user.userId,
+      userId: this.$store.state.user.userId, // 用户ID
+      deptId: this.$store.state.user.deptId, // 部门ID
       loading: false,
       drawerLoading: false,
       // 项目类型选择
@@ -630,6 +618,7 @@ export default {
       uploadUrl: '',
       listProFileResult: [], // 上传文件信息列表
       fileList1: [],
+      oldFileId: '',
       // 详情内更换执行人
       changeNameShow: false,
       userValue: '' // 修改后执行人
@@ -804,7 +793,7 @@ export default {
           })
         })
     },
-    join_redact(proId, taskId) {
+    join_redact(proId,taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
@@ -816,11 +805,13 @@ export default {
           //   message: '保存修改'
           // });
           let data = {
-            // proId: proId,
+            proId: proId,
             taskId: taskId,
             isIgnore: 1,
-            taskfileList: {}
+            taskfileList: [],
+            proFileList:[]
           }
+          data.isIgnore = true
           this.taskSave(data)
         })
         .catch(action => {
@@ -968,6 +959,7 @@ export default {
         this.changeDoUserNameShow = 'true'
       } else {
         data.doUserId = nextuserValue
+        data.proFileList = []
         this.$axios
           .post('/pmbs/api/task/save', data)
           .then(this.changeDoUserNameAffirmSuss)
@@ -1161,10 +1153,12 @@ export default {
           updateUserId: this.userId, // 上传人ID
           fileName: resData.fileName, //'文档名称',
           localPath: resData.path, //'本地路径',
-          suffix: resData.fileType //'文档后缀'
+          suffix: resData.fileType, //'文档后缀'
+          oldFileId: this.oldFileId // 原文档ID
         }
         listProFileResult.push(listProFileResultData)
         this.listProFileResult = listProFileResult
+        // this.updateBan = true
         // console.log(this.listProFileResult)
       }
     },
@@ -1173,13 +1167,18 @@ export default {
       // console.log(file)
       let data = file
       let listProFileResult = this.listProFileResult
-      for (let i = 0; i < listProFileResult.length; i++) {
-        let element = listProFileResult[i]
-        if (element.fileId == data.fileId) {
-          listProFileResult[i].deleteFlag = true
-        }
+      if (listProFileResult.fileId) {
+        this.oldFileId = listProFileResult.fileId
+      }else{
+        this.listProFileResult = []
       }
-      this.listProFileResult = listProFileResult
+      // for (let i = 0; i < listProFileResult.length; i++) {
+      //   let element = listProFileResult[i]
+      //   if (element.fileId == data.fileId) {
+      //     listProFileResult[i].deleteFlag = true
+      //   }
+      // }
+      // this.listProFileResult = listProFileResult
       // console.log(this.listProFileResult)
     },
     ///////// 任务成果附件上传 end /////////
@@ -1363,6 +1362,7 @@ export default {
 .task .top {
   height: 36px;
   line-height: 36px;
+  margin-bottom: 13px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -1406,7 +1406,7 @@ export default {
   font-weight: 700;
   font-size: 16px;
   box-sizing: border-box;
-  padding: 13px 0;
+  margin-bottom: 13px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;

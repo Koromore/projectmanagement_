@@ -1234,6 +1234,7 @@ export default {
 } */
 .project .top {
   height: 36px;
+  margin-bottom: 13px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -1288,7 +1289,7 @@ export default {
   font-weight: 700;
   font-size: 16px;
   box-sizing: border-box;
-  padding: 13px 0;
+  margin-bottom: 13px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
