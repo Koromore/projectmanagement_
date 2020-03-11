@@ -876,7 +876,8 @@ export default {
       // console.log(pro)
       // console.log(task)
       this.drawer3 = true
-      this.drawer3_task = `${pro}-${task}`
+      // this.drawer3_task = `${pro}-${task}`
+      this.drawer3_task = `${task}`
       this.taskFeedbackId = id
     },
     achieve(id, status) {
@@ -1003,6 +1004,7 @@ export default {
           fileId: '', // 文档ID
           fileName: resData.fileName, //'附件名称',
           isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
+          ptId: this.taskData.taskId, //所属任务ID
           localPath: resData.path, //'本地路径',
           suffix: resData.fileType //'文档后缀'
         }
@@ -1092,8 +1094,8 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
-        // this.projectShowDetail = data
-        // this.proName = data.proName
+        this.projectShowDetail = data
+        this.proName = data.proName
         this.proExpertTime = data.expertTime
         this.pickerOptionsTime() // 禁用时间函数
       }
@@ -1244,6 +1246,8 @@ export default {
     changeTaskDeil() {
       // console.log('修改任务详情')
       // listProFile
+      this.drawer1 = false
+      this.drawer5 = false
       let taskData = this.taskData // 任务详情
       let listProFile = this.listProFile // 需求文档
       let listProFileResult = this.listProFileResult // 结果文档
@@ -1266,8 +1270,7 @@ export default {
       if (res.status == 200) {
         // this.projectListJoin = res.data.data
         this.messageWin(res.data.msg)
-        this.drawer1 = false
-        this.drawer5 = false
+        
         this.result = ''
         this.listProFile = []
         this.listProFileResult = []
