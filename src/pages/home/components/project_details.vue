@@ -55,7 +55,7 @@
           <el-table-column prop="deptName" label="部门"></el-table-column>
           <el-table-column prop="taskName" label="任务">
             <template slot-scope="scope">
-              <el-link @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
+              <el-link type="primary" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
             </template>
           </el-table-column>
           <el-table-column prop="status" label="状态">
@@ -75,7 +75,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
                 <!-- doUserId -->
               </div>
@@ -109,9 +109,10 @@
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="overDesc" label="成果">
             <div
-              class="result"
+              class="taskfile"
               slot-scope="scope"
               v-if="scope.row.status == 3 && scope.row.taskfileList.length != 0"
+              @click="download(scope.row.taskfileList[0])"
             >
               <img
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
@@ -135,7 +136,8 @@
                 srcset
               />
               <img v-else src="static/images/document/other.png" width="24" alt srcset />
-              <div class="filenametext">{{scope.row.taskfileList[0].fileName}}</div>
+              <br>
+              <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
           <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
@@ -145,7 +147,7 @@
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status == 2 || scope.row.status == 4"
                   type="info"
-                  @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
+                  @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 >反馈</el-button>
                 <el-button
                   size="small"
@@ -196,27 +198,6 @@
         <el-col :span="24" class="need">
           <el-col :span="24" class="span">需求</el-col>
           <el-col :span="24" class>{{projectShowDetail.remark}}</el-col>
-          <!-- <el-col :span="24" class>
-            方案结构
-            <br />1.平台现状分析(事实数据，反应注册人数、认证人数)
-            <br />2.指出运营现状的问题(根据事实数据，指出问题)
-            <br />3.行业环境及趋势或优秀案例及效果(大家-般怎么做)
-            <br />4.提出我们的解决施策(我们怎么做)
-            <br />5.效果量化(说明整体KPI，明确阶段KPI)
-            <br />6.创意实施(具体创意细化)
-            <br />7.预算及KPI
-            <br />
-            <br />
-          </el-col>
-          <el-col :span="24" class>
-            其他补充
-            <br />1.重点创意必须联系设计制作创意DEMO
-            <br />2.客户重点提及各地车友会的资源利用，创意构思时要重点考虑。
-            <br />3.网易云音乐需明确合作资源
-            <br />4.竞争情报:三选一，对手为XXXXXX
-            <br />
-            <br />
-          </el-col>-->
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
             <div v-for="item in projectShowDetail.listProFile" :key="item.index" class="fileList_">
@@ -439,7 +420,7 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+                v-show="taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -515,7 +496,7 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+                <div class="smname" v-for="item in taskData.proFileList" :key="item.index" @click="download(item)">
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -576,7 +557,7 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index">
+                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index" @click="download(item)">
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -708,6 +689,7 @@ export default {
       // 反馈信息
       feedbackContent: '', // 任务反馈内容
       taskFeedbackId: '', // 反馈任务的ID
+      projFeedbackId: '', // 反馈任务的ID
 
       // 项目类型选择
       task_type: [],
@@ -873,14 +855,15 @@ export default {
           })
         })
     },
-    feedback(id, pro, task) {
+    feedback(proId,taskId, pro, task) {
       // console.log(id)
       // console.log(pro)
       // console.log(task)
       this.drawer3 = true
       // this.drawer3_task = `${pro}-${task}`
       this.drawer3_task = `${task}`
-      this.taskFeedbackId = id
+      this.taskFeedbackId = taskId
+      this.projFeedbackId = proId
     },
     achieve(id, status) {
       // console.log('完成' + id)
@@ -1289,6 +1272,7 @@ export default {
         feedback: this.feedbackContent, // 反馈内容
         // feedbackId: 0,
         initUserId: this.userId, // 反馈人ID
+        proId: this.projFeedbackId, // 反馈项目ID
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
@@ -1422,7 +1406,6 @@ export default {
         })
     },
     //  [download 下载附件]
-
     download(row) {
       let localPath = row.localPath
       // console.log("123")
@@ -1591,6 +1574,9 @@ export default {
   flex-direction: column;
   align-items: flex-start;
 }
+.project_details .table1 .taskfile {
+  cursor: pointer;
+}
 .project_details .table2 {
   display: flex;
   flex-wrap: wrap;
@@ -1644,11 +1630,6 @@ export default {
   position: relative;
   width: 64px;
   font-size: 13px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.project_details .table2 .need .fileList_ span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

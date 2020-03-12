@@ -110,6 +110,7 @@
         >
           <el-table-column prop="proName" label="名称">
             <el-link
+              type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
@@ -198,6 +199,7 @@
         >
           <el-table-column prop="name" label="名称">
             <el-link
+              type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,1)"
             >{{scope.row.proName}}</el-link>

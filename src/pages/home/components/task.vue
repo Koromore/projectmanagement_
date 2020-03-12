@@ -121,7 +121,11 @@
             :filter-method="filterDepartment"
           ></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row,0)">{{scope.row.taskName}}</el-link>
+            <el-link
+              type="primary"
+              slot-scope="scope"
+              @click="task_detail(scope.row,0)"
+            >{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="执行状态">
             <template slot-scope="scope">
@@ -140,7 +144,7 @@
               <el-button
                 size="small"
                 type="info"
-                @click="feedback(scope.row.taskId,scope.row.proName,scope.row.taskName)"
+                @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
               >反馈</el-button>
               <el-button
@@ -177,7 +181,11 @@
         >
           <el-table-column prop="proName" label="所属项目"></el-table-column>
           <el-table-column prop="taskName" label="任务">
-            <el-link slot-scope="scope" @click="task_detail(scope.row,1)">{{scope.row.taskName}}</el-link>
+            <el-link
+              type="primary"
+              slot-scope="scope"
+              @click="task_detail(scope.row,1)"
+            >{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
@@ -196,7 +204,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -227,10 +235,36 @@
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
           <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
-          <el-table-column prop="result" label="成果">
-            <div class="result" slot-scope="scope" v-if="scope.row.state == 3">
-              <img src="static/images/document/ppt.png" width="24" alt srcset />
-              <div>策划方案</div>
+          <el-table-column prop="taskfileList" label="成果">
+            <div
+              class="taskfile"
+              slot-scope="scope"
+              v-if="scope.row.status == 3 && scope.row.taskfileList.length != 0"
+              @click="download(scope.row.taskfileList[0])"
+            >
+              <img
+                v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
+                src="static/images/document/word.png"
+                width="24"
+                alt
+                srcset
+              />
+              <img
+                v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
+                src="static/images/document/excle.png"
+                width="24"
+                alt
+                srcset
+              />
+              <img
+                v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
+                src="static/images/document/ppt.png"
+                width="24"
+                alt
+                srcset
+              />
+              <img v-else src="static/images/document/other.png" width="24" alt srcset />
+              <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
           <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
@@ -384,7 +418,7 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+                <div class="smname" v-for="item in taskData.proFileList" :key="item.index" @click="download(item)">
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -445,7 +479,7 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index">
+                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index" @click="download(item)">
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -600,6 +634,7 @@ export default {
       pickerOptions: {},
       // 反馈任务ID
       taskFeedbackId: '',
+      ProjFeedbackId: '',
       // 反馈内容
       feedbackContent: '',
       // 上传附件
@@ -764,11 +799,12 @@ export default {
       }
     },
     // 反馈按钮
-    feedback(id, proName, taskName) {
+    feedback(proId, taskId, proName, taskName) {
       // console.log('反馈' + id)
       this.drawer2 = true
       this.drawer2_task = proName + '-' + taskName
-      this.taskFeedbackId = id
+      this.taskFeedbackId = proId
+      this.ProjFeedbackId = taskId
     },
     sponsor_achieve(proId, taskId) {
       this.$confirm('是否确认此操作？', '确认信息', {
@@ -793,7 +829,7 @@ export default {
           })
         })
     },
-    join_redact(proId,taskId) {
+    join_redact(proId, taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
@@ -809,7 +845,7 @@ export default {
             taskId: taskId,
             isIgnore: 1,
             taskfileList: [],
-            proFileList:[]
+            proFileList: []
           }
           data.isIgnore = true
           this.taskSave(data)
@@ -837,22 +873,6 @@ export default {
     },
     task_detail(taskData, type) {
       let userId = this.userId
-      // console.log(taskData)
-      // if (type == 0) {
-      //   this.resultBan = true
-      //   this.updateBan = true
-      // } else if (
-      //   type == 1 &&
-      //   taskData.isIgnore != true &&
-      //   taskData.status == 1
-      // ) {
-      //   this.resultBan = false
-      //   this.updateBan = false
-      // } else {
-      //   this.resultBan = true
-      //   this.updateBan = true
-      // }
-
       this.drawer1 = true
       // this.statusListValue = taskData.status.toString()
       this.getDepTypeList()
@@ -1035,41 +1055,9 @@ export default {
     getTasklistAjaxSuss(res) {
       this.loading = false
       if (res.status == 200) {
-        let data = res.data.items
+        let data = res.data.data.items
         this.tasklist = data
-        this.initiateTaskListTota = res.data.totalRows // 我发起任务列表总页数
-        // console.log(this.initiateTaskListTota)
-        // let filtrateProList_ = []
-        // let filtrateDepList_ = []
-        // for (let i = 0; i < data.length; i++) {
-        //   let element = data[i]
-        //   filtrateProList_.push(element.proName)
-        //   filtrateDepList_.push(element.deptName)
-        // }
-        // // console.log(filtrateProList)
-        // // console.log(filtrateDepList)
-        // let filtratePro = [] // 通过项目筛选
-        // let filtrateDep = [] // 通过部门筛选
-        // let filtrateProList = this.unique(filtrateProList_)
-        // let filtrateDepList = this.unique(filtrateDepList_)
-        // for (let i = 0; i < filtrateProList.length; i++) {
-        //   let element = filtrateProList[i];
-        //   let filtrateProData = {
-        //     text: element,
-        //     value: element
-        //   }
-        //   filtratePro.push(filtrateProData)
-        // }
-        // for (let i = 0; i < filtrateDepList.length; i++) {
-        //   let element = filtrateDepList[i];
-        //   let filtrateDepData = {
-        //     text: element,
-        //     value: element
-        //   }
-        //   filtrateDepList.push(filtrateDepData)
-        // }
-        // this.filtratePro = filtratePro
-        // this.filtrateDep = filtrateDep
+        this.initiateTaskListTota = res.data.data.totalRows // 我发起任务列表总页数
       }
       // console.log(res)
     },
@@ -1084,9 +1072,9 @@ export default {
     getTasklistAjax_Suss(res) {
       this.loading = false
       if (res.status == 200) {
-        let data = res.data.items
+        let data = res.data.data.items
         this.tasklist_ = data
-        this.participateTaskListTota = res.data.totalRows // 我参与任务列表总页数
+        this.participateTaskListTota = res.data.data.totalRows // 我参与任务列表总页数
       }
       // console.log(res)
     },
@@ -1169,17 +1157,9 @@ export default {
       let listProFileResult = this.listProFileResult
       if (listProFileResult.fileId) {
         this.oldFileId = listProFileResult.fileId
-      }else{
+      } else {
         this.listProFileResult = []
       }
-      // for (let i = 0; i < listProFileResult.length; i++) {
-      //   let element = listProFileResult[i]
-      //   if (element.fileId == data.fileId) {
-      //     listProFileResult[i].deleteFlag = true
-      //   }
-      // }
-      // this.listProFileResult = listProFileResult
-      // console.log(this.listProFileResult)
     },
     ///////// 任务成果附件上传 end /////////
 
@@ -1189,6 +1169,8 @@ export default {
       // console.log('修改任务详情')
       // console.log('修改任务详情')
       // listProFile
+      this.drawer1 = false
+      this.drawer5 = false
       let taskData = this.taskData // 任务详情
       let listProFile = this.listProFile // 需求文档
       let listProFileResult = this.listProFileResult // 结果文档
@@ -1200,6 +1182,7 @@ export default {
       this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
+
     ///////// 任务新增/修改/完成 start /////////
     taskSave(data) {
       // console.log(this.new_task.presetTime)
@@ -1212,8 +1195,6 @@ export default {
       if (res.status == 200) {
         // this.projectListJoin = res.data.data
         this.messageWin(res.data.msg)
-        this.drawer1 = false
-        this.drawer5 = false
         this.result = ''
         this.listProFile = []
         this.listProFileResult = []
@@ -1243,6 +1224,7 @@ export default {
         feedback: this.feedbackContent, // 反馈内容
         // feedbackId: 0,
         initUserId: this.userId, // 反馈人ID
+        proId: this.projFeedbackId,
         taskId: this.taskFeedbackId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
@@ -1303,6 +1285,14 @@ export default {
     // 详情内修改执行人
     changeName() {
       this.changeNameShow = true
+    },
+    download(row) {
+      let localPath = row.localPath
+      // console.log("123")
+      let a = document.createElement('a')
+      a.download = ''
+      a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
+      a.click()
     },
     // 抽屉取消按钮
     empty() {
@@ -1459,6 +1449,14 @@ export default {
 }
 .task .table .page {
   text-align: center;
+}
+.task .table .taskfile {
+  cursor: pointer;
+}
+.task .table .filenametext {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .state_color1 {
   color: rgb(1, 176, 114);
