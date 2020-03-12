@@ -145,10 +145,20 @@
               <div v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
-                  v-if="scope.row.isIgnore != true && scope.row.status == 2 || scope.row.status == 4"
+                  v-if="scope.row.isIgnore != true && scope.row.status != 3 && scope.row.status != 5"
                   type="info"
                   @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 >反馈</el-button>
+              </div>
+              <div v-else-if="userId == proInitUserId || userId == manager">
+                <el-button
+                  size="small"
+                  v-if="scope.row.isIgnore != true && scope.row.status == 1"
+                  type="info"
+                  @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
+                >反馈</el-button>
+              </div>
+              <div v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status == 2"
@@ -604,7 +614,7 @@
         </el-scrollbar>
         <el-row class="batton_pa" v-show="batton_pa" v-if="!resultBan">
           <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
+            <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
           </el-col>
         </el-row>
@@ -618,9 +628,10 @@ export default {
   name: 'project_details',
   data() {
     return {
-      // userId: this.$store.state.user.userId,
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
+      manager: '', // 项目经理
+      proInitUserId: '', // 项目发起人
       loading: false,
       drawerLoading: false,
       proId: '', // 项目ID
@@ -1075,6 +1086,8 @@ export default {
         this.projectShowDetail = data
         this.proName = data.proName
         this.proExpertTime = data.expertTime
+        this.manager = data.manager // 项目经理
+        this.proInitUserId = data.initUserId // 项目发起人
         this.pickerOptionsTime() // 禁用时间函数
       }
     },
@@ -1190,7 +1203,11 @@ export default {
     // 新增任务提交按钮
     putIn() {
       // 预计时间
-      let expertTime = this.formatData(this.new_task.presetTime)
+      let expertTime = ''
+      if (this.new_task.presetTime) {
+        expertTime = this.formatData(this.new_task.presetTime)
+      }
+      
       // 创建时间
       let createTime = this.formatData2(new Date())
       // 选择的执行部门ID
@@ -1215,7 +1232,7 @@ export default {
         expertTime: expertTime, // '预计时间',
         faTask: this.faTask, // '父任务id',
         initUserId: this.userId, //'发起人id',
-        proFileList: this.listProFileResult, // 上传文档列表
+        proFileList: this.listProFile, // 上传文档列表
         proId: this.proId, // '所属项目id',
         remark: this.new_task.remark, // '需求',
         taskName: this.new_task.new_name, //'任务名',
@@ -1223,7 +1240,7 @@ export default {
       }
       // data.taskName[0].oldFileId = this.oldFileId
       this.taskSave(data)
-      this.drawer1 = true
+      this.drawer1 = false
     },
     ///////// 修改任务详情 start /////////
     changeTaskDeil() {
@@ -1404,6 +1421,16 @@ export default {
             message: '已取消'
           })
         })
+    },
+    // 抽屉取消按钮
+    empty() {
+      this.drawer1 = false
+      this.drawer2 = false
+      this.drawer3 = false
+      this.drawer4 = false
+      this.drawer5 = false
+      this.feedbackContent = ''
+      this.result = ''
     },
     //  [download 下载附件]
     download(row) {

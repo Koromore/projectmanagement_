@@ -20,6 +20,7 @@ export default new Vuex.Store({
         // user: { userId: 982, deptId: 91, realName: '赵吉' }, //员工信息
         // user: { userId: 4001, deptId: 51, realName: '石杨' }, //员工信息
         // user: { userId: 365, deptId: 117, realName: '杨欢' }, //员工信息
+        // user: { userId: 147, deptId: 51, realName: '张倩' }, //员工信息
         token: '', //登录令牌
         userSign: '', //用户信息带参
         isLogin: 'error', //error/success, //是否登陆
