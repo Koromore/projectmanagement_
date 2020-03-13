@@ -95,11 +95,11 @@
         <!-- </div> -->
       </el-col>
       <el-col :span="24" class="tabs" v-if="userId != 152">
-        <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">我发起</div>
-        <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
+        <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我发起</div>
+        <div @click="table_tab(2)" :class="[tabs_activity==2 ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-show="table_show">
+      <el-col :span="24" class="table table1" v-show="tabs_activity == 1">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -129,7 +129,7 @@
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
           <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
           <el-table-column prop="realName" label="下达人"></el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
@@ -188,7 +188,7 @@
         </div>
       </el-col>
       <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-show="!table_show">
+      <el-col :span="24" class="table table2" v-show="tabs_activity == 2">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -422,17 +422,12 @@
             <el-col :span="24" class="title">{{drawer3_name}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
-              <el-input
-                type="textarea"
-                :rows="9"
-                placeholder="请输入内容"
-                v-model="delayReason"
-              >反馈反馈反馈反馈反馈</el-input>
+              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="delayReason"></el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info" @click="empty">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
+            <el-button size="small" type="primary" @click="delayAchieve">提交</el-button>
           </el-col>
         </el-row>
       </el-drawer>
@@ -559,7 +554,6 @@ export default {
       // 1审核中 2执行中 3已完成 4延期
       // 我参与 我发起选项卡
       tabs_activity: 1,
-      table_show: true,
       // 项目类型1选择
       tab1_act: '',
       // 项目类型2选择
@@ -725,6 +719,10 @@ export default {
       }
       return result
     },
+    // tabs_activity
+    projectListNum() {
+      this.tabs_activity = this.$store.state.projectListNum
+    },
     // 获取新建项目分类
     getAllClientAndBusiness() {
       this.$axios
@@ -870,13 +868,8 @@ export default {
     },
     // 选项卡
     table_tab(e) {
-      if (e == 1) {
-        this.tabs_activity = 1
-        this.table_show = true
-      } else if (e == 2) {
-        this.tabs_activity = 2
-        this.table_show = false
-      }
+      this.tabs_activity = e
+      this.$store.commit('projectListShow', e)
     },
     // 按钮
     feedback(id, name) {
@@ -902,19 +895,45 @@ export default {
       this.$emit('getData', proDetail)
       // this.$emit('getShopCode',value)
     },
+    delayAchieve() {
+      let proId = this.proId
+      let overTime = this.formatData2(new Date())
+      let data = {
+        proId: proId,
+        status: 3,
+        delayReason: delayReason, // 延期原因
+        overTime: overTime
+      }
+      this.getProjectSave(data)
+    },
     achieve(proId, name, state) {
       // console.log('完成' + proId)
+      this.proId = proId
+      let delayReason = this.delayReason
       if (state == 4) {
         this.drawer3 = true
         this.drawer3_name = name
       } else {
-        let overTime = this.formatData2(new Date())
-        let data = {
-          proId: proId,
-          status: 3,
-          overTime: overTime
-        }
-        this.getProjectSave(data)
+        this.$confirm('是否确认此操作？', '确认信息', {
+          distinguishCancelAndClose: true,
+          confirmButtonText: '确认',
+          cancelButtonText: '取消'
+        })
+          .then(() => {
+            let overTime = this.formatData2(new Date())
+            let data = {
+              proId: proId,
+              status: 3,
+              overTime: overTime
+            }
+            this.getProjectSave(data)
+          })
+          .catch(action => {
+            this.$message({
+              type: 'info',
+              message: '已取消'
+            })
+          })
       }
     },
     // 项目新增/修改/完成
@@ -1227,6 +1246,7 @@ export default {
     this.widthheight()
     this.getAllClientAndBusiness() // 获取
     this.getProjectList() // 获取项目列表
+    this.projectListNum()
   }
 }
 </script>

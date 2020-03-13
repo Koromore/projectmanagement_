@@ -384,7 +384,7 @@ export default {
       this.proId = data.proId
       this.status = data.status
       this.new_project.new_name = data.proName
-      this.new_project.business_type = [data.clientId,data.serviceId]
+      this.new_project.business_type = [data.clientId, data.serviceId]
       if (data.isUsual == false) {
         this.new_project.radio1 = '0'
       } else {

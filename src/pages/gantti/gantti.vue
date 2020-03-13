@@ -160,7 +160,7 @@ export default {
           level: 1
         }
         // that.formatData(new Date(element.updateTime))
-        ganttListData.params.start_time = that.formatData(new Date(element.updateTime))
+        ganttListData.params.start_time = that.formatData(new Date(element.createTime))
         // for (let i = 0; i < data.length; i++) {
       //   const element = data[i]
       //   if (element.params.state == 1) {
@@ -194,7 +194,7 @@ export default {
           ganttListData.end_time = new Date().getTime()
         }else{
           ganttListData.params.end_time = that.formatData(new Date(element.overTime))
-          ganttListData.end_time = new Date(element.overTime).getTime()
+          ganttListData.end_time = new Date(element.expertTime).getTime()
         }
         ganttList.push(ganttListData)
       }

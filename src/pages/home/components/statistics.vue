@@ -498,7 +498,13 @@ export default {
       }),
         myChart.on('click', function(params) {
           // console.log(params)
-          let name = params.name
+          let name = ''
+          if (params.name) {
+            name = params.name
+          }else if(params.value){
+            name = params.value
+          }
+          // console.log(name)
           that.$router.push({
             path: '/home/components/project',
             query: { name: name }

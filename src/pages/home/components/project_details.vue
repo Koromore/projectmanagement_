@@ -25,7 +25,11 @@
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i @click="addtask" v-if="projectShowDetail.status != 3" class="el-icon-circle-plus-outline"></i>
+          <i
+            @click="addtask"
+            v-if="projectShowDetail.status != 3"
+            class="el-icon-circle-plus-outline"
+          ></i>
           <i @click="gantt(1)" class="el-icon-tickets"></i>
           <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
           <i @click="sousuoShow" class="el-icon-search"></i>
@@ -75,7 +79,17 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.isIgnore != true && scope.row.listOaUser != null && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-if="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                >更换</el-link>
+                <el-link
+                  type="primary"
+                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-else-if="deptId == 150 && scope.row.deptId == 93 && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                >更换</el-link>
+                <el-link
+                  type="primary"
+                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-else-if="deptId == 150 && scope.row.deptId == 64 && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
                 <!-- doUserId -->
               </div>
@@ -136,11 +150,11 @@
                 srcset
               />
               <img v-else src="static/images/document/other.png" width="24" alt srcset />
-              <br>
+              <br />
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="136">
+          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="210">
             <template slot-scope="scope">
               <div v-if="userId == scope.row.initUserId">
                 <el-button
@@ -207,7 +221,11 @@
         </el-col>
         <el-col :span="24" class="need">
           <el-col :span="24" class="span">需求</el-col>
-          <el-col :span="24" class>{{projectShowDetail.remark}}</el-col>
+          <el-col :span="24" class>
+            <pre>
+            {{projectShowDetail.remark}}
+            </pre>
+          </el-col>
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
             <div v-for="item in projectShowDetail.listProFile" :key="item.index" class="fileList_">
@@ -430,7 +448,17 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+                v-if="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+              >更换</el-link>
+              <el-link
+                type="primary"
+                @click="changeName()"
+                v-else-if="deptId == 150 && taskData.deptId == 93 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+              >更换</el-link>
+              <el-link
+                type="primary"
+                @click="changeName()"
+                v-else-if="deptId == 150 && taskData.deptId == 64 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -506,7 +534,12 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.proFileList" :key="item.index" @click="download(item)">
+                <div
+                  class="smname"
+                  v-for="item in taskData.proFileList"
+                  :key="item.index"
+                  @click="download(item)"
+                >
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -567,7 +600,12 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index" @click="download(item)">
+                <div
+                  class="smname"
+                  v-for="item in taskData.taskfileList"
+                  :key="item.index"
+                  @click="download(item)"
+                >
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -866,7 +904,7 @@ export default {
           })
         })
     },
-    feedback(proId,taskId, pro, task) {
+    feedback(proId, taskId, pro, task) {
       // console.log(id)
       // console.log(pro)
       // console.log(task)
@@ -1043,7 +1081,7 @@ export default {
       let listProFileResult = this.listProFileResult
       if (listProFileResult.fileId) {
         this.oldFileId = listProFileResult.fileId
-      }else{
+      } else {
         this.listProFileResult = []
       }
       // for (let i = 0; i < listProFileResult.length; i++) {
@@ -1083,6 +1121,7 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        // data.remark = data.remark.replace(/↵/g,"\n")
         this.projectShowDetail = data
         this.proName = data.proName
         this.proExpertTime = data.expertTime
@@ -1207,7 +1246,7 @@ export default {
       if (this.new_task.presetTime) {
         expertTime = this.formatData(this.new_task.presetTime)
       }
-      
+
       // 创建时间
       let createTime = this.formatData2(new Date())
       // 选择的执行部门ID
@@ -1520,7 +1559,7 @@ export default {
 }
 .project_details .detail_list i {
   font-size: 24px;
-  cursor:pointer;
+  cursor: pointer;
 }
 .project_details .detail_list .sousuo {
   display: flex;
@@ -1887,5 +1926,12 @@ export default {
 }
 .elementUpload {
   width: 100%;
+}
+pre {
+  font-family: '微软雅黑';
+  font-weight: 400;
+  font-size: 16px;
+  color: rgb(96, 94, 94);
+  line-height: 28px;
 }
 </style>

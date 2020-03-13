@@ -1,42 +1,285 @@
 <template>
   <div class="taskDetail">
-      <el-drawer title="任务" :visible.sync="drawer" :with-header="false">
-        <el-scrollbar style="height: 100%">
-          <el-row class="task_details">
-            <el-col :span="6" class="title">执行部门：</el-col>
-            <el-col :span="18">{{taskData.deptName}}</el-col>
-            <el-col :span="6" class="title">任务类型：</el-col>
-            <el-col :span="18">{{taskData.typeName}}</el-col>
-            <el-col :span="6" class="title">执行人：</el-col>
-            <el-col :span="18">{{taskData.doUserName}}</el-col>
-            <el-col :span="6" class="title">状态：</el-col>
-            <el-col :span="18">
-              <el-select
-                v-model="statusListValue"
-                size="mini"
-                :class="{'state_color1': statusListValue == 1,
-                  'state_color2': statusListValue == 2,
-                  'state_color3': statusListValue == 3,
-                  'state_color4': statusListValue == 4}"
-                placeholder="请选择"
+    <el-drawer title="任务" :visible.sync="drawer" :with-header="false">
+      <el-scrollbar style="height: 100%">
+        <el-row class="add_box">
+          <el-col :span="24">
+            <el-col :span="6" class="title title1">创建任务</el-col>
+          </el-col>
+          <el-col :span="6" class="title">父任务</el-col>
+          <el-col :span="13">
+            <!-- <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input> -->
+            <el-select
+              v-model="new_task.faTask"
+              filterable
+              placeholder="请选择"
+              class="parent_task"
+              clearable
+              :disabled="faTaskDisabled"
+            >
+              <el-option
+                v-for="item in faTaskList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <!-- {{new_task.faTask}} -->
+          </el-col>
+          <el-col :span="24">
+            <el-col :span="6" class="title title2">执行部门</el-col>
+            <el-col :span="15" :offset="6" class="department">
+              <el-radio
+                v-model="new_task.department"
+                :label="items.id"
+                v-for="items in deptList"
+                :key="items.index"
+              >{{items.name}}</el-radio>
+            </el-col>
+          </el-col>
+
+          <el-col :span="6" class="title">名称</el-col>
+          <el-col :span="13">
+            <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
+          </el-col>
+          <el-col :span="6" class="title">预计时间</el-col>
+          <el-col :span="13" class="presetTime">
+            <el-date-picker
+              v-model="new_task.presetTime"
+              type="date"
+              placeholder="选择日期"
+              :picker-options="pickerOptions"
+            ></el-date-picker>
+          </el-col>
+          <el-col :span="6" class="title">任务类型</el-col>
+          <el-col :span="13" class="task_type">
+            <el-select v-model="task_type_value" placeholder="请选择任务类型">
+              <el-option
+                v-for="item in task_type"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="6" class="title">需求</el-col>
+          <el-col :span="13">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 6, maxRows: 8}"
+              placeholder="请输入内容"
+              v-model="new_task.remark"
+            ></el-input>
+          </el-col>
+          <!-- 上传 -->
+          <el-col :span="13" :offset="6" class="upload">
+            <el-upload :action="uploadUrl" :on-remove="handleRemove" :on-success="handleSuccess">
+              <el-button size="small" type="primary">点击上传</el-button>
+              <span class="text">上传附件</span>
+            </el-upload>
+          </el-col>
+          <!-- 上传 -->
+
+          <el-col :span="12" :offset="7" class="batton">
+            <el-button size="small" type="info" @click="empty">取消</el-button>
+            <el-button size="small" type="primary" @click="putIn">提交</el-button>
+          </el-col>
+        </el-row>
+      </el-scrollbar>
+    </el-drawer>
+    <!-- 抽屉 -->
+    <el-drawer title="历史记录" :visible.sync="drawer2" :with-header="false">
+      <el-row class="records">
+        <el-col :span="23" :offset="1" class="title">历史记录</el-col>
+        <el-col :span="23" :offset="1" class="records_list" :style="style1">
+          <el-scrollbar>
+            <el-timeline>
+              <el-timeline-item
+                v-for="item in records_list"
+                :key="item.index"
+                :timestamp="item.time"
+                placement="top"
               >
+                <el-card class="content">
+                  <p>变动内容：{{item.result}}</p>
+                  <p>更新人：{{item.people}}</p>
+                </el-card>
+              </el-timeline-item>
+            </el-timeline>
+          </el-scrollbar>
+        </el-col>
+      </el-row>
+    </el-drawer>
+
+    <!-- 抽屉 -->
+    <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
+      <el-row class="feedback">
+        <el-col :span="24">
+          <el-col :span="24" class="title">{{drawer3_task}}</el-col>
+          <el-col :span="6" class="title">反馈</el-col>
+          <el-col :span="24">
+            <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+          </el-col>
+        </el-col>
+        <el-col :span="14" :offset="5" class="batton">
+          <el-button size="small" type="info" @click="empty">取消</el-button>
+          <el-button size="small" type="primary" @click="taskFeedback()">提交</el-button>
+        </el-col>
+      </el-row>
+    </el-drawer>
+    <!-- 抽屉 -->
+    <el-drawer title="任务" :visible.sync="drawer4" :with-header="false">
+      <el-row class="feedback">
+        <el-col :span="24">
+          <el-col :span="24" class="title">{{drawer4_task}}</el-col>
+          <el-col :span="6" class="title">延期原因</el-col>
+          <el-col :span="24">
+            <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
+          </el-col>
+        </el-col>
+        <el-col :span="12" :offset="7" class="batton">
+          <el-button size="small" type="info" @click="empty">取消</el-button>
+          <el-button size="small" type="primary">提交</el-button>
+        </el-col>
+      </el-row>
+    </el-drawer>
+    <!-- 任务详情抽屉 start -->
+    <el-drawer title="任务" :visible.sync="drawer5" :with-header="false">
+      <el-scrollbar style="height: 100%" v-loading="drawerLoading">
+        <el-row class="task_details">
+          <el-col :span="24" class="title">{{taskData.proName}}-{{taskData.taskName}}</el-col>
+          <el-col :span="6" class="title">执行部门：</el-col>
+          <el-col :span="18">{{taskData.deptName}}</el-col>
+          <el-col :span="6" class="title">任务类型：</el-col>
+          <el-col :span="18">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+            >
+              <el-select v-model="taskData.typeId" placeholder="请选择任务类型" size="mini">
                 <el-option
-                  v-for="item in statusList"
+                  v-for="item in task_type"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
                 ></el-option>
               </el-select>
-            </el-col>
-            <el-col :span="6" class="title">预计时间：</el-col>
-            <el-col :span="18">{{taskData.expertTime}}</el-col>
-            <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime}}</el-col>
-            <el-col :span="6" class="title">需求：</el-col>
-            <el-col :span="18">{{taskData.remark}}</el-col>
-            <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18">
-              <div class="smname" v-for="item in taskData.proFileList" :key="item.index">
+            </template>
+            <template v-else>{{taskData.typeName}}</template>
+          </el-col>
+          <el-col :span="6" class="title">执行人：</el-col>
+          <el-col :span="18">
+            <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
+            <el-select
+              v-if="changeNameShow"
+              v-model="taskData.doUserId"
+              filterable
+              placeholder="请选择"
+              size="mini"
+              clearable
+              style="width:99px;"
+            >
+              <el-option
+                v-for="item in taskData.listOaUser"
+                :key="item.userId"
+                :label="item.realName"
+                :value="item.userId"
+              ></el-option>
+            </el-select>
+            <el-link
+              type="primary"
+              @click="changeName()"
+              v-if="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+            >更换</el-link>
+            <el-link
+              type="primary"
+              @click="changeName()"
+              v-else-if="deptId == 150 && taskData.deptId == 93 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+            >更换</el-link>
+            <el-link
+              type="primary"
+              @click="changeName()"
+              v-else-if="deptId == 150 && taskData.deptId == 64 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+            >更换</el-link>
+          </el-col>
+          <el-col :span="6" class="title">状态：</el-col>
+          <el-col :span="18">
+            <el-select
+              v-model="statusListValue"
+              size="mini"
+              :class="{'state_color1': taskData.status == 1,
+                  'state_color2': taskData.status == 2}"
+              placeholder="请选择"
+              v-if="taskData.status==1 && taskData.doUserId == userId"
+            >
+              <el-option
+                v-for="item in statusList"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+            <span
+              v-else-if="taskData.status==1 && taskData.doUserId != userId"
+              class="state_color1"
+            >执行中</span>
+            <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
+            <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
+            <span v-else-if="taskData.status==4" class="state_color4">延期</span>
+            <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
+          </el-col>
+          <el-col :span="6" class="title">预计时间：</el-col>
+          <el-col :span="18">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+            >
+              <el-date-picker
+                v-model="taskData.expertTime"
+                type="date"
+                placeholder="选择日期"
+                :picker-options="pickerOptions"
+                size="mini"
+              ></el-date-picker>
+            </template>
+            <template v-else>{{taskData.expertTime}}</template>
+          </el-col>
+          <el-col :span="6" class="title">完成时间：</el-col>
+          <el-col :span="18">{{taskData.overTime}}</el-col>
+          <el-col :span="6" class="title">需求：</el-col>
+          <el-col :span="18">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+            >
+              <el-input
+                type="textarea"
+                :autosize="{ minRows: 1, maxRows: 9}"
+                placeholder="请输入内容"
+                v-model="taskData.remark"
+              ></el-input>
+            </template>
+            <template v-else>{{taskData.remark}}</template>
+          </el-col>
+          <el-col :span="6" class="title">附件：</el-col>
+          <el-col :span="18" class="proFileList">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+            >
+              <el-upload
+                :action="uploadUrl"
+                :on-remove="handleRemove"
+                :on-success="handleSuccess"
+                :file-list="fileList0"
+                class="elementUpload"
+              >
+                <el-button size="mini" type="primary">点击上传附件</el-button>
+              </el-upload>
+            </template>
+            <template v-else>
+              <div
+                class="smname"
+                v-for="item in taskData.proFileList"
+                :key="item.index"
+                @click="download(item)"
+              >
                 <img
                   v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                   src="static/images/document/word.png"
@@ -61,52 +304,101 @@
                 <img v-else src="static/images/document/other.png" width="24" alt srcset />
                 <div>{{item.fileName}}</div>
               </div>
-            </el-col>
-            <el-divider content-position="right"></el-divider>
-            <el-col :span="6" class="title">完成结果：</el-col>
-            <el-col :span="18">
-              <el-input type="textarea" :rows="3" placeholder="请输入内容" v-model="result">完成结果：描述</el-input>
-            </el-col>
-            <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18">
+            </template>
+          </el-col>
+          <el-divider content-position="right"></el-divider>
+          <el-col :span="6" class="title">完成结果：</el-col>
+          <el-col :span="18">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
+            >
+              <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入内容"
+                :disabled="resultBan"
+                v-model="taskData.overDesc"
+              ></el-input>
+            </template>
+            <template v-else>{{taskData.overDesc}}</template>
+          </el-col>
+          <el-col :span="6" class="title">附件：</el-col>
+          <el-col :span="18" class="proFileList">
+            <template
+              v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
+            >
               <el-upload
                 action="/pmbs/file/upload?upType=1&demandType=1"
-                list-type="picture-card"
-                
+                :on-remove="handleRemoveResult"
+                :on-success="handleSuccessResult"
+                :disabled="updateBan"
+                :fileList="fileList1"
+                :limit="1"
+                class="elementUpload"
               >
-                <i class="el-icon-plus"></i>
+                <el-button size="mini" type="primary">点击上传文档</el-button>
               </el-upload>
-              <el-dialog :visible.sync="dialogVisibleResult" class="upload_list">
-                <img width="100%" :src="dialogImageUrlResult" alt />
-              </el-dialog>
-            </el-col>
-            <el-divider content-position="right"></el-divider>
-            <el-col :span="6" class="title">反馈意见：</el-col>
-            <el-col :span="18" class="suggest">
-              <el-scrollbar style="height: 100%;">
-                <el-col
-                  :span="23"
-                  class="suggest_list"
-                  v-for="item in suggest_list"
-                  :key="item.index"
-                >
-                  <el-col :span="12" class="time">{{item.updateTime}}</el-col>
-                  <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
-                  <el-col :span="24" class="content">{{item.feedback}}</el-col>
-                </el-col>
-              </el-scrollbar>
-            </el-col>
-          </el-row>
-        </el-scrollbar>
-        <el-row class="batton_pa">
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info" @click="cancel">取消</el-button>
-            <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
+            </template>
+            <template v-else>
+              <div
+                class="smname"
+                v-for="item in taskData.taskfileList"
+                :key="item.index"
+                @click="download(item)"
+              >
+                <img
+                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                  src="static/images/document/word.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                  src="static/images/document/excle.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                  src="static/images/document/ppt.png"
+                  width="24"
+                  alt
+                  srcset
+                />
+                <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                <div>{{item.fileName}}</div>
+              </div>
+            </template>
+          </el-col>
+          <el-divider content-position="right"></el-divider>
+          <el-col :span="6" class="title">反馈意见：</el-col>
+          <el-col :span="18" class="suggest">
+            <el-scrollbar style="height: 100%;">
+              <el-col
+                :span="23"
+                class="suggest_list"
+                v-for="item in taskData.feedbackList"
+                :key="item.index"
+              >
+                <el-col :span="12" class="time">{{item.updateTime}}</el-col>
+                <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
+                <el-col :span="24" class="content">{{item.feedback}}</el-col>
+              </el-col>
+            </el-scrollbar>
           </el-col>
         </el-row>
-      </el-drawer>
-      <!-- 抽屉-反馈 -->
-      <!-- 抽屉 -->
+      </el-scrollbar>
+      <el-row class="batton_pa" v-show="batton_pa" v-if="!resultBan">
+        <el-col :span="12" :offset="7" class="batton">
+          <el-button size="small" type="info" @click="empty">取消</el-button>
+          <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
+        </el-col>
+      </el-row>
+    </el-drawer>
+    <!-- 抽屉-反馈 -->
+    <!-- 抽屉 -->
   </div>
 </template>
 <script>

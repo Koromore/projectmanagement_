@@ -94,11 +94,11 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="tabs" v-if="userId != 152">
-        <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">我发起</div>
-        <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">我参与</div>
+        <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我发起</div>
+        <div @click="table_tab(2)" :class="[tabs_activity==2 ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-show="table_show">
+      <el-col :span="24" class="table table1" v-show="tabs_activity==1">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -139,7 +139,7 @@
           </el-table-column>
           <el-table-column prop="faTaskName" label="父任务"></el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
@@ -169,7 +169,7 @@
       </el-col>
       <!--  -->
       <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-show="!table_show">
+      <el-col :span="24" class="table table2" v-show="tabs_activity==2">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -267,7 +267,7 @@
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="operation" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
@@ -342,7 +342,7 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-show="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser != null && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+                v-show="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -615,7 +615,6 @@ export default {
       resultBan: false, // 完成成果禁止输入
       cause: '', // 延期原因
       tabs_activity: 1,
-      table_show: true,
       // 项目类型1选择
       tab1_act: '',
       // 项目类型2选择
@@ -748,13 +747,7 @@ export default {
     },
     // 选项卡
     table_tab(e) {
-      if (e == 1) {
-        this.tabs_activity = 1
-        this.table_show = true
-      } else if (e == 2) {
-        this.tabs_activity = 2
-        this.table_show = false
-      }
+      this.tabs_activity = e
     },
     //
     tab1_change(e, id) {

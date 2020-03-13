@@ -10,7 +10,7 @@
           </div>
           <!-- <el-badge :value="3" class="item">
             <i class="el-icon-bell"></i>
-          </el-badge> -->
+          </el-badge>-->
           <!-- 头像 -->
           <div class="usual">
             <div class="portrait">
@@ -46,6 +46,20 @@ export default {
       //退出登录
       // this.$store.commit('logout');
       // this.$router.push({ path: '/logout' })
+      this.$axios
+        .post('/pmbs/api/logout?userId=' + this.$store.state.user.userId, {})
+        .then(res => {
+          console.log(res)
+          if (res.data.errcode == 0) {
+            //退出登录
+            this.$store.commit('clearToken')
+          } else {
+            this.$message({
+              message: res.data.msg,
+              type: 'warning'
+            })
+          }
+        })
     },
     // 标签编辑
     handleClose(tag) {
@@ -160,7 +174,6 @@ export default {
 .topheader .portrait {
   width: 40px;
   height: 40px;
-  line-height: 40px;
   font-size: 16px;
   text-align: center;
   border-radius: 50%;

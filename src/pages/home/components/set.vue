@@ -3,15 +3,15 @@
     <el-row>
       <!--  -->
       <el-col :span="24" class="tabs">
-        <div @click="table_tab(1)" :class="[tabs_activity=='1' ? 'act' : '']">业务类型</div>
-        <div @click="table_tab(2)" :class="[tabs_activity=='2' ? 'act' : '']">客户</div>
+        <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">业务类型</div>
+        <div @click="table_tab(2)" :class="[tabs_activity==2 ? 'act' : '']">客户</div>
       </el-col>
       <!--  -->
       <el-col :span="24" class="add">
         <el-button size="small" type="primary" @click="add_drawer()">新增</el-button>
       </el-col>
       <!-- 业务类型 -->
-      <el-col :span="24" class="table table1" v-show="table_show">
+      <el-col :span="24" class="table table1" v-show="tabs_activity==1">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -22,7 +22,7 @@
         >
           <el-table-column prop="businessName" label="名称"></el-table-column>
 
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="small"
@@ -46,7 +46,7 @@
         </el-col>
       </el-col>
       <!-- 客户 -->
-      <el-col :span="24" class="table table2" v-show="!table_show">
+      <el-col :span="24" class="table table2" v-show="tabs_activity==2">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -64,7 +64,7 @@
               </span>
             </template>
           </el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button size="small" type="info" @click="client_change(scope.row)">修改</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
@@ -142,7 +142,6 @@ export default {
       clientList: [], // 客户列表
       // 1审核中 2执行中 3已完成 4延期
       tabs_activity: 1, // 1-业务类型 2-客户
-      table_show: true,
       operation: 1, // 1-新增 2-修改
       transferId: '', // 新增/修改时传递的ID
       // 新增
@@ -173,13 +172,7 @@ export default {
     },
     // 选项卡
     table_tab(e) {
-      if (e == 1) {
-        this.tabs_activity = 1
-        this.table_show = true
-      } else if (e == 2) {
-        this.tabs_activity = 2
-        this.table_show = false
-      }
+      this.tabs_activity = e
     },
     // 业务类型列表获取
     getBusinessListAjax(data) {
@@ -224,6 +217,7 @@ export default {
       this.operation = 1
       this.transferId = ''
       this.new_name = name
+      this.businessListCheck = []
     },
     // 业务类型修改
     business_change(id, name) {
@@ -380,7 +374,10 @@ export default {
     businessDeleteSuss(res) {
       if (res.status == 200) {
         // 获取业务类型列表
-        this.getBusinessListAjax()
+        let data = {
+          pageNum: this.businessListPageNum
+        }
+        this.getBusinessListAjax(data)
         // 业务类型删除成功提示
         this.messageWin(res.data.msg)
       }
@@ -398,7 +395,10 @@ export default {
         // 消息提示
         this.messageWin(res.data.msg)
         // 重新获取客户列表
-        this.getClientListAjax()
+        let data = {
+          pageNum: this.clientListPageNum
+        }
+        this.getClientListAjax(data)
       }
     },
     // 分页函数
