@@ -144,7 +144,7 @@
               <el-button
                 size="small"
                 type="info"
-                @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
+                @click="feedback(scope.row)"
                 v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
               >反馈</el-button>
               <el-button
@@ -418,7 +418,12 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.proFileList" :key="item.index" @click="download(item)">
+                <div
+                  class="smname"
+                  v-for="item in taskData.proFileList"
+                  :key="item.index"
+                  @click="download(item)"
+                >
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -479,7 +484,12 @@
                 </el-upload>
               </template>
               <template v-else>
-                <div class="smname" v-for="item in taskData.taskfileList" :key="item.index" @click="download(item)">
+                <div
+                  class="smname"
+                  v-for="item in taskData.taskfileList"
+                  :key="item.index"
+                  @click="download(item)"
+                >
                   <img
                     v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                     src="static/images/document/word.png"
@@ -519,6 +529,38 @@
                   <el-col :span="12" class="time">{{item.updateTime}}</el-col>
                   <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
                   <el-col :span="24" class="content">{{item.feedback}}</el-col>
+                  <el-col :span="24" class="fileListBox">
+                    <div
+                      class="fileList"
+                      v-for="items in item.feedbackFileList"
+                      :key="items.index"
+                      @click="download(item)"
+                    >
+                      <img
+                        v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                        src="static/images/document/word.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                        src="static/images/document/excle.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                        src="static/images/document/ppt.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                      <div>{{items.fileName}}</div>
+                    </div>
+                  </el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
@@ -545,6 +587,18 @@
             <el-col :span="6" class="title">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+            </el-col>
+            <el-col :span="24" class="Upload">
+              <el-divider></el-divider>
+              <el-upload
+                action="/pmbs/file/upload?upType=1&demandType=1"
+                :on-remove="handleRemoveFeedback"
+                :on-success="handleSuccessFeedback"
+                :limit="1"
+                class="elementUpload"
+              >
+                <el-button size="mini" type="primary">点击上传文档</el-button>
+              </el-upload>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -633,9 +687,10 @@ export default {
       pickerOptions: {},
       // 反馈任务ID
       taskFeedbackId: '',
-      ProjFeedbackId: '',
+      projFeedbackId: '',
       // 反馈内容
       feedbackContent: '',
+      feedbackFileList: [], // 反馈附件
       // 上传附件
       dialogImageUrl: '',
       dialogVisible: false,
@@ -792,12 +847,12 @@ export default {
       }
     },
     // 反馈按钮
-    feedback(proId, taskId, proName, taskName) {
+    feedback(taskData) {
       // console.log('反馈' + id)
       this.drawer2 = true
-      this.drawer2_task = proName + '-' + taskName
-      this.taskFeedbackId = proId
-      this.ProjFeedbackId = taskId
+      this.drawer2_task = taskData.proName + '-' + taskData.taskName
+      this.taskFeedbackId = taskData.taskId
+      this.projFeedbackId = taskData.proId
     },
     sponsor_achieve(proId, taskId) {
       this.$confirm('是否确认此操作？', '确认信息', {
@@ -1209,18 +1264,58 @@ export default {
         // this.taskData = data
       }
     },
+    ///////// 上传附件 start /////////
+    handleRemoveFeedback(file) {
+      // console.log(file)
+      let feedbackFileList = this.feedbackFileList
+      let data = file.response.data
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        let element = feedbackFileList[i]
+        if (element.localPath == data.path) {
+          feedbackFileList.splice(i, 1)
+        }
+      }
+      this.feedbackFileList = feedbackFileList
+      // console.log(feedbackFileList)
+    },
+    handleSuccessFeedback(file) {
+      let data = file.data
+      // console.log(data)
+      let feedbackFileList = this.feedbackFileList
+      let time = new Date()
+      let feedbackFileListData = {
+        createTime: time,
+        deleteFlag: false,
+        feedbackId: '',
+        fileId: '',
+        fileName: data.fileName,
+        localPath: data.path,
+        suffix: data.fileType,
+        taskId: '',
+        updateTime: time
+      }
+      feedbackFileList.push(feedbackFileListData)
+    },
+    ///////// 上传附件 end /////////
     // 任务反馈
     taskFeedback() {
       let updateTime = new Date()
+      let taskId = this.taskFeedbackId
+      let feedbackFileList = this.feedbackFileList
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        const element = feedbackFileList[i];
+        feedbackFileList[i].taskId = taskId
+      }
       let data = {
         // deleteFlag: true,
         feedback: this.feedbackContent, // 反馈内容
-        // feedbackId: 0,
+        feedbackFileList: feedbackFileList, // 反馈附件
         initUserId: this.userId, // 反馈人ID
         proId: this.projFeedbackId,
-        taskId: this.taskFeedbackId, // 反馈任务ID
+        taskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
+      console.log(data)
       if (data.feedback == '') {
         this.messageError('信息不能为空')
       } else {
@@ -1511,15 +1606,32 @@ export default {
   font-size: 13px;
   color: rgb(162, 162, 162);
 }
+.task .task_details .suggest .fileListBox{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.task .task_details .suggest .fileList {
+  width: 72px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+  margin-top: 13px;
+}
+.task .task_details .suggest .fileList div{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .task .task_details .suggest {
-  height: 108px;
+  height: 172px;
 }
 /* .task .task_details .suggest .el-scrollbar{
   height: 100%;
   overflow-x: scroll;
 } */
 .task .task_details .suggest .suggest_list {
-  height: 48px;
+  /* height: 48px; */
   margin-bottom: 12px;
 }
 .task .task_details .suggest .suggest_list .pop,

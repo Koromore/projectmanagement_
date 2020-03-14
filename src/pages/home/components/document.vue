@@ -387,7 +387,6 @@
                   type="textarea"
                   :rows="3"
                   placeholder="请输入内容"
-                  :disabled="resultBan"
                   v-model="taskData.overDesc"
                 ></el-input>
               </template>
@@ -456,6 +455,38 @@
                   <el-col :span="12" class="time">{{item.updateTime}}</el-col>
                   <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
                   <el-col :span="24" class="content">{{item.feedback}}</el-col>
+                  <el-col :span="24" class="fileListBox">
+                    <div
+                      class="fileList"
+                      v-for="items in item.feedbackFileList"
+                      :key="items.index"
+                      @click="download(item)"
+                    >
+                      <img
+                        v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                        src="static/images/document/word.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                        src="static/images/document/excle.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                        src="static/images/document/ppt.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                      <div>{{items.fileName}}</div>
+                    </div>
+                  </el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
@@ -1245,14 +1276,14 @@ export default {
   color: rgb(162, 162, 162);
 }
 .task .task_details .suggest {
-  height: 108px;
+  height: 172px;
 }
 /* .task .task_details .suggest .el-scrollbar{
   height: 100%;
   overflow-x: scroll;
 } */
 .task .task_details .suggest .suggest_list {
-  height: 48px;
+  /* height: 48px; */
   margin-bottom: 12px;
 }
 .task .task_details .suggest .suggest_list .pop,
@@ -1268,6 +1299,23 @@ export default {
 .task .task_details .suggest .suggest_list .content {
   color: #000;
   font-size: 16px;
+}
+.task .task_details .suggest .fileListBox{
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.task .task_details .suggest .fileList {
+  width: 72px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+  margin-top: 13px;
+}
+.task .task_details .suggest .fileList div{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .task .batton_pa {
   width: 100%;

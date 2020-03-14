@@ -236,146 +236,6 @@
       </el-col>
 
       <!-- 抽屉 -->
-      <el-drawer title="添加任务" :visible.sync="drawer2" :with-header="false">
-        <el-scrollbar style="height: 100%">
-          <el-row class="add_box">
-            <el-col :span="24">
-              <el-col :span="6" class="title title1">创建项目</el-col>
-            </el-col>
-            <el-col :span="6" class="title">名称</el-col>
-            <el-col :span="13">
-              <el-input placeholder="请输入内容" v-model="new_project.new_name" clearable></el-input>
-            </el-col>
-            <el-col :span="6" class="title">分类</el-col>
-            <el-col :span="13">
-              <el-cascader
-                v-model="new_project.business_type"
-                :options="business_type_list"
-                @change="handleChange"
-                style="width: 100%;"
-              ></el-cascader>
-            </el-col>
-            <el-col :span="18" :offset="6">
-              <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
-              <el-radio v-model="new_project.radio1" label="2">日常</el-radio>
-            </el-col>
-            <el-col :span="6" class="title">预计时间</el-col>
-            <el-col :span="13" class="presetTime">
-              <el-date-picker v-model="new_project.presetTime" type="date" placeholder="选择日期"></el-date-picker>
-            </el-col>
-            <el-col :span="6" class="title">需求</el-col>
-            <el-col :span="13">
-              <el-input
-                type="textarea"
-                :autosize="{ minRows: 6, maxRows: 8}"
-                placeholder="请输入内容"
-                v-model="new_project.demand"
-              ></el-input>
-            </el-col>
-            <el-col :span="18" :offset="6">
-              <el-radio v-model="new_project.radio2" label="1">项目经理</el-radio>
-              <el-radio v-model="new_project.radio2" label="2">执行部门</el-radio>
-            </el-col>
-            <el-col :span="13" :offset="6" v-show="new_project.radio2 == 1">
-              <el-input placeholder="请输入内容" v-model="new_project.manager" clearable></el-input>
-              <el-select
-                v-model="new_project.managerId"
-                filterable
-                placeholder="请选择"
-                class="userList"
-              >
-                <el-option
-                  v-for="item in userList"
-                  :key="item.index"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-col>
-            <el-col :span="17" :offset="6" v-show="new_project.radio2 == 2">
-              <el-checkbox-group v-model="new_project.checkList" class="check_box">
-                <el-checkbox
-                  :label="items.id"
-                  v-for="items in deptList"
-                  :key="items.index"
-                >{{items.name}}</el-checkbox>
-              </el-checkbox-group>
-            </el-col>
-            <el-col :span="24">
-              <el-col :span="6" class="title">知晓人</el-col>
-            </el-col>
-            <el-col :span="18" :offset="6" class="know_pop">
-              <el-tag
-                :key="tag"
-                v-for="tag in new_project.dynamicTags"
-                closable
-                :disable-transitions="false"
-                @close="handleClose(tag)"
-                class="know_pop_list"
-              >{{tag}}</el-tag>
-            </el-col>
-            <el-col :span="9" :offset="6">
-              <el-select v-model="add_list" filterable placeholder="请选择">
-                <el-option
-                  v-for="item in userList"
-                  :key="item.index"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-            </el-col>
-            <el-col :span="6" :offset="1">
-              <el-button size="small" type="primary" @click="showInput">添加</el-button>
-            </el-col>
-            <!-- 上传 -->
-            <el-col :span="13" :offset="6" class="upload">
-              <el-upload
-                action="https://jsonplaceholder.typicode.com/posts/"
-                list-type="picture-card"
-                :auto-upload="false"
-                :on-success="testtest"
-              >
-                <i slot="default" class="el-icon-plus"></i>
-                <div slot="file" slot-scope="{file}">
-                  <img class="el-upload-list__item-thumbnail" :src="file.url" alt />
-                  <span class="el-upload-list__item-actions">
-                    <span
-                      class="el-upload-list__item-preview"
-                      @click="handlePictureCardPreview(file)"
-                    >
-                      <i class="el-icon-zoom-in"></i>
-                    </span>
-                    <span
-                      v-if="!disabled"
-                      class="el-upload-list__item-delete"
-                      @click="handleDownload(file)"
-                    >
-                      <i class="el-icon-download"></i>
-                    </span>
-                    <span
-                      v-if="!disabled"
-                      class="el-upload-list__item-delete"
-                      @click="handleRemove(file)"
-                    >
-                      <i class="el-icon-delete"></i>
-                    </span>
-                  </span>
-                </div>
-              </el-upload>
-              <el-dialog :visible.sync="dialogVisible" class="upload_list">
-                <img width="100%" :src="dialogImageUrl" alt />
-              </el-dialog>
-              <div class="text">附件</div>
-            </el-col>
-          </el-row>
-        </el-scrollbar>
-        <el-row class="batton_pa">
-          <el-col :span="12" :offset="7" class="batton">
-            <el-button size="small" type="info">取消</el-button>
-            <el-button size="small" type="primary">提交</el-button>
-          </el-col>
-        </el-row>
-      </el-drawer>
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
         <el-row class="feedback">
@@ -407,6 +267,19 @@
                 >{{item.taskName}}</el-checkbox>
                 <!-- <el-checkbox label="网页交互"></el-checkbox> -->
               </el-checkbox-group>
+            </el-col>
+
+            <el-col :span="24" class="Upload">
+              <el-divider></el-divider>
+              <el-upload
+                action="/pmbs/file/upload?upType=0&demandType=1"
+                :on-remove="handleRemoveFeedback"
+                :on-success="handleSuccessFeedback"
+                :limit="1"
+                class="elementUpload"
+              >
+                <el-button size="mini" type="primary">点击上传文档</el-button>
+              </el-upload>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -481,9 +354,7 @@ export default {
       // 点击编辑获取的项目详情
       projectData: {},
       // 上传附件
-      dialogImageUrl: '',
-      dialogVisible: false,
-      disabled: false,
+      feedbackFileList: [], // 文件信息
       // 业务类型列表
       business_type_list: [
         {
@@ -801,23 +672,39 @@ export default {
         1
       )
     },
-    // 上传附件
-    handleRemove(file) {
-      // console.log(file)
+    ///////// 上传附件 start /////////
+    handleRemoveFeedback(file) {
+      console.log(file)
+      let feedbackFileList = this.feedbackFileList
+      let data = file.response.data
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        let element = feedbackFileList[i]
+        if (element.localPath == data.path) {
+          feedbackFileList.splice(i,1)
+        }
+      }
+      this.feedbackFileList = feedbackFileList
+      // console.log(feedbackFileList)
     },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url
-      this.dialogVisible = true
+    handleSuccessFeedback(file) {
+      let data = file.data
+      console.log(data)
+      let feedbackFileList = this.feedbackFileList
+      let time = new Date()
+      let feedbackFileListData = {
+        createTime: time,
+        deleteFlag: false,
+        feedbackId: '',
+        fileId: '',
+        fileName: data.fileName,
+        localPath: data.path,
+        suffix: data.fileType,
+        taskId: '',
+        updateTime: time
+      }
+      feedbackFileList.push(feedbackFileListData)
     },
-    handleDownload(file) {
-      // console.log(file)
-    },
-    // 上传回调
-    testtest(res, file, fileList) {
-      // console.log(res)
-      // console.log(file)
-      // console.log(fileList)
-    },
+    ///////// 上传附件 start /////////
     // 获取浏览器宽高
     widthheight() {
       let winWidth = window.innerWidth
@@ -825,6 +712,7 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
+    
     // 查询按钮
     tab1_change(e, id) {
       // console.log(e)
@@ -900,7 +788,7 @@ export default {
       let overTime = this.formatData2(new Date())
       let data = {
         proId: proId,
-        status: 3,
+        status: 5,
         delayReason: delayReason, // 延期原因
         overTime: overTime
       }
@@ -967,7 +855,7 @@ export default {
     },
     // 获取我发起项目下所有任务回调
     getProjectTaskListInitSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         let projectTaskLisInit = res.data.data
         this.projectTaskLisInit = projectTaskLisInit
@@ -997,18 +885,23 @@ export default {
     },
     // 项目反馈-任务批量反馈
     projectFeedback() {
-      // console.log(this.new_task.presetTime)
-      // console.log(expertTime)
       let updateTime = new Date()
       let checkListTask = this.checkListTask
       let taskId = checkListTask.join(',')
+      let feedbackFileList = this.feedbackFileList
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        const element = feedbackFileList[i];
+        feedbackFileList[i].taskId = taskId
+      }
       let data = {
         feedback: this.feedbackContent, // 反馈内容
+        feedbackFileList: feedbackFileList, // 反馈附件
         initUserId: this.userId, // 反馈人ID
         proId: this.proId, // 反馈项目ID
         moreTaskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
+      console.log(data)
       if (data.feedback == '' || data.moreTaskId == '') {
         this.messageError('信息不能为空')
       } else {

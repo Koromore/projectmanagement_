@@ -8,11 +8,11 @@ Vue.use(Vuex)
 // 项目群ID150  项目部ID93 内容营销部64
 export default new Vuex.Store({
   state: {
-    // user: {}, // 员工信息
+    user: {}, // 员工信息
     // user: { userId: 152 }, //员工信息
     // user: { userId: 527, deptId: 91, realName: '付德全' }, //员工信息
-    user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
-    // user: { userId: 6, deptId: 41, realName: '宋秀' }, //员工信息
+    // user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
+    user: { userId: 6, deptId: 41, realName: '宋秀' }, //员工信息
     // user: { userId: 266, deptId: 134, realName: '冯永强' }, //员工信息
     // user: { userId: 40, deptId: 134, realName: '桂婷' }, //员工信息
     // user: { userId: 403, deptId: 121, realName: '林成伟' }, //员工信息
@@ -21,6 +21,7 @@ export default new Vuex.Store({
     // user: { userId: 4001, deptId: 51, realName: '石杨' }, //员工信息
     // user: { userId: 365, deptId: 117, realName: '杨欢' }, //员工信息
     // user: { userId: 147, deptId: 51, realName: '张倩' }, //员工信息
+    // user: { userId: 33, deptId: 121, realName: '聂玲' }, //员工信息
     token: '', //登录令牌
     userSign: '', //用户信息带参
     isLogin: 'success', //error/success, //是否登陆

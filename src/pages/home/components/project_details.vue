@@ -79,17 +79,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-if="scope.row.deptId == deptId && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                >更换</el-link>
-                <el-link
-                  type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-else-if="deptId == 150 && scope.row.deptId == 93 && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                >更换</el-link>
-                <el-link
-                  type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-else-if="deptId == 150 && scope.row.deptId == 64 && scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 >更换</el-link>
                 <!-- doUserId -->
               </div>
@@ -156,7 +146,7 @@
           </el-table-column>
           <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="210">
             <template slot-scope="scope">
-              <div v-if="userId == scope.row.initUserId">
+              <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status != 3 && scope.row.status != 5"
@@ -164,7 +154,7 @@
                   @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 >反馈</el-button>
               </div>
-              <div v-else-if="userId == proInitUserId || userId == manager">
+              <div class="linblo" v-else-if="userId == proInitUserId || userId == manager">
                 <el-button
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status == 1"
@@ -172,7 +162,7 @@
                   @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
                 >反馈</el-button>
               </div>
-              <div v-if="userId == scope.row.initUserId">
+              <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status == 2"
@@ -181,7 +171,7 @@
                   @click="sponsor_achieve(scope.row.proId,scope.row.taskId)"
                 >完成</el-button>
               </div>
-              <div v-else-if="userId == scope.row.doUserId">
+              <div class="linblo" v-else-if="userId == scope.row.doUserId">
                 <el-button
                   size="small"
                   v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
@@ -209,7 +199,7 @@
         </el-col>
         <el-col :span="7" class="title">
           <el-col :span="24">预计时间</el-col>
-          <el-col :span="24">{{projectShowDetail.expertTime}}</el-col>
+          <el-col :span="24">{{projectShowDetail.createTime}}--{{projectShowDetail.expertTime}}</el-col>
         </el-col>
         <el-col :span="7" class="title">
           <el-col :span="24">项目类别</el-col>
@@ -380,10 +370,22 @@
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
             </el-col>
+            <el-col :span="24" class="Upload">
+              <el-divider></el-divider>
+              <el-upload
+                action="/pmbs/file/upload?upType=1&demandType=1"
+                :on-remove="handleRemoveFeedback"
+                :on-success="handleSuccessFeedback"
+                :limit="1"
+                class="elementUpload"
+              >
+                <el-button size="mini" type="primary">点击上传文档</el-button>
+              </el-upload>
+            </el-col>
           </el-col>
-          <el-col :span="14" :offset="5" class="batton">
+          <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info" @click="empty">取消</el-button>
-            <el-button size="small" type="primary" @click="taskFeedback()">提交</el-button>
+            <el-button size="small" type="primary" @click="taskFeedback">提交</el-button>
           </el-col>
         </el-row>
       </el-drawer>
@@ -448,17 +450,7 @@
               <el-link
                 type="primary"
                 @click="changeName()"
-                v-if="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
-              >更换</el-link>
-              <el-link
-                type="primary"
-                @click="changeName()"
-                v-else-if="deptId == 150 && taskData.deptId == 93 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
-              >更换</el-link>
-              <el-link
-                type="primary"
-                @click="changeName()"
-                v-else-if="deptId == 150 && taskData.deptId == 64 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+                v-if="taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
               >更换</el-link>
             </el-col>
             <el-col :span="6" class="title">状态：</el-col>
@@ -645,6 +637,38 @@
                   <el-col :span="12" class="time">{{item.updateTime}}</el-col>
                   <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
                   <el-col :span="24" class="content">{{item.feedback}}</el-col>
+                  <el-col :span="24" class="fileListBox">
+                    <div
+                      class="fileList"
+                      v-for="items in item.feedbackFileList"
+                      :key="items.index"
+                      @click="download(item)"
+                    >
+                      <img
+                        v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                        src="static/images/document/word.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                        src="static/images/document/excle.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                        src="static/images/document/ppt.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                      <div>{{items.fileName}}</div>
+                    </div>
+                  </el-col>
                 </el-col>
               </el-scrollbar>
             </el-col>
@@ -739,13 +763,15 @@ export default {
       feedbackContent: '', // 任务反馈内容
       taskFeedbackId: '', // 反馈任务的ID
       projFeedbackId: '', // 反馈任务的ID
-
+      feedbackFileList: [], // 反馈附件列表
       // 项目类型选择
       task_type: [],
       task_type_value: '',
 
       // 任务详情
-      taskData: {},
+      taskData: {
+        listOaUser: []
+      },
       batton_pa: true, // 是否显示完成按钮
       result: '', // 完成结果
       resultBan: false, // 完成成果禁止输入
@@ -1150,9 +1176,7 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data
-        console.log(data)
         this.taskList = data
-        console.log(this.taskList)
       }
     },
     // 获取项目详情-我参与
@@ -1280,6 +1304,14 @@ export default {
       // data.taskName[0].oldFileId = this.oldFileId
       this.taskSave(data)
       this.drawer1 = false
+      this.new_task.presetTime = ''
+      this.new_task.faTask = ''
+      this.new_task.department = ''
+      this.new_task.new_name = ''
+      this.new_task.presetTime = ''
+      this.task_type_value = ''
+      this.new_task.remark = ''
+      this.listProFile = []
     },
     ///////// 修改任务详情 start /////////
     changeTaskDeil() {
@@ -1318,20 +1350,60 @@ export default {
       }
     },
     ///////// 任务新增/修改/完成 end /////////
+    ///////// 上传附件 start /////////
+    handleRemoveFeedback(file) {
+      // console.log(file)
+      let feedbackFileList = this.feedbackFileList
+      let data = file.response.data
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        let element = feedbackFileList[i]
+        if (element.localPath == data.path) {
+          feedbackFileList.splice(i, 1)
+        }
+      }
+      this.feedbackFileList = feedbackFileList
+      // console.log(feedbackFileList)
+    },
+    handleSuccessFeedback(file) {
+      let data = file.data
+      // console.log(data)
+      let feedbackFileList = this.feedbackFileList
+      let time = new Date()
+      let feedbackFileListData = {
+        createTime: time,
+        deleteFlag: false,
+        feedbackId: '',
+        fileId: '',
+        fileName: data.fileName,
+        localPath: data.path,
+        suffix: data.fileType,
+        taskId: '',
+        updateTime: time
+      }
+      feedbackFileList.push(feedbackFileListData)
+    },
+    ///////// 上传附件 end /////////
     // 任务反馈
     taskFeedback() {
       // console.log(this.new_task.presetTime)
       // console.log(expertTime)
       let updateTime = new Date()
+      let taskId = this.taskFeedbackId
+      let feedbackFileList = this.feedbackFileList
+      for (let i = 0; i < feedbackFileList.length; i++) {
+        const element = feedbackFileList[i]
+        feedbackFileList[i].taskId = taskId
+      }
       let data = {
         // deleteFlag: true,
         feedback: this.feedbackContent, // 反馈内容
-        // feedbackId: 0,
+        feedbackFileList: feedbackFileList, // 反馈附件
         initUserId: this.userId, // 反馈人ID
         proId: this.projFeedbackId, // 反馈项目ID
-        taskId: this.taskFeedbackId, // 反馈任务ID
+        taskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
+      // console.log(data)
       if (data.feedback == '') {
         this.messageError('信息不能为空')
       } else {
@@ -1868,7 +1940,7 @@ export default {
   height: 172px;
 }
 .project_details .task_details .suggest .suggest_list {
-  height: 48px;
+  /* height: 48px; */
   margin-bottom: 12px;
 }
 .project_details .task_details .suggest .suggest_list .pop,
@@ -1884,6 +1956,23 @@ export default {
 .project_details .task_details .suggest .suggest_list .content {
   color: #000;
   font-size: 16px;
+}
+.project_details .task_details .suggest .fileListBox {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.project_details .task_details .suggest .fileList {
+  width: 72px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+  margin-top: 13px;
+}
+.project_details .task_details .suggest .fileList div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .project_details .batton_pa {
   width: 100%;
@@ -1933,5 +2022,8 @@ pre {
   font-size: 16px;
   color: rgb(96, 94, 94);
   line-height: 28px;
+}
+.linblo {
+  display: inline-block;
 }
 </style>

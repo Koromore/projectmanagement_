@@ -184,49 +184,29 @@ export default {
   methods: {
     test() {
       let obj = {
-        data: {
-          businessName: null,
-          clientId: 55,
-          clientName: null,
-          createTime: '2020-03-09 18:35:05',
-          deleteFlag: null,
-          department: '41,150,27',
-          expertTime: '2020-03-13 13:00:00',
-          initUserId: 527,
-          isPro: null,
-          isUsual: false,
-          knowUser: '266,24',
-          listDept: null,
-          listKnowUser: null,
-          listProFile: [
-            {
-              deleteFlag: null,
-              fileId: null,
-              fileName: 'C7 二层平面图',
-              isPro: false,
-              localPath: 'uploadtemp/project/demand/1583750035332.pdf',
-              ptId: null,
-              suffix: 'pdf',
-              updateTime: null
-            }
-          ],
-          listTask: null,
-          listUserId: null,
-          manager: null,
-          overTime: null,
-          proId: 45,
-          proName: '广本车主周3月活动-编辑4',
-          projectType: null,
-          realName: null,
-          remark:
-            '需求背景\n1.广本飞度社区运营，长期无法达到客户期望；\n2.由销售部长直接提出，进行飞度社区增粉、提升认证车主数量为核心指标的专项方案策划。\n\n方案结构\n1.平台现状分析（事实数据，反应注册人数、认证人数）\n2.指出运营现状的问题（根据事实数据，指出问题）\n3.行业环境及趋势或优秀案例及效果（大家一般怎么做）\n4.提出我们的解决施策（我们怎么做）\n5.效果量化（说明整体KPI，明确阶段KPI）\n6.创意实施（具体创意细化）\n7.预算及KPI\n\n其他补充\n1.重点创意必须联系设计制作创意DEMO\n2.客户重点提及 各地车友会的资源利用，创意构思时要重点考虑。\n3.网易云音乐需明确合作资源\n4.竞争情报：三选一，对手为XXXX,XXXXX',
-          serviceId: 45,
-          status: 1,
-          updateTime: null,
-          usual: false
-        },
-        errcode: 0,
-        msg: 'success'
+        deleteFlag: true,
+        deptName: 'string',
+        feedback: 'string',
+        feedbackFileList: [
+          {
+            createTime: '2020-03-14T10:06:59.874Z',
+            deleteFlag: true,
+            feedbackId: 0,
+            fileId: 0,
+            fileName: 'string',
+            localPath: 'string',
+            suffix: 'string',
+            taskId: 0,
+            updateTime: '2020-03-14T10:06:59.876Z'
+          }
+        ],
+        feedbackId: 0,
+        feedbackUserName: 'string',
+        initUserId: 0,
+        moreTaskId: 'string',
+        proId: 0,
+        taskId: 0,
+        updateTime: '2020-03-14T10:06:59.876Z'
       }
 
       // typeName typeId
