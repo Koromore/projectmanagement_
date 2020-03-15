@@ -126,8 +126,8 @@
           <el-table-column prop="num" label="总任务数/待完成">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime_" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime_" label="完成时间" sortable></el-table-column>
           <el-table-column prop="realName" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
@@ -559,19 +559,7 @@ export default {
       if (seconds >= 0 && seconds <= 9) {
         seconds = '0' + seconds
       }
-      return (
-        year +
-        '-' +
-        month +
-        '-' +
-        strDate +
-        ' ' +
-        hours +
-        ':' +
-        minutes +
-        ':' +
-        seconds
-      )
+      return (`${year}-${month}-${strDate} ${hours}:${minutes}:${seconds}`)
     },
     listUniq(array, key) {
       var result = [array[0]]
@@ -680,7 +668,7 @@ export default {
       for (let i = 0; i < feedbackFileList.length; i++) {
         let element = feedbackFileList[i]
         if (element.localPath == data.path) {
-          feedbackFileList.splice(i,1)
+          feedbackFileList.splice(i, 1)
         }
       }
       this.feedbackFileList = feedbackFileList
@@ -712,7 +700,7 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
-    
+
     // 查询按钮
     tab1_change(e, id) {
       // console.log(e)
@@ -890,7 +878,7 @@ export default {
       let taskId = checkListTask.join(',')
       let feedbackFileList = this.feedbackFileList
       for (let i = 0; i < feedbackFileList.length; i++) {
-        const element = feedbackFileList[i];
+        const element = feedbackFileList[i]
         feedbackFileList[i].taskId = taskId
       }
       let data = {
@@ -1005,6 +993,8 @@ export default {
         let projectListOriginate = res.data.data
         for (let i = 0; i < projectListOriginate.length; i++) {
           let element = projectListOriginate[i]
+          projectListOriginate[i].expertTime_ = this.$date(element.expertTime)
+          projectListOriginate[i].overTime_ = this.$date(element.overTime)
           let unfintask = 0
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
@@ -1015,6 +1005,7 @@ export default {
           projectListOriginate[i].unfintask = unfintask
         }
         // console.log(projectListOriginate)
+        
 
         this.projectListOriginate = projectListOriginate
 
@@ -1039,6 +1030,12 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let projectListJoin = res.data.data
+        for (let i = 0; i < projectListJoin.length; i++) {
+          let element = projectListJoin[i];
+          projectListJoin[i].expertTime = this.$date(element.expertTime)
+          projectListJoin[i].overTime = this.$date(element.overTime)
+          
+        }
         this.projectListJoin = projectListJoin
 
         this.totalnum_ = this.projectListJoin.length
@@ -1140,6 +1137,11 @@ export default {
     this.getAllClientAndBusiness() // 获取
     this.getProjectList() // 获取项目列表
     this.projectListNum()
+    // let time = '2012-12-12'
+    
+    // console.log(time)
+    // console.log(this.$date(time))
+    // console.log(this.$time(time))
   }
 }
 </script>

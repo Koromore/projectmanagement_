@@ -24,6 +24,7 @@ export default new Vuex.Store({
     // user: { userId: 33, deptId: 121, realName: '聂玲' }, //员工信息
     token: '', //登录令牌
     userSign: '', //用户信息带参
+    // isLogin: 'error', //error/success, //是否登陆
     isLogin: 'success', //error/success, //是否登陆
     isRouterAlive: true, // 控制页面刷新
     projectListNum: 1,

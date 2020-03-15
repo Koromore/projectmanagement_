@@ -11,12 +11,16 @@ import wlGantt from 'wl-gantt'
 import "wl-gantt/lib/wl-gantt.css"
 import echarts from 'echarts'
 import gunter from './components/gante_test/gante'
+import {date,date_,time} from '@/utils/date'
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.use(wlGantt)
 Vue.use(gunter)
 Vue.prototype.$echarts = echarts
+Vue.prototype.$date = date
+Vue.prototype.$date_ = date_
+Vue.prototype.$time = time
 
 
 

@@ -311,10 +311,10 @@
                   size="mini"
                 ></el-date-picker>
               </template>
-              <template v-else>{{taskData.expertTime}}</template>
+              <template v-else>{{taskData.expertTime_}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime}}</el-col>
+            <el-col :span="18">{{taskData.overTime_}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -679,6 +679,8 @@ export default {
       let listProFile = this.listProFile // 需求文档
       let listProFileResult = this.listProFileResult // 结果文档
       let status = this.statusListValue
+      delete taskData.expertTime_
+      delete taskData.overTime_
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
@@ -751,6 +753,12 @@ export default {
       console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        data.expertTime_ = this.$date(data.expertTime)
+        data.overTime_ = this.$time(data.overTime)
+        for (let i = 0; i < data.feedbackList.length; i++) {
+          let element = data.feedbackList[i]
+          data.feedbackList[i].updateTime = this.$time(element.updateTime)
+        }
         this.taskData = data
         this.listProFile_ = data.proFileList
         this.listProFileResult = data.taskfileList
@@ -1057,7 +1065,12 @@ export default {
             this.fileHistoryLoading = false
 
             if (res.data && res.data.length != 0) {
-              this.fileHistoryList = res.data
+              let data = res.data
+              for (let i = 0; i < data.length; i++) {
+                const element = data[i]
+                data[i].updateTime = this.$time(element.updateTime)
+              }
+              this.fileHistoryList = data
             } else {
               console.log('暂无数据')
             }
@@ -1088,10 +1101,15 @@ export default {
     },
     // 获取文档列表回调
     getTaskfilePageListSuss(res) {
+      this.loading = false
       if (res.status == 200) {
-        this.loading = false
+        let data = res.data.items
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          data[i].updateTime = this.$time(element.updateTime)
+        }
         this.totalnum = res.data.totalRows
-        this.tableData = res.data.items
+        this.tableData = data
       }
     }
   },

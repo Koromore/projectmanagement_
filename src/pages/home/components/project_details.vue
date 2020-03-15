@@ -108,8 +108,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime_" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime_" label="完成时间" sortable></el-table-column>
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="overDesc" label="成果">
             <div
@@ -492,10 +492,10 @@
                   size="mini"
                 ></el-date-picker>
               </template>
-              <template v-else>{{taskData.expertTime}}</template>
+              <template v-else>{{taskData.expertTime_}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime}}</el-col>
+            <el-col :span="18">{{taskData.overTime_}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -836,7 +836,8 @@ export default {
       if (strDate >= 0 && strDate <= 9) {
         strDate = '0' + strDate
       }
-      return year + '-' + month + '-' + strDate
+      // return (year + '-' + month + '-' + strDate)
+      return `${year}-${month}-${strDate}`
     },
     // 时间格式Y-M-D H-M-S
     formatData2(date) {
@@ -862,19 +863,7 @@ export default {
       if (seconds >= 0 && seconds <= 9) {
         seconds = '0' + seconds
       }
-      return (
-        year +
-        '-' +
-        month +
-        '-' +
-        strDate +
-        ' ' +
-        hours +
-        ':' +
-        minutes +
-        ':' +
-        seconds
-      )
+      return `${year}-${month}-${strDate} ${hours}:${minutes}:${seconds}`
     },
     // 获取浏览器宽高
     widthheight() {
@@ -998,9 +987,17 @@ export default {
     // 获取任务详情回调
     getTaskDetailSuss(res) {
       this.drawerLoading = false
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        // data.expertTime = this.$date(data.expertTime)
+        // data.overTime = this.$time(data.overTime)
+        data.expertTime_ = this.$date(data.expertTime)
+        data.overTime_ = this.$time(data.overTime)
+        for (let i = 0; i < data.feedbackList.length; i++) {
+          let element = data.feedbackList[i]
+          data.feedbackList[i].updateTime = this.$time(element.updateTime)
+        }
         this.taskData = data
         this.listProFile = data.proFileList
         this.listProFileResult = data.taskfileList
@@ -1147,6 +1144,8 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        data.createTime_ = this.$date_(data.createTime)
+        data.expertTime_ = this.$date_(data.expertTime)
         // data.remark = data.remark.replace(/↵/g,"\n")
         this.projectShowDetail = data
         this.proName = data.proName
@@ -1176,6 +1175,11 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data
+        for (let i = 0; i < data.length; i++) {
+          const element = data[i]
+          data[i].expertTime_ = this.$date(element.expertTime)
+          data[i].overTime_ = this.$time(element.overTime)
+        }
         this.taskList = data
       }
     },
@@ -1197,6 +1201,13 @@ export default {
     getProjectOfUserTaskSuss(res) {
       this.loading = false
       if (res.status == 200) {
+        let data = res.data.data
+
+        for (let i = 0; i < data.length; i++) {
+          const element = data[i]
+          data[i].expertTime_ = this.$date(element.expertTime)
+          data[i].overTime_ = this.$time(element.overTime)
+        }
         let taskList = res.data.data
         this.taskList = taskList
       }
@@ -1326,6 +1337,8 @@ export default {
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
+      delete taskData.expertTime_
+      delete taskData.overTime_
       this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
@@ -1475,6 +1488,8 @@ export default {
       // console.log(data)
       let nextuserValue = this.nextuserValue
       data.proFileList = []
+      delete data.expertTime_
+      delete data.overTime_
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {

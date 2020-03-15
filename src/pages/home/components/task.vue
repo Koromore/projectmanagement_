@@ -232,8 +232,8 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime_" label="预计时间" sortable></el-table-column>
+          <el-table-column prop="overTime_" label="完成时间" sortable></el-table-column>
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="taskfileList" label="成果">
             <div
@@ -384,10 +384,10 @@
                   size="mini"
                 ></el-date-picker>
               </template>
-              <template v-else>{{taskData.expertTime}}</template>
+              <template v-else>{{taskData.expertTime_}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime}}</el-col>
+            <el-col :span="18">{{taskData.overTime_}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -968,6 +968,12 @@ export default {
       this.drawerLoading = false
       if (res.status == 200) {
         let data = res.data.data
+        data.expertTime_ = this.$date(data.expertTime)
+        data.overTime_ = this.$time(data.overTime)
+        for (let i = 0; i < data.feedbackList.length; i++) {
+          let element = data.feedbackList[i]
+          data.feedbackList[i].updateTime = this.$time(element.updateTime)
+        }
         this.taskData = data
         this.listProFile = data.proFileList
         this.listProFileResult = data.taskfileList
@@ -1026,6 +1032,8 @@ export default {
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {
+        delete data.expertTime_
+        delete data.overTime_
         data.doUserId = nextuserValue
         data.proFileList = []
         this.$axios
@@ -1104,6 +1112,10 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data.items
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          data[i].expertTime = this.$date(element.expertTime)
+        }
         this.tasklist = data
         this.initiateTaskListTota = res.data.data.totalRows // 我发起任务列表总页数
       }
@@ -1121,6 +1133,11 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data.items
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          data[i].expertTime_ = this.$date(element.expertTime)
+          data[i].overTime_ = this.$time(element.overTime)
+        }
         this.tasklist_ = data
         this.participateTaskListTota = res.data.data.totalRows // 我参与任务列表总页数
       }
@@ -1226,6 +1243,8 @@ export default {
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
+      delete taskData.expertTime_
+      delete taskData.overTime_
       // console.log(taskData.listProFile)
       this.taskSave(taskData)
     },
@@ -1303,7 +1322,7 @@ export default {
       let taskId = this.taskFeedbackId
       let feedbackFileList = this.feedbackFileList
       for (let i = 0; i < feedbackFileList.length; i++) {
-        const element = feedbackFileList[i];
+        const element = feedbackFileList[i]
         feedbackFileList[i].taskId = taskId
       }
       let data = {
@@ -1606,7 +1625,7 @@ export default {
   font-size: 13px;
   color: rgb(162, 162, 162);
 }
-.task .task_details .suggest .fileListBox{
+.task .task_details .suggest .fileListBox {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -1618,7 +1637,7 @@ export default {
   color: rgb(162, 162, 162);
   margin-top: 13px;
 }
-.task .task_details .suggest .fileList div{
+.task .task_details .suggest .fileList div {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
