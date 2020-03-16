@@ -168,7 +168,7 @@
                   v-if="scope.row.isIgnore != true && scope.row.status == 2"
                   type="primary"
                   slot="reference"
-                  @click="sponsor_achieve(scope.row.proId,scope.row.taskId)"
+                  @click="sponsor_achieve(scope.row)"
                 >完成</el-button>
               </div>
               <div class="linblo" v-else-if="userId == scope.row.doUserId">
@@ -199,7 +199,7 @@
         </el-col>
         <el-col :span="7" class="title">
           <el-col :span="24">预计时间</el-col>
-          <el-col :span="24">{{projectShowDetail.createTime}}--{{projectShowDetail.expertTime}}</el-col>
+          <el-col :span="24">{{projectShowDetail.createTime_}}--{{projectShowDetail.expertTime_}}</el-col>
         </el-col>
         <el-col :span="7" class="title">
           <el-col :span="24">项目类别</el-col>
@@ -459,7 +459,8 @@
                 v-model="statusListValue"
                 size="mini"
                 :class="{'state_color1': taskData.status == 1,
-                  'state_color2': taskData.status == 2}"
+                  'state_color2': taskData.status == 2,
+                  'state_color4': taskData.status == 4}"
                 placeholder="请选择"
                 v-if="taskData.status==1 && taskData.doUserId == userId"
               >
@@ -476,7 +477,23 @@
               >执行中</span>
               <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
               <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
-              <span v-else-if="taskData.status==4" class="state_color4">延期</span>
+              <!-- <span v-else-if="taskData.status==4" class="state_color4">延期</span> -->
+              <el-select
+                v-model="statusListValue"
+                size="mini"
+                :class="{'state_color1': taskData.status == 1,
+                  'state_color2': taskData.status == 2,
+                  'state_color4': taskData.status == 4}"
+                placeholder="请选择"
+                v-if="taskData.status==4"
+              >
+                <el-option
+                  v-for="item in statusList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
               <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
             </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
@@ -645,21 +662,21 @@
                       @click="download(item)"
                     >
                       <img
-                        v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                        v-if="items.suffix == 'doc' || items.suffix == 'docx'"
                         src="static/images/document/word.png"
                         width="24"
                         alt
                         srcset
                       />
                       <img
-                        v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                        v-else-if="items.suffix == 'xls' || items.suffix == 'xlsx'"
                         src="static/images/document/excle.png"
                         width="24"
                         alt
                         srcset
                       />
                       <img
-                        v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                        v-else-if="items.suffix == 'ppt' || items.suffix == 'pptx'"
                         src="static/images/document/ppt.png"
                         width="24"
                         alt
@@ -674,7 +691,11 @@
             </el-col>
           </el-row>
         </el-scrollbar>
-        <el-row class="batton_pa" v-show="batton_pa" v-if="!resultBan">
+        <el-row
+          class="batton_pa"
+          v-show="batton_pa"
+          v-if="taskData.status == 1 || taskData.status == 4"
+        >
           <el-col :span="12" :offset="7" class="batton">
             <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
@@ -755,7 +776,8 @@ export default {
       // 状态列表
       statusList: [
         { value: 1, label: '执行中' },
-        { value: 2, label: '完成' }
+        { value: 2, label: '完成' },
+        { value: 4, label: '延期' }
       ],
       statusListValue: '',
       style1: '',
@@ -874,7 +896,9 @@ export default {
     },
     addtask() {
       this.drawer1 = true
-      this.taskData = {}
+      this.taskData = {
+        listOaUser: []
+      }
       // 任务类型获取
       this.getDepTypeList()
       // 部门列表获取
@@ -1202,7 +1226,6 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data
-
         for (let i = 0; i < data.length; i++) {
           const element = data[i]
           data[i].expertTime_ = this.$date(element.expertTime)
@@ -1339,6 +1362,8 @@ export default {
       taskData.status = status
       delete taskData.expertTime_
       delete taskData.overTime_
+      delete taskData.feedbackList
+      // console.log(taskData)
       this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
@@ -1525,23 +1550,26 @@ export default {
       this.file_list = []
       this.listProFileResult = []
     },
-    sponsor_achieve(proId, taskId) {
+    sponsor_achieve(taskData) {
       this.$confirm('是否确认此操作？', '确认信息', {
-        distinguishCancelAndClose: true,
+        type: 'warning',
         confirmButtonText: '确认',
         cancelButtonText: '取消'
-      })
-        .then(() => {
+      }).then(() => {
+          let expertTime = new Date(taskData.expertTime)
+          let newTime = new Date()
           let data = {
-            proId: proId,
-            taskId: taskId,
+            proId: taskData.proId,
+            taskId: taskData.taskId,
             status: 3,
             proFileList: [],
             taskfileList: []
           }
+          if (expertTime<newTime) {
+            data.status = 5
+          }
           this.taskSave(data)
-        })
-        .catch(action => {
+        }).catch(() => {
           this.$message({
             type: 'info',
             message: '已取消'

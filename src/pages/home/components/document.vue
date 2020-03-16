@@ -295,7 +295,22 @@
               >执行中</span>
               <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
               <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
-              <span v-else-if="taskData.status==4" class="state_color4">延期</span>
+              <el-select
+                v-model="statusListValue"
+                size="mini"
+                :class="{'state_color1': taskData.status == 1,
+                  'state_color2': taskData.status == 2,
+                  'state_color4': taskData.status == 4}"
+                placeholder="请选择"
+                v-if="taskData.status==4"
+              >
+                <el-option
+                  v-for="item in statusList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
               <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
             </el-col>
             <el-col :span="6" class="title">预计时间：</el-col>
@@ -558,7 +573,8 @@ export default {
       // 状态列表
       statusList: [
         { value: 1, label: '执行中' },
-        { value: 2, label: '完成' }
+        { value: 2, label: '完成' },
+        { value: 4, label: '延期' }
       ],
       statusListValue: '',
       drawer1: false,
@@ -681,6 +697,7 @@ export default {
       let status = this.statusListValue
       delete taskData.expertTime_
       delete taskData.overTime_
+      delete taskData.feedbackList
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
@@ -929,6 +946,7 @@ export default {
           Object.assign(taskfile, this.listProFile[0])
         )
         .then(res => {
+          this.getTaskfilePageList()
           console.log(res)
           this.dialogFileVisible = false
         })

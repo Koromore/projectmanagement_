@@ -118,9 +118,10 @@
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
-              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
           <el-table-column prop="num" label="总任务数/待完成">
@@ -138,17 +139,13 @@
                 v-if="scope.row.status == 2"
                 @click="feedback(scope.row.proId,scope.row.proName)"
               >反馈</el-button>
-              <el-popconfirm
-                title="确认执行此操作吗？"
-                @onConfirm="achieve(scope.row.proId,scope.row.proName,scope.row.status)"
-              >
-                <el-button
-                  size="small"
-                  type="primary"
-                  slot="reference"
-                  v-if="scope.row.status == 2"
-                >完成</el-button>
-              </el-popconfirm>
+              <el-button
+                size="small"
+                type="primary"
+                slot="reference"
+                v-if="scope.row.status == 2"
+                @click="achieve(scope.row)"
+              >完成</el-button>
               <el-button
                 size="small"
                 type="info"
@@ -207,9 +204,10 @@
           <el-table-column prop="state_text" label="状态">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
-              <span v-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
@@ -559,7 +557,7 @@ export default {
       if (seconds >= 0 && seconds <= 9) {
         seconds = '0' + seconds
       }
-      return (`${year}-${month}-${strDate} ${hours}:${minutes}:${seconds}`)
+      return `${year}-${month}-${strDate} ${hours}:${minutes}:${seconds}`
     },
     listUniq(array, key) {
       var result = [array[0]]
@@ -774,6 +772,7 @@ export default {
     delayAchieve() {
       let proId = this.proId
       let overTime = this.formatData2(new Date())
+      let delayReason = this.delayReason
       let data = {
         proId: proId,
         status: 5,
@@ -782,13 +781,14 @@ export default {
       }
       this.getProjectSave(data)
     },
-    achieve(proId, name, state) {
+    achieve(proDate) {
       // console.log('完成' + proId)
-      this.proId = proId
-      let delayReason = this.delayReason
-      if (state == 4) {
+      this.proId = proDate.proId
+      let expertTime = new Date(proDate.expertTime)
+      let newTime = new Date()
+      if (expertTime<newTime) {
         this.drawer3 = true
-        this.drawer3_name = name
+        this.drawer3_name = proDate.proName
       } else {
         this.$confirm('是否确认此操作？', '确认信息', {
           distinguishCancelAndClose: true,
@@ -823,10 +823,10 @@ export default {
       // console.log(res)
       let data = res.data.data
       if (res.status == 200) {
-        if (data.status == 3) {
+        if (data.status == 3 || data.status == 5) {
           this.messageWin('项目已完成')
-          this.getProjectList()
         }
+        this.getProjectList()
       }
     },
 
@@ -1005,7 +1005,6 @@ export default {
           projectListOriginate[i].unfintask = unfintask
         }
         // console.log(projectListOriginate)
-        
 
         this.projectListOriginate = projectListOriginate
 
@@ -1031,10 +1030,9 @@ export default {
       if (res.status == 200) {
         let projectListJoin = res.data.data
         for (let i = 0; i < projectListJoin.length; i++) {
-          let element = projectListJoin[i];
+          let element = projectListJoin[i]
           projectListJoin[i].expertTime = this.$date(element.expertTime)
           projectListJoin[i].overTime = this.$date(element.overTime)
-          
         }
         this.projectListJoin = projectListJoin
 
@@ -1138,7 +1136,7 @@ export default {
     this.getProjectList() // 获取项目列表
     this.projectListNum()
     // let time = '2012-12-12'
-    
+
     // console.log(time)
     // console.log(this.$date(time))
     // console.log(this.$time(time))
