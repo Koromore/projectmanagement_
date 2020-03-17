@@ -378,7 +378,7 @@
                 v-if="taskData.status==4"
               >
                 <el-option
-                  v-for="item in statusList"
+                  v-for="item in statusList_"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -549,7 +549,7 @@
                       class="fileList"
                       v-for="items in item.feedbackFileList"
                       :key="items.index"
-                      @click="download(item)"
+                      @click="download(items)"
                     >
                       <img
                         v-if="item.suffix == 'doc' || item.suffix == 'docx'"
@@ -692,6 +692,9 @@ export default {
       // 状态列表
       statusList: [
         { value: 1, label: '执行中' },
+        { value: 2, label: '完成' }
+      ],
+      statusList: [
         { value: 2, label: '完成' },
         { value: 4, label: '延期' }
       ],

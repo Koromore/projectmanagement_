@@ -770,6 +770,7 @@ export default {
       // this.$emit('getShopCode',value)
     },
     delayAchieve() {
+      this.drawer3 = false
       let proId = this.proId
       let overTime = this.formatData2(new Date())
       let delayReason = this.delayReason
@@ -796,9 +797,10 @@ export default {
           cancelButtonText: '取消'
         })
           .then(() => {
+            // console.log(1)
             let overTime = this.formatData2(new Date())
             let data = {
-              proId: proId,
+              proId: proDate.proId,
               status: 3,
               overTime: overTime
             }
@@ -1070,13 +1072,13 @@ export default {
       this.pageNum_ = page
       console.log(page)
 
-      this.totalnum_ = this.projectListOriginate.length
+      this.totalnum_ = this.projectListJoin.length
 
-      var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
+      var json = JSON.parse(JSON.stringify(this.projectListJoin)) //拷贝数据 避免影响原始数据
 
       this.currentData_ = json.splice(
-        (this.pageNum - 1) * 10,
-        (this.pageNum - 1) * 10 + 10
+        (this.pageNum_ - 1) * 10,
+        (this.pageNum_ - 1) * 10 + 10
       )
 
       console.log(this.currentData_)

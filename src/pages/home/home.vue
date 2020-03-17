@@ -57,6 +57,14 @@
               style="width: 100%;"
             ></el-cascader>
           </el-col>
+          <el-col :span="6" class="title">立项</el-col>
+          <el-col :span="13">
+            <el-cascader
+              v-model="new_project.business_type"
+              :options="business_type_list"
+              style="width: 100%;"
+            ></el-cascader>
+          </el-col>
           <el-col :span="18" :offset="6">
             <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
             <el-radio v-model="new_project.radio1" label="0">日常</el-radio>

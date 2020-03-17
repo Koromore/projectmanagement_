@@ -21,6 +21,13 @@
             @click="table_tab(2)"
             :class="[tabs_activity=='2' ? 'act' : '']"
           >项目需求</el-button>
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="table_tab(3)"
+            :class="[tabs_activity=='3' ? 'act' : '']"
+          >立项背景</el-button>
         </el-button-group>
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
@@ -46,7 +53,7 @@
         </el-col>
       </el-col>
       <!-- 任务列表 -->
-      <el-col :span="24" class="table table1" v-if="table_show">
+      <el-col :span="24" class="table table1" v-if="tabs_activity == 1">
         <!--  -->
         <el-table
           v-loading="loading"
@@ -192,7 +199,7 @@
         </el-table>
       </el-col>
       <!-- 项目需求 -->
-      <el-col :span="24" class="table table2" v-if="!table_show">
+      <el-col :span="24" class="table table2" v-if="tabs_activity == 2">
         <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
           <el-col :span="24">{{projectShowDetail.proName}}</el-col>
@@ -248,6 +255,19 @@
             <div></div>
           </el-col>
         </el-col>
+      </el-col>
+      <!-- 立项背景 -->
+      <el-col :span="24" class="table table3" v-if="tabs_activity == 3">
+        <el-col :span="24">立项名称：xxxxxx</el-col>
+        <el-col :span="24">项目类别：xxxxxx</el-col>
+        <el-col :span="24">合同归属地：xxxxxx</el-col>
+        <el-col :span="24">客户名称：xxxxxx</el-col>
+        <el-col :span="24">品牌：xxxxxx</el-col>
+        <el-col :span="24">立项日期：xxxxxx</el-col>
+        <el-col :span="24">项目编号：xxxxxx</el-col>
+        <el-col :span="24">项目类型：xxxxxx</el-col>
+        <el-col :span="24">项目执行周期：xxxxxx</el-col>
+        <el-col :span="24">客户部服务人员：xxxxxx</el-col>
       </el-col>
       <!-- 抽屉创建任务 -->
       <el-drawer title="创建任务" :visible.sync="drawer1" :with-header="false">
@@ -488,7 +508,7 @@
                 v-if="taskData.status==4"
               >
                 <el-option
-                  v-for="item in statusList"
+                  v-for="item in statusList_"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -659,7 +679,7 @@
                       class="fileList"
                       v-for="items in item.feedbackFileList"
                       :key="items.index"
-                      @click="download(item)"
+                      @click="download(items)"
                     >
                       <img
                         v-if="items.suffix == 'doc' || items.suffix == 'docx'"
@@ -776,6 +796,9 @@ export default {
       // 状态列表
       statusList: [
         { value: 1, label: '执行中' },
+        { value: 2, label: '完成' }
+      ],
+      statusList_: [
         { value: 2, label: '完成' },
         { value: 4, label: '延期' }
       ],
@@ -906,13 +929,13 @@ export default {
     },
     // 选项卡
     table_tab(e) {
-      if (e == 1) {
-        this.tabs_activity = 1
-        this.table_show = true
-      } else if (e == 2) {
-        this.tabs_activity = 2
-        this.table_show = false
-      }
+      // if (e == 1) {
+      this.tabs_activity = e
+      // this.table_show = true
+      // } else if (e == 2) {
+      // this.tabs_activity = 2
+      // this.table_show = false
+      // }
     },
     redact(proId, taskId) {
       // console.log('忽略' + taskId)
@@ -1555,7 +1578,8 @@ export default {
         type: 'warning',
         confirmButtonText: '确认',
         cancelButtonText: '取消'
-      }).then(() => {
+      })
+        .then(() => {
           let expertTime = new Date(taskData.expertTime)
           let newTime = new Date()
           let data = {
@@ -1565,11 +1589,12 @@ export default {
             proFileList: [],
             taskfileList: []
           }
-          if (expertTime<newTime) {
+          if (expertTime < newTime) {
             data.status = 5
           }
           this.taskSave(data)
-        }).catch(() => {
+        })
+        .catch(() => {
           this.$message({
             type: 'info',
             message: '已取消'
@@ -1835,6 +1860,13 @@ export default {
 .project_details .table2 .need .fileList_ .shade i {
   color: white;
   font-size: 32px;
+}
+.project_details .table3 > div {
+  margin-top: 6px;
+  font-weight: 400;
+  font-size: 16px;
+  color: rgb(96, 94, 94);
+  line-height: 28px;
 }
 .state_color1 {
   color: rgb(1, 176, 114);
