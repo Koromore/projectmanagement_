@@ -622,6 +622,29 @@ export default {
       // console.log(value)
       // console.log(this.value)
     },
+    ///////// 获取所有客户信息 start /////////
+    getAllClientapiList() {
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
+        .then(this.getAllClientapiListSuss)
+    },
+    // 获取所有客户信息回调
+    getAllClientapiListSuss(res) {
+      if (res.status == 200) {
+        let data = res.data
+        let clientIdList = []
+        data.forEach(element => {
+          let clientIdListDate = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListDate)
+        })
+        this.clientIdList = clientIdList
+      }
+      // console.log(res)
+    },
+    ///////// 获取所有客户信息 end /////////
     // 添加知晓人标签
     showInput() {
       let list = this.new_project.dynamicTags
@@ -1134,9 +1157,10 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    this.getAllClientAndBusiness() // 获取
+    // this.getAllClientAndBusiness() // 获取客户列表
     this.getProjectList() // 获取项目列表
-    this.projectListNum()
+    this.projectListNum() // 
+    this.getAllClientapiList() // 获取所有客户信息列表
     // let time = '2012-12-12'
 
     // console.log(time)

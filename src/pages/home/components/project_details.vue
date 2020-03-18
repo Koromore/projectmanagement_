@@ -52,7 +52,7 @@
           </el-col>
         </el-col>
       </el-col>
-      <!-- 任务列表 -->
+      <!--------- 任务列表 start --------->
       <el-col :span="24" class="table table1" v-if="tabs_activity == 1">
         <!--  -->
         <el-table
@@ -198,7 +198,8 @@
           </el-table-column>
         </el-table>
       </el-col>
-      <!-- 项目需求 -->
+      <!--------- 任务列表 end --------->
+      <!--------- 项目需求 start --------->
       <el-col :span="24" class="table table2" v-if="tabs_activity == 2">
         <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
@@ -211,7 +212,7 @@
         <el-col :span="7" class="title">
           <el-col :span="24">项目类别</el-col>
           <el-col :span="24">
-            {{projectShowDetail.clientName}}-
+            {{pasProjectapiDetai.clientName}}-
             {{projectShowDetail.businessName}}-
             {{projectShowDetail.projectType}}
           </el-col>
@@ -256,19 +257,21 @@
           </el-col>
         </el-col>
       </el-col>
-      <!-- 立项背景 -->
+      <!--------- 项目需求 end --------->
+      <!--------- 立项背景 start --------->
       <el-col :span="24" class="table table3" v-if="tabs_activity == 3">
-        <el-col :span="24">立项名称：xxxxxx</el-col>
-        <el-col :span="24">项目类别：xxxxxx</el-col>
-        <el-col :span="24">合同归属地：xxxxxx</el-col>
-        <el-col :span="24">客户名称：xxxxxx</el-col>
-        <el-col :span="24">品牌：xxxxxx</el-col>
-        <el-col :span="24">立项日期：xxxxxx</el-col>
-        <el-col :span="24">项目编号：xxxxxx</el-col>
-        <el-col :span="24">项目类型：xxxxxx</el-col>
-        <el-col :span="24">项目执行周期：xxxxxx</el-col>
-        <el-col :span="24">客户部服务人员：xxxxxx</el-col>
+        <el-col :span="24">立项名称：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">项目类别：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">合同归属地：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">客户名称：{{pasProjectapiDetai.clientName}}</el-col>
+        <el-col :span="24">品牌：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">立项日期：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">项目编号：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">项目类型：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">项目执行周期：{{pasProjectapiDetai.projectName}}</el-col>
+        <el-col :span="24">客户部服务人员：{{pasProjectapiDetai.projectName}}</el-col>
       </el-col>
+      <!--------- 立项背景 end --------->
       <!-- 抽屉创建任务 -->
       <el-drawer title="创建任务" :visible.sync="drawer1" :with-header="false">
         <el-scrollbar style="height: 100%">
@@ -756,6 +759,7 @@ export default {
       deptList: [], // 部门列表
       departmentList: [], // 部门列表未处理
       projectShowDetail: {}, // 项目详情
+      pasProjectapiDetai: {}, // 立项详情
       // 1执行中 2审核中 3已完成 4延期
       // 我参与 我发起选项卡
       tabs_activity: 1,
@@ -1179,6 +1183,21 @@ export default {
       }
       let data = `?proId=${proId}`
       this.getProjectShowDetail(data)
+    },
+    // 获取立项背景
+    getProjectapiDetai() {
+      let data = `?projectId=837`
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/projectapi/projectDetailAjax' + data)
+        .then(this.getProjectapiDetaiSuss)
+    },
+    // 获取项目需求回调/api/project/projectOfUserTask
+    getProjectapiDetaiSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        let data = res.data
+        this.pasProjectapiDetai = data
+      }
     },
     // 获取项目需求
     getProjectShowDetail(data) {
@@ -1651,6 +1670,7 @@ export default {
     this.getParams()
     this.upload()
     this.getParentTask()
+    this.getProjectapiDetai() // 获取立项背景
     // console.log(Date.now('2030-03-17 00:00:00'))
   }
 }

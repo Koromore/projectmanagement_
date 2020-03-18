@@ -48,22 +48,33 @@
           <el-col :span="13">
             <el-input placeholder="请输入内容" v-model="new_project.new_name" clearable></el-input>
           </el-col>
-          <el-col :span="6" class="title">分类</el-col>
+          <el-col :span="6" class="title">客户</el-col>
           <el-col :span="13">
             <el-cascader
-              v-model="new_project.business_type"
+              v-model="business_type"
               :options="business_type_list"
+              clearable
               @change="handleChange"
               style="width: 100%;"
             ></el-cascader>
+            {{business_type}}
           </el-col>
           <el-col :span="6" class="title">立项</el-col>
           <el-col :span="13">
-            <el-cascader
-              v-model="new_project.business_type"
-              :options="business_type_list"
-              style="width: 100%;"
-            ></el-cascader>
+            <el-select
+              v-model="new_project.pasprojectId"
+              filterable
+              clearable
+              placeholder="请选择"
+              class="pasproject"
+            >
+              <el-option
+                v-for="item in pasProjectList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
           </el-col>
           <el-col :span="18" :offset="6">
             <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
@@ -193,7 +204,10 @@ export default {
       show_acti: 2,
       drawer: false,
       restaurants: [
-        { value: '测试1', deptId: 'id1' },
+        {
+          value: '测试1',
+          deptId: 'id1'
+        },
         {
           value: '测试2',
           deptId: 'id2'
@@ -203,7 +217,6 @@ export default {
           deptId: 'id3'
         }
       ],
-      business_type_list: [], // 业务类型列表
       deptList: [], // 部门列表
       userList: [], // 用户列表
       radio2: '1', // 项目经理,执行部门 选择
@@ -215,6 +228,7 @@ export default {
       new_project: {
         new_name: '', // 任务名称
         business_type: [], // 分类 客户-类型
+        pasprojectId: '',
         radio1: '0', // 专项，日常
         presetTime: '', // 预计时间
         remark: '', // 需求
@@ -223,6 +237,9 @@ export default {
         checkList: [], // 执行部门
         dynamicTags: [] // 知晓人
       },
+      business_type: [], // 分类 客户-类型
+      business_type_list: [],
+      pasProjectList: [],
       checkListBan: false, // 执行部门禁用
       // 禁止选择当前时间之前的时间
       pickerOptions: {
@@ -257,6 +274,11 @@ export default {
         this.new_project.manager = ''
         this.new_project.managerId = ''
       }
+    },
+    business_type: function(newQuestion, oldQuestion) {
+      let clientId = this.business_type[0]
+      let data = `?clientId=${clientId}`
+      this.getProjectapiListAjax(data)
     },
     $route: 'router_url'
   },
@@ -320,9 +342,10 @@ export default {
         1
       )
     },
-    // 接受子组件数据
+    ///////// 接受子组件数据 start /////////
     getMsgFormSon(data) {
       this.drawer = true
+      this.getClientapiListAjax()
       // 获取客户列表
       // this.getClientListAjax()
       // 获取新建项目分类
@@ -383,9 +406,71 @@ export default {
       //   }
       // ]
     },
+    ///////// 接受子组件数据 end /////////
+    ///////// 用户列表获取 start /////////
+    getClientapiListAjax(res) {
+      // let list = this.userList
+      let userId = this.userId
+      // if (list.length == 0) {
+      // let data = `?userId=${userId}`
+      let data = `?userId=113`
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax' + data)
+        .then(this.getClientapiListAjaxSuss)
+      // }
+    },
+    // 用户列表获取回调
+    getClientapiListAjaxSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        let data = res.data
+        // console.log(data)
+        let clientList = []
+        data.forEach(element => {
+          // console.log(element)
+          let clientListData = {
+            value: element.clientId,
+            label: element.clientName//,
+            // children: []
+          }
+          clientList.push(clientListData)
+        });
+        // console.log(clientList)
+        this.business_type_list = clientList
+      }
+    },
+    ///////// 用户列表获取 end /////////
+    ///////// 立项列表获取 start /////////
+    getProjectapiListAjax(data) {
+      // let list = this.userList
+      // let userId = this.userId
+      // if (list.length == 0) {
+      // let data = `?userId=${userId}`
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/projectapi/listAjax' + data)
+        .then(this.getProjectapiListAjaxSuss)
+      // }
+    },
+    // 立项列表获取回调
+    getProjectapiListAjaxSuss(res) {
+      console.log(res)
+      if (res.status == 200) {
+        let data = res.data
+        let pasProjectList = []
+        data.forEach(element => {
+          let pasProjectListData = {
+            value: element.projectId,
+            label: element.projectName
+          }
+          pasProjectList.push(pasProjectListData)
+        })
+        this.pasProjectList = pasProjectList
+      }
+    },
+    ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      console.log(data)
+      // console.log(data)
       // if (res.status == 200) {
       // let data = data
       // console.log(data)
@@ -613,7 +698,7 @@ export default {
           }
           business_type_list.push(business_type)
         }
-        this.business_type_list = business_type_list
+        // this.business_type_list = business_type_list
         // console.log(this.business_type_list)
       }
       // console.log(res)
@@ -655,6 +740,7 @@ export default {
         proName: this.new_project.new_name, // '项目名称',
         clientId: this.new_project.business_type[0], // '所属客户ID',
         serviceId: this.new_project.business_type[1], // '所属业务ID'
+        pasprojectId: this.new_project.pasprojectId, // 立项ID
         isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
@@ -857,6 +943,9 @@ export default {
   margin-bottom: 13px;
 }
 .home .add_box .userList {
+  width: 100%;
+}
+.home .add_box .pasproject {
   width: 100%;
 }
 .home .batton_pa {
