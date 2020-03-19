@@ -232,8 +232,12 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime_" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime_" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable>
+             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable>
+             <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          </el-table-column>
           <el-table-column prop="initUserName" label="下达人"></el-table-column>
           <el-table-column prop="taskfileList" label="成果">
             <div
@@ -399,10 +403,10 @@
                   size="mini"
                 ></el-date-picker>
               </template>
-              <template v-else>{{taskData.expertTime_}}</template>
+              <template v-else>{{$date(taskData.expertTime)}}</template>
             </el-col>
             <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime_}}</el-col>
+            <el-col :span="18">{{$time(taskData.overTime)}}</el-col>
             <el-col :span="6" class="title">需求：</el-col>
             <el-col :span="18">
               <template
@@ -541,7 +545,7 @@
                   v-for="item in taskData.feedbackList"
                   :key="item.index"
                 >
-                  <el-col :span="12" class="time">{{item.updateTime}}</el-col>
+                  <el-col :span="12" class="time">{{$time(item.updateTime)}}</el-col>
                   <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
                   <el-col :span="24" class="content">{{item.feedback}}</el-col>
                   <el-col :span="24" class="fileListBox">
@@ -796,7 +800,7 @@ export default {
     // 获取新建项目分类
     getAllClientAndBusiness() {
       this.$axios
-        .post('/pmbs/client/getAllClientAndBusiness')
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
         .then(this.getAllClientAndBusinessSuss)
     },
     // 获取新建项目分类回调
@@ -804,9 +808,6 @@ export default {
       if (res.status == 200) {
         let data = res.data.data
         let clientIdList = []
-        // console.log(data)
-        // let business_type_list = []
-        // 循环提取名称和ID
         for (let i = 0; i < data.length; i++) {
           let element = data[i]
           let clientIdListData = {
@@ -992,12 +993,6 @@ export default {
       this.drawerLoading = false
       if (res.status == 200) {
         let data = res.data.data
-        data.expertTime_ = this.$date(data.expertTime)
-        data.overTime_ = this.$time(data.overTime)
-        for (let i = 0; i < data.feedbackList.length; i++) {
-          let element = data.feedbackList[i]
-          data.feedbackList[i].updateTime = this.$time(element.updateTime)
-        }
         this.taskData = data
         this.listProFile = data.proFileList
         this.listProFileResult = data.taskfileList
@@ -1056,8 +1051,6 @@ export default {
       if (nextuserValue == '') {
         this.changeDoUserNameShow = 'true'
       } else {
-        delete data.expertTime_
-        delete data.overTime_
         data.doUserId = nextuserValue
         data.proFileList = []
         this.$axios
@@ -1136,10 +1129,6 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data.items
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          data[i].expertTime = this.$date(element.expertTime)
-        }
         this.tasklist = data
         this.initiateTaskListTota = res.data.data.totalRows // 我发起任务列表总页数
       }
@@ -1157,11 +1146,6 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data.data.items
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          data[i].expertTime_ = this.$date(element.expertTime)
-          data[i].overTime_ = this.$time(element.overTime)
-        }
         this.tasklist_ = data
         this.participateTaskListTota = res.data.data.totalRows // 我参与任务列表总页数
       }
@@ -1267,8 +1251,6 @@ export default {
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
-      delete taskData.expertTime_
-      delete taskData.overTime_
       delete taskData.feedbackList
       // console.log(taskData.listProFile)
       this.taskSave(taskData)

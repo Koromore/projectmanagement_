@@ -50,19 +50,36 @@
           </el-col>
           <el-col :span="6" class="title">客户</el-col>
           <el-col :span="13">
-            <el-cascader
-              v-model="business_type"
-              :options="business_type_list"
+            <el-select v-model="clientId" filterable clearable placeholder="请选择" class="pasproject">
+              <el-option
+                v-for="item in clientList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="6" class="title">业务类型</el-col>
+          <el-col :span="13">
+            <el-select
+              v-model="businessId"
+              filterable
               clearable
-              @change="handleChange"
-              style="width: 100%;"
-            ></el-cascader>
-            {{business_type}}
+              placeholder="请选择"
+              class="pasproject"
+            >
+              <el-option
+                v-for="item in businessList"
+                :key="item.index"
+                :label="item.label"
+                :value="item.value"
+              ></el-option>
+            </el-select>
           </el-col>
           <el-col :span="6" class="title">立项</el-col>
           <el-col :span="13">
             <el-select
-              v-model="new_project.pasprojectId"
+              v-model="pasprojectId"
               filterable
               clearable
               placeholder="请选择"
@@ -227,8 +244,6 @@ export default {
       // 新增
       new_project: {
         new_name: '', // 任务名称
-        business_type: [], // 分类 客户-类型
-        pasprojectId: '',
         radio1: '0', // 专项，日常
         presetTime: '', // 预计时间
         remark: '', // 需求
@@ -237,9 +252,12 @@ export default {
         checkList: [], // 执行部门
         dynamicTags: [] // 知晓人
       },
-      business_type: [], // 分类 客户-类型
-      business_type_list: [],
-      pasProjectList: [],
+      clientList: [], // 客户列表
+      clientId: '', // 分类 客户
+      businessList: [], // 业务列表
+      businessId: [], // 分类 业务
+      pasProjectList: [], // 立项信息列表
+      pasprojectId: [], // 分类 立项
       checkListBan: false, // 执行部门禁用
       // 禁止选择当前时间之前的时间
       pickerOptions: {
@@ -275,10 +293,15 @@ export default {
         this.new_project.managerId = ''
       }
     },
-    business_type: function(newQuestion, oldQuestion) {
-      let clientId = this.business_type[0]
-      let data = `?clientId=${clientId}`
-      this.getProjectapiListAjax(data)
+    clientId: function(newQuestion, oldQuestion) {
+      let clientId = this.clientId
+      if (clientId) {
+        // 根据客户ID查立项
+        let data = `?clientId=${clientId}`
+        this.getProjectapiListAjax(data)
+        // 根据客户ID查业务
+        this.getBusinessByClientId(data)
+      }
     },
     $route: 'router_url'
   },
@@ -357,17 +380,6 @@ export default {
       // this.$router.replace('/home/components/project').catch(err => {
       //   console.log(err)
       // })
-      // new_project: {
-      //   new_name: '', // 任务名称
-      //   business_type: [], // 分类 客户-类型
-      //   radio1: '0', // 专项，日常
-      //   presetTime: '', // 预计时间
-      //   remark: '', // 需求
-      //   manager: '', // 项目经理
-      //   managerId: '', // 项目经理ID
-      //   checkList: [], // 执行部门
-      //   dynamicTags: [] // 知晓人
-      // },
       // 点击新建项目时置空信息
       this.proData = {} // 项目详情
       this.proId = '' // 项目Id
@@ -393,31 +405,23 @@ export default {
       // 编辑项目
       this.typeName = '编辑项目'
       this.proData = data
-      // this.file_list = [
-      //   {
-      //     name: 'food.jpeg',
-      //     url:
-      //       'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-      //   },
-      //   {
-      //     name: 'food2.jpeg',
-      //     url:
-      //       'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
-      //   }
-      // ]
     },
     ///////// 接受子组件数据 end /////////
+
     ///////// 用户列表获取 start /////////
     getClientapiListAjax(res) {
-      // let list = this.userList
-      let userId = this.userId
-      // if (list.length == 0) {
+      let clientList = this.clientList
+      // let userId = this.userId
+      let userId = 982
+      if (clientList.length == 0) {
+        let data = {
+          userId: userId
+        }
       // let data = `?userId=${userId}`
-      let data = `?userId=113`
       this.$axios
-        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax' + data)
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax', data)
         .then(this.getClientapiListAjaxSuss)
-      // }
+      }
     },
     // 用户列表获取回调
     getClientapiListAjaxSuss(res) {
@@ -430,16 +434,44 @@ export default {
           // console.log(element)
           let clientListData = {
             value: element.clientId,
-            label: element.clientName//,
+            label: element.clientName //,
             // children: []
           }
           clientList.push(clientListData)
-        });
+        })
         // console.log(clientList)
-        this.business_type_list = clientList
+        this.clientList = clientList
       }
     },
     ///////// 用户列表获取 end /////////
+
+    ///////// 根据客户ID查业务 start /////////
+    getBusinessByClientId(data) {
+      this.$axios
+        .post('/pmbs/api/business/getBusinessByClientId' + data)
+        .then(this.getBusinessByClientIdSuss)
+    },
+    // 根据客户ID查业务回调
+    getBusinessByClientIdSuss(res) {
+      if (res.status == 200) {
+        let data = res.data
+        // 循环提取名称和ID
+        let businessList = []
+        data.forEach(element => {
+          let businessListData = {
+            value: element.businessId,
+            label: element.businessName
+          }
+          businessList.push(businessListData)
+        })
+        this.businessList = businessList
+        // business_type: [], // 分类 客户-类型
+        // business_type_list: [], // 客户/类型列表
+      }
+      // console.log(res)
+    },
+    ///////// 根据客户ID查业务 end /////////
+
     ///////// 立项列表获取 start /////////
     getProjectapiListAjax(data) {
       // let list = this.userList
@@ -453,7 +485,7 @@ export default {
     },
     // 立项列表获取回调
     getProjectapiListAjaxSuss(res) {
-      console.log(res)
+      // console.log(res)
       if (res.status == 200) {
         let data = res.data
         let pasProjectList = []
@@ -470,14 +502,17 @@ export default {
     ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      // console.log(data)
+      console.log(data)
       // if (res.status == 200) {
       // let data = data
       // console.log(data)
       this.proId = data.proId
       this.status = data.status
       this.new_project.new_name = data.proName
-      this.new_project.business_type = [data.clientId, data.serviceId]
+      this.clientId = data.clientId
+      this.businessId = data.businessId
+      this.pasprojectId = data.pasprojectId
+      // this.new_project.business_type = [data.clientId, data.serviceId]
       if (data.isUsual == false) {
         this.new_project.radio1 = '0'
       } else {
@@ -666,45 +701,8 @@ export default {
         // console.log(restaurants)
       }
     },
-    // 获取新建项目分类
-    getAllClientAndBusiness() {
-      this.$axios
-        .post('/pmbs/client/getAllClientAndBusiness')
-        .then(this.getAllClientAndBusinessSuss)
-    },
-    // 获取新建项目分类回调
-    getAllClientAndBusinessSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        let business_type_list = []
-        // 循环提取名称和ID
-        for (let i = 0; i < data.length; i++) {
-          let business_type = {
-            value: '',
-            label: '',
-            children: []
-          }
-          let element = data[i]
-          business_type.value = element.clientId
-          business_type.label = element.clientName
-          for (let j = 0; j < element.businessList.length; j++) {
-            let element_ = element.businessList[j]
-            let children = {}
-            if (element_ != null) {
-              children.value = element_.businessId
-              children.label = element_.businessName
-              business_type.children.push(children)
-            }
-          }
-          business_type_list.push(business_type)
-        }
-        // this.business_type_list = business_type_list
-        // console.log(this.business_type_list)
-      }
-      // console.log(res)
-    },
 
-    // 新增项目
+    ///////// 新增项目 start /////////
     addProject() {
       let userId = this.$store.state.user.userId
       // 创建时间
@@ -738,9 +736,9 @@ export default {
         initUserId: userId, //'发起人id',
         status: this.status, // 状态
         proName: this.new_project.new_name, // '项目名称',
-        clientId: this.new_project.business_type[0], // '所属客户ID',
-        serviceId: this.new_project.business_type[1], // '所属业务ID'
-        pasprojectId: this.new_project.pasprojectId, // 立项ID
+        clientId: this.clientId, // '所属客户ID',
+        serviceId: this.businessId, // '所属业务ID'
+        pasprojectId: this.pasprojectId, // 立项ID
         isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
@@ -760,6 +758,9 @@ export default {
       if (
         data.proName == '' ||
         this.new_project.business_type == [] ||
+        data.clientId == '' ||
+        data.serviceId == '' ||
+        data.pasprojectId == '' ||
         data.expertTime == '' ||
         data.remark == '' ||
         changeId == ''
@@ -787,6 +788,7 @@ export default {
         // this.$refs[projeck].getProjectList()
       }
     },
+    ///////// 新增项目 end /////////
     // 获取项目反馈-项目详情
     getProjectFeedbackDetail() {
       let data = `?proId=1`
@@ -847,8 +849,6 @@ export default {
     // this.getProjectFeedbackDetail()
     // 获取部门列表
     this.getDeptList()
-    // 获取新建项目分类
-    this.getAllClientAndBusiness()
     // 获取用户列表
     this.getListAjax()
     // this.restaurants = this.loadAll()

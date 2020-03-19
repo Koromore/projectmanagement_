@@ -634,7 +634,7 @@ export default {
     },
     getAllClientAndBusiness() {
       this.$axios
-        .post('/pmbs/client/getAllClientAndBusiness')
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
         .then(this.getAllClientAndBusinessSuss)
     },
     // 获取新建项目分类回调

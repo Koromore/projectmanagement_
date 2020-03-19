@@ -184,29 +184,16 @@ export default {
   methods: {
     test() {
       let obj = {
-        deleteFlag: true,
-        deptName: 'string',
-        feedback: 'string',
-        feedbackFileList: [
+        clientList: [
           {
-            createTime: '2020-03-14T10:06:59.874Z',
-            deleteFlag: true,
-            feedbackId: 0,
-            fileId: 0,
-            fileName: 'string',
-            localPath: 'string',
-            suffix: 'string',
-            taskId: 0,
-            updateTime: '2020-03-14T10:06:59.876Z'
+            clientId: 55,
+            clientName: '广汽'
+          },
+          {
+            clientId: 57,
+            clientName: '丰田'
           }
-        ],
-        feedbackId: 0,
-        feedbackUserName: 'string',
-        initUserId: 0,
-        moreTaskId: 'string',
-        proId: 0,
-        taskId: 0,
-        updateTime: '2020-03-14T10:06:59.876Z'
+        ]
       }
 
       // typeName typeId

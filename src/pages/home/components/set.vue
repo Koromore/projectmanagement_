@@ -7,8 +7,8 @@
         <div @click="table_tab(2)" :class="[tabs_activity==2 ? 'act' : '']">客户</div>
       </el-col>
       <!--  -->
-      <el-col :span="24" class="add">
-        <el-button size="small" type="primary" @click="add_drawer()">新增</el-button>
+      <el-col :span="24" class="add" :style="addBut">
+        <el-button size="small" type="primary" :disabled="disabled" @click="add_drawer()">新增</el-button>
       </el-col>
       <!-- 业务类型 -->
       <el-col :span="24" class="table table1" v-show="tabs_activity==1">
@@ -67,9 +67,9 @@
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button size="small" type="info" @click="client_change(scope.row)">修改</el-button>
-              <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
+              <!-- <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
                 <el-button size="small" type="primary" slot="reference">删除</el-button>
-              </el-popconfirm>
+              </el-popconfirm>-->
             </template>
           </el-table-column>
         </el-table>
@@ -78,7 +78,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
-            :total="clientPage.totalRows"
+            :total="clientPage"
             @current-change="clientListPage"
           ></el-pagination>
         </el-col>
@@ -90,12 +90,12 @@
         <el-col :span="24" class="new_name">
           <el-col :span="6" class="title title1">名称</el-col>
           <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="new_name" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="new_name" clearable :disabled="disabled"></el-input>
           </el-col>
           <el-col :span="6" class="title title2" v-show="tabs_activity == 2">业务</el-col>
           <el-col :span="13" :offset="6" class="check_box" v-show="tabs_activity == 2">
             <!-- 业务类型列表 -->
-            <el-checkbox-group v-model="businessListCheck" @change="test">
+            <el-checkbox-group v-model="businessListCheck">
               <el-checkbox
                 :label="items.businessId"
                 v-for="items in businessList"
@@ -140,16 +140,19 @@ export default {
       client: '广汽本田',
       businessList: [], // 业务类型列表
       clientList: [], // 客户列表
-      // 1审核中 2执行中 3已完成 4延期
+      clientListPageData: {}, // 客户分页信息
       tabs_activity: 1, // 1-业务类型 2-客户
       operation: 1, // 1-新增 2-修改
       transferId: '', // 新增/修改时传递的ID
+      disabled: false, // 按钮禁用
+      addBut: 'opacity: 1;',
       // 新增
       new_name: '',
       // 选中的业务类型
       businessListCheck: [],
+
       businessPage: {}, // 业务分页信息
-      clientPage: {}, // 客户分页信息
+      clientPage: 0, // 客户分页信息
       businessListPageNum: 1, // 业务列表分页
       clientListPageNum: 1 // 客户列表分页
     }
@@ -173,6 +176,11 @@ export default {
     // 选项卡
     table_tab(e) {
       this.tabs_activity = e
+      if (e == 1) {
+        this.disabled = false
+      } else if (e == 2) {
+        this.disabled = true
+      }
     },
     // 业务类型列表获取
     getBusinessListAjax(data) {
@@ -193,24 +201,90 @@ export default {
         // pageRows
       }
     },
-    // 客户列表获取
+    ///////// 客户列表获取 start /////////
     getClientListAjax(data) {
       this.loading = true
       if (data == undefined) {
         data = {}
       }
       this.$axios
-        .post('/pmbs/client/list', data)
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax', data)
         .then(this.getClientListAjaxSuss)
     },
     // 客户列表获取回调
     getClientListAjaxSuss(res) {
       this.loading = false
       if (res.status == 200) {
-        this.clientList = res.data.data.items
-        this.clientPage = res.data.data
+        let data = res.data
+        
+        let clientList = []
+        let clientListPageData = {
+          page1: [],
+          page2: [],
+          page3: [],
+          page4: [],
+          page5: [],
+          page6: [],
+          page7: [],
+          page8: [],
+          page9: []
+        }
+        let page = 1
+        data.forEach((element, index) => {
+          // data[index].businessList = []
+          let clientListData = {
+            clientId: element.clientId,
+            clientName: element.clientName,
+            businessList: []
+          }
+          clientList.push(clientListData)
+          if (index <= 9) {
+            clientListPageData.page1.push(clientListData)
+          } else if (index > 9 && index <= 19) {
+            clientListPageData.page2.push(clientListData)
+          } else if (index > 19 && index <= 29) {
+            clientListPageData.page3.push(clientListData)
+          } else if (index > 29 && index <= 39) {
+            clientListPageData.page4.push(clientListData)
+          } else if (index > 39 && index <= 49) {
+            clientListPageData.page5.push(clientListData)
+          } else if (index > 49 && index <= 59) {
+            clientListPageData.page6.push(clientListData)
+          } else if (index > 59 && index <= 69) {
+            clientListPageData.page7.push(clientListData)
+          }
+        })
+        this.clientList = clientListPageData['page1']
+        this.clientPage = data.length
+        this.clientListPageData = clientListPageData
+        // this.getBusinessByClientIds(clientListPageData.page1)
       }
     },
+    ///////// 客户列表获取 end /////////
+    ///////// 客户及关联业务获取 start /////////
+    getBusinessByClientIds(data) {
+      this.loading = true
+      if (data == undefined) {
+        data = {}
+      }
+      this.$axios
+        .post('pmbs/api/business/getBusinessByClientIds', data)
+        .then(this.getBusinessByClientIdsSuss)
+    },
+    // 客户列表获取回调
+    getBusinessByClientIdsSuss(res) {
+      this.loading = false
+      if (res.status == 200) {
+        let data = res.data
+        for (let i = 0; i < data.length; i++) {
+          let element = data[i]
+          data[i].businessList = []
+        }
+        this.clientList = data
+        // this.clientPage = res.data.data
+      }
+    },
+    ///////// 客户及关联业务获取 end /////////
     // 新增按钮
     add_drawer() {
       this.drawer = true
@@ -288,7 +362,7 @@ export default {
         // console.log(businessListCheck)
         data = {
           clientId: this.transferId, // 客户ID
-          clientName: this.new_name, // 客户名称
+          // clientName: this.new_name, // 客户名称
           businessList: businessList // 包含的业务类型
         }
         // console.log(data.businessList)
@@ -324,21 +398,21 @@ export default {
         this.loading = false
       }
     },
-    // 客户新增/修改
+    ///////// 客户关联业务修改 start /////////
     clientSave(res) {
       let data = res
       this.loading = true
       this.$axios.post('/pmbs/client/save', data).then(this.clientSaveSuss)
     },
-    // 客户新增/修改回调
+    // 客户关联业务修改回调
     clientSaveSuss(res) {
       // console.log(res)
       if (res.status == 200) {
         // 获取客户列表
-        let data = {
-          pageNum: this.clientListPageNum
-        }
-        this.getClientListAjax(data)
+        let clientListPageData = this.clientListPageData
+        let page = this.clientListPageNum
+        let data = clientListPageData[`page${page}`]
+        // this.getBusinessByClientIds(data)
         // 新增/修改成功提示
         this.messageWin(res.data.msg)
         // 清空输入框（重置参数）
@@ -349,20 +423,22 @@ export default {
         this.loading = false
       }
     },
-    // 删除按钮
-    delete_but(e) {
-      let tabs_activity = this.tabs_activity
-      let data = {}
+    ///////// 客户关联业务修改 end /////////
 
-      if (tabs_activity == 1) {
-        data = e
-        this.businessDelete(data)
-      } else if (tabs_activity == 2) {
-        data = e
-        this.clientDelete(data)
-      }
-    },
-    // 业务类型删除请求发送
+    // 删除按钮
+    // delete_but(e) {
+    //   let tabs_activity = this.tabs_activity
+    //   let data = {}
+
+    //   if (tabs_activity == 1) {
+    //     data = e
+    //     this.businessDelete(data)
+    //   } else if (tabs_activity == 2) {
+    //     data = e
+    //     this.clientDelete(data)
+    //   }
+    // },
+    ///////// 业务类型删除请求发送 start /////////
     businessDelete(res) {
       let data = '?id=' + res
       // console.log(data)
@@ -382,26 +458,27 @@ export default {
         this.messageWin(res.data.msg)
       }
     },
+    ///////// 业务类型删除请求发送 end /////////
     // 客户删除请求发送
-    clientDelete(res) {
-      let data = {
-        clientId: res
-      }
-      this.$axios.post('/pmbs/client/delete', data).then(this.clientDeleteSuss)
-    },
-    // 客户删除请求回调
-    clientDeleteSuss(res) {
-      if (res.status == 200) {
-        // 消息提示
-        this.messageWin(res.data.msg)
-        // 重新获取客户列表
-        let data = {
-          pageNum: this.clientListPageNum
-        }
-        this.getClientListAjax(data)
-      }
-    },
-    // 分页函数
+    // clientDelete(res) {
+    //   let data = {
+    //     clientId: res
+    //   }
+    //   this.$axios.post('/pmbs/client/delete', data).then(this.clientDeleteSuss)
+    // },
+    // // 客户删除请求回调
+    // clientDeleteSuss(res) {
+    //   if (res.status == 200) {
+    //     // 消息提示
+    //     this.messageWin(res.data.msg)
+    //     // 重新获取客户列表
+    //     let data = {
+    //       pageNum: this.clientListPageNum
+    //     }
+    //     this.getClientListAjax(data)
+    //   }
+    // },
+    ///////// 业务类型分页 start /////////
     businessListPage(page) {
       this.businessListPageNum = page
       let data = {
@@ -409,13 +486,17 @@ export default {
       }
       this.getBusinessListAjax(data)
     },
+    ///////// 业务类型分页 end /////////
+    ///////// 客户分页 start /////////
     clientListPage(page) {
       this.clientListPageNum = page
-      let data = {
-        pageNum: page
-      }
-      this.getClientListAjax(data)
+      let clientListPageData = this.clientListPageData
+      let data = clientListPageData[`page${page}`]
+      // console.log(data)
+      this.clientList = data
+      // this.getBusinessByClientIds(data)
     },
+    ///////// 客户分页 end /////////
     // 消息提示
     messageWin(message) {
       // 成功提示
@@ -427,18 +508,6 @@ export default {
     messageError(message) {
       // 错误提示
       this.$message.error(message)
-    },
-    test() {
-      let obj = {
-        businessList: [
-          {
-            businessId: 16,
-            businessName: '官网'
-          }
-        ],
-        clientId: '',
-        clientName: '丰田'
-      }
     }
   },
   // 钩子函数

@@ -127,8 +127,12 @@
           <el-table-column prop="num" label="总任务数/待完成">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
-          <el-table-column prop="expertTime_" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime_" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable>
+            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable>
+            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          </el-table-column>
           <el-table-column prop="realName" label="下达人"></el-table-column>
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
@@ -210,8 +214,12 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable>
+            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable>
+            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          </el-table-column>
           <el-table-column prop="realName" label="下达人" filter-placement="bottom-end"></el-table-column>
         </el-table>
         <!-- 分页 -->
@@ -467,6 +475,15 @@ export default {
       currentData_: [] //当前渲染的数据
     }
   },
+  // 计算属性
+  // computed: {
+  //   date: function(data) {
+  //     return this.$date(data)
+  //   },
+  //   time: function(data) {
+  //     return this.$time(data)
+  //   }
+  // },
   // 侦听器
   watch: {
     // 如果 `checkListDept` 发生改变，这个函数就会运行
@@ -532,6 +549,9 @@ export default {
   methods: {
     // del(){
     //   this.$delete(this.data,"plain", val)
+    // },
+    // date(data){
+    //   return this.$date(data)
     // },
     // 时间格式Y-M-D H-M-S
     formatData2(date) {
@@ -810,7 +830,7 @@ export default {
       this.proId = proDate.proId
       let expertTime = new Date(proDate.expertTime)
       let newTime = new Date()
-      if (expertTime<newTime) {
+      if (expertTime < newTime) {
         this.drawer3 = true
         this.drawer3_name = proDate.proName
       } else {
@@ -1018,8 +1038,6 @@ export default {
         let projectListOriginate = res.data.data
         for (let i = 0; i < projectListOriginate.length; i++) {
           let element = projectListOriginate[i]
-          projectListOriginate[i].expertTime_ = this.$date(element.expertTime)
-          projectListOriginate[i].overTime_ = this.$date(element.overTime)
           let unfintask = 0
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
@@ -1056,8 +1074,6 @@ export default {
         let projectListJoin = res.data.data
         for (let i = 0; i < projectListJoin.length; i++) {
           let element = projectListJoin[i]
-          projectListJoin[i].expertTime = this.$date(element.expertTime)
-          projectListJoin[i].overTime = this.$date(element.overTime)
         }
         this.projectListJoin = projectListJoin
 
@@ -1157,15 +1173,9 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    // this.getAllClientAndBusiness() // 获取客户列表
     this.getProjectList() // 获取项目列表
-    this.projectListNum() // 
+    this.projectListNum() //
     this.getAllClientapiList() // 获取所有客户信息列表
-    // let time = '2012-12-12'
-
-    // console.log(time)
-    // console.log(this.$date(time))
-    // console.log(this.$time(time))
   }
 }
 </script>
