@@ -19,21 +19,21 @@ export default {
       this.$axios
         .post('/pmbs/api/login', {
           // aesStr: 'NTI3LGZ1ZmVxdWFuLDIwMjAtMDMtMDk='
-          aesStr:aesStr
+          aesStr: aesStr
         })
         .then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.data.data) {
-              window.sessionStorage.setItem('isLogin','success');
-              this.$store.commit('login',{
-                  token:res.data.data.token.token,
-                  user:res.data.data.user,
-                  userSign:aesStr
-              });
-              this.$router.push({ path: '/home' });
-          }else{
-              //失败就直接调回去
-              this.$store.commit('clearToken');
+            window.sessionStorage.setItem('isLogin', 'success')
+            this.$store.commit('login', {
+              token: res.data.data.token.token,
+              user: res.data.data.user,
+              userSign: aesStr
+            })
+            this.$router.push({ path: '/home' })
+          } else {
+            //失败就直接调回去
+            this.$store.commit('clearToken')
           }
         })
     }

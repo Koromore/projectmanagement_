@@ -255,9 +255,9 @@ export default {
       clientList: [], // 客户列表
       clientId: '', // 分类 客户
       businessList: [], // 业务列表
-      businessId: [], // 分类 业务
+      businessId: '', // 分类 业务
       pasProjectList: [], // 立项信息列表
-      pasprojectId: [], // 分类 立项
+      pasprojectId: '', // 分类 立项
       checkListBan: false, // 执行部门禁用
       // 禁止选择当前时间之前的时间
       pickerOptions: {
@@ -383,6 +383,9 @@ export default {
       // 点击新建项目时置空信息
       this.proData = {} // 项目详情
       this.proId = '' // 项目Id
+      this.clientId = '' // 分类 客户 
+      this.businessId = '' // 分类 业务
+      this.pasprojectId = '' // 分类 立项
       this.new_project.new_name = '' // 任务名称
       this.new_project.business_type = [] // 分类 客户-类型
       this.new_project.presetTime = '' // 预计时间
@@ -412,14 +415,14 @@ export default {
     getClientapiListAjax(res) {
       let clientList = this.clientList
       // let userId = this.userId
-      let userId = 982
+      let userId = 113
       if (clientList.length == 0) {
-        let data = {
-          userId: userId
-        }
-      // let data = `?userId=${userId}`
+        // let data = {
+        //   userId: userId
+        // }
+      let data = `?userId=${userId}`
       this.$axios
-        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax', data)
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax'+ data)
         .then(this.getClientapiListAjaxSuss)
       }
     },

@@ -18,6 +18,8 @@ export default {
   name: 'statistics',
   data() {
     return {
+      userId: this.$store.state.user.userId, // 用户ID
+      deptId: this.$store.state.user.deptId, // 部门ID
       // 统计数据
       statisticsData: {},
       // 业务占比数据
@@ -45,9 +47,10 @@ export default {
     // 获取统计数据
     getStatisticsData() {
       // console.log("123")
-      let data = {}
+      let userId = this.userId
+      let data = `?userId=${userId}`
       this.$axios
-        .post('/pmbs/api/statistic/listAjax', data)
+        .post('/pmbs/api/statistic/listAjax'+data)
         .then(this.getStatisticsDataSuss)
     },
     // 获取统计数据回调
@@ -374,10 +377,10 @@ export default {
       clientStatusData[0].barWidth = 81
       // barWidth: 81
       let percent = 0
-      if (clientNameData.length <=5) {
+      if (clientNameData.length <=3) {
         percent = 100
-      } else if(clientNameData.length > 5){
-        percent = 5/clientNameData.length * 100
+      } else if(clientNameData.length > 3){
+        percent = 3/clientNameData.length * 100
       }
       // console.log(clientNameData)
       // 绘制图表

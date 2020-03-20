@@ -8,7 +8,7 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="add" :style="addBut">
-        <el-button size="small" type="primary" :disabled="disabled" @click="add_drawer()">新增</el-button>
+        <el-button size="small" type="primary" :disabled="disabled" @click="add_drawer()" :style="addBut">新增</el-button>
       </el-col>
       <!-- 业务类型 -->
       <el-col :span="24" class="table table1" v-show="tabs_activity==1">
@@ -58,7 +58,7 @@
           <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column prop="businessList" label="业务">
             <template slot-scope="scope">
-              <span v-for="(items, index) in scope.row.businessList" :key="index">
+              <span v-for="(items, index) in scope.row.businessList" :key="index" v-show="items != null">
                 <span v-if="index != 0">、</span>
                 {{items.businessName}}
               </span>
@@ -67,9 +67,6 @@
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button size="small" type="info" @click="client_change(scope.row)">修改</el-button>
-              <!-- <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.clientId)">
-                <el-button size="small" type="primary" slot="reference">删除</el-button>
-              </el-popconfirm>-->
             </template>
           </el-table-column>
         </el-table>
@@ -178,8 +175,10 @@ export default {
       this.tabs_activity = e
       if (e == 1) {
         this.disabled = false
+        this.addBut= 'opacity: 1;'
       } else if (e == 2) {
         this.disabled = true
+        this.addBut= 'opacity: 0;'
       }
     },
     // 业务类型列表获取
@@ -216,7 +215,7 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data
-        
+
         let clientList = []
         let clientListPageData = {
           page1: [],
@@ -254,10 +253,13 @@ export default {
             clientListPageData.page7.push(clientListData)
           }
         })
-        this.clientList = clientListPageData['page1']
+        // this.clientList = clientListPageData['page1']
         this.clientPage = data.length
         this.clientListPageData = clientListPageData
-        // this.getBusinessByClientIds(clientListPageData.page1)
+        let pageData = {
+          clientList: clientListPageData.page1
+        }
+        this.getBusinessByClientIds(pageData)
       }
     },
     ///////// 客户列表获取 end /////////
@@ -268,7 +270,7 @@ export default {
         data = {}
       }
       this.$axios
-        .post('pmbs/api/business/getBusinessByClientIds', data)
+        .post('/pmbs/api/business/getBusinessByClientIds', data)
         .then(this.getBusinessByClientIdsSuss)
     },
     // 客户列表获取回调
@@ -276,10 +278,6 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let data = res.data
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          data[i].businessList = []
-        }
         this.clientList = data
         // this.clientPage = res.data.data
       }
@@ -293,14 +291,16 @@ export default {
       this.new_name = name
       this.businessListCheck = []
     },
-    // 业务类型修改
+    ///////// 业务类型修改 start /////////
     business_change(id, name) {
       this.drawer = true
       this.operation = 2
       this.transferId = id
       this.new_name = name
     },
-    // 客户修改
+    ///////// 业务类型修改 end /////////
+
+    ///////// 客户修改按钮 start /////////
     client_change(data) {
       // console.log(data)
       this.drawer = true
@@ -316,8 +316,11 @@ export default {
       this.businessListCheck = businessListCheck
       // .clientId,scope.row.clientName
     },
+    ///////// 客户修改按钮 end /////////
+
     // 提交按钮--包含业务类型和客户的新增和修改
     putIn() {
+      this.drawer = false
       let tabs_activity = this.tabs_activity
       let data = {}
       // console.log(tabs_activity)
@@ -373,7 +376,7 @@ export default {
         }
       }
     },
-    // 业务类型新增/修改
+    ///////// 业务类型新增/修改 start /////////
     businessSave(res) {
       let data = res
       this.loading = true
@@ -381,13 +384,19 @@ export default {
         .post('/pmbs/api/business/save', data)
         .then(this.businessSaveSuss)
     },
-    // 业务类型新增/修改回调
+    // 业务类型新增/修改回调 start //
     businessSaveSuss(res) {
       if (res.status == 200) {
         // 获取业务类型列表
-        let data = {
-          pageNum: this.businessListPageNum
+        let pageNum = this.businessListPageNum
+        let clientListPageData = this.clientListPageData
+        let pageData = {
+          clientList: clientListPageData[`page${pageNum}`]
         }
+        let data = {
+          pageNum: this.clientListPageNum
+        }
+        this.getBusinessByClientIds(pageData)
         this.getBusinessListAjax(data)
         // 新增/修改成功提示
         this.messageWin(res.data.msg)
@@ -398,6 +407,8 @@ export default {
         this.loading = false
       }
     },
+    ///////// 业务类型新增/修改 end /////////
+
     ///////// 客户关联业务修改 start /////////
     clientSave(res) {
       let data = res
@@ -411,8 +422,10 @@ export default {
         // 获取客户列表
         let clientListPageData = this.clientListPageData
         let page = this.clientListPageNum
-        let data = clientListPageData[`page${page}`]
-        // this.getBusinessByClientIds(data)
+        let pageData = {
+          clientList: clientListPageData[`page${page}`]
+        }
+        this.getBusinessByClientIds(pageData)
         // 新增/修改成功提示
         this.messageWin(res.data.msg)
         // 清空输入框（重置参数）
@@ -426,18 +439,18 @@ export default {
     ///////// 客户关联业务修改 end /////////
 
     // 删除按钮
-    // delete_but(e) {
-    //   let tabs_activity = this.tabs_activity
-    //   let data = {}
+    delete_but(e) {
+      let tabs_activity = this.tabs_activity
+      let data = {}
 
-    //   if (tabs_activity == 1) {
-    //     data = e
-    //     this.businessDelete(data)
-    //   } else if (tabs_activity == 2) {
-    //     data = e
-    //     this.clientDelete(data)
-    //   }
-    // },
+      if (tabs_activity == 1) {
+        data = e
+        this.businessDelete(data)
+      } else if (tabs_activity == 2) {
+        data = e
+        this.clientDelete(data)
+      }
+    },
     ///////// 业务类型删除请求发送 start /////////
     businessDelete(res) {
       let data = '?id=' + res
@@ -491,10 +504,13 @@ export default {
     clientListPage(page) {
       this.clientListPageNum = page
       let clientListPageData = this.clientListPageData
-      let data = clientListPageData[`page${page}`]
+      // let data = clientListPageData[`page${page}`]
+      let pageData = {
+        clientList: clientListPageData[`page${page}`]
+      }
       // console.log(data)
-      this.clientList = data
-      // this.getBusinessByClientIds(data)
+      // this.clientList = data
+      this.getBusinessByClientIds(pageData)
     },
     ///////// 客户分页 end /////////
     // 消息提示

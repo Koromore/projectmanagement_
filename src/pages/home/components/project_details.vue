@@ -258,9 +258,9 @@
               <br />
               <span>{{item.fileName}}</span>
             </div>
-            <div></div>
-            <div></div>
           </el-col>
+          <el-col :span="24" class="span">延期原因</el-col>
+          <el-col :span="24">{{projectShowDetail.delayReason}}</el-col>
         </el-col>
       </el-col>
       <!--------- 项目需求 end --------->
@@ -451,7 +451,7 @@
           </el-col>
         </el-row>
       </el-drawer>
-      <!-- 任务详情抽屉 start -->
+      <!--------- 任务详情抽屉 start --------->
       <el-drawer title="任务" :visible.sync="drawer5" :with-header="false">
         <el-scrollbar style="height: 100%" v-loading="drawerLoading">
           <el-row class="task_details">
@@ -748,7 +748,7 @@
           </el-col>
         </el-row>
       </el-drawer>
-      <!-- 任务详情抽屉 end -->
+      <!--------- 任务详情抽屉 end --------->
     </el-row>
   </div>
 </template>
@@ -1595,7 +1595,7 @@ export default {
         cancelButtonText: '取消'
       })
         .then(() => {
-          let expertTime = new Date(taskData.expertTime)
+          let expertTime = new Date(new Date(taskData.expertTime).getTime() + 24*60*60*1000)
           let newTime = new Date()
           let data = {
             proId: taskData.proId,
@@ -2021,6 +2021,7 @@ export default {
   text-align: center;
   font-size: 13px;
   color: rgb(162, 162, 162);
+  cursor:pointer;
 }
 .project_details .task_details .smname div {
   overflow: hidden;
@@ -2059,6 +2060,7 @@ export default {
   font-size: 13px;
   color: rgb(162, 162, 162);
   margin-top: 13px;
+  cursor:pointer;
 }
 .project_details .task_details .suggest .fileList div {
   overflow: hidden;

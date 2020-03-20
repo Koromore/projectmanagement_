@@ -698,7 +698,7 @@ export default {
         { value: 1, label: '执行中' },
         { value: 2, label: '完成' }
       ],
-      statusList: [
+      statusList_: [
         { value: 2, label: '完成' },
         { value: 4, label: '延期' }
       ],
@@ -806,7 +806,7 @@ export default {
     // 获取新建项目分类回调
     getAllClientAndBusinessSuss(res) {
       if (res.status == 200) {
-        let data = res.data.data
+        let data = res.data
         let clientIdList = []
         for (let i = 0; i < data.length; i++) {
           let element = data[i]
@@ -1631,6 +1631,7 @@ export default {
   text-align: center;
   font-size: 13px;
   color: rgb(162, 162, 162);
+  cursor:pointer;
 }
 .task .task_details .suggest .fileListBox {
   display: flex;
@@ -1643,6 +1644,7 @@ export default {
   font-size: 13px;
   color: rgb(162, 162, 162);
   margin-top: 13px;
+  cursor:pointer;
 }
 .task .task_details .suggest .fileList div {
   overflow: hidden;

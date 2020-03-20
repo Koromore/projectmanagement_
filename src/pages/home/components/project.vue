@@ -828,7 +828,7 @@ export default {
     achieve(proDate) {
       // console.log('完成' + proId)
       this.proId = proDate.proId
-      let expertTime = new Date(proDate.expertTime)
+      let expertTime = new Date(new Date(proDate.expertTime).getTime() + 24*60*60*1000)
       let newTime = new Date()
       if (expertTime < newTime) {
         this.drawer3 = true
