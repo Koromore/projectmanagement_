@@ -9,7 +9,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     user: {}, // 员工信息
-    // user: { userId: 152 }, //员工信息
+    // user: { userId: 89 }, //员工信息
     // user: { userId: 527, deptId: 91, realName: '付德全' }, //员工信息
     // user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
     // user: { userId: 6, deptId: 41, realName: '宋秀' }, //员工信息
@@ -23,12 +23,16 @@ export default new Vuex.Store({
     // user: { userId: 147, deptId: 51, realName: '张倩' }, //员工信息
     // user: { userId: 33, deptId: 121, realName: '聂玲' }, //员工信息
     // user: { userId: 10, deptId: 102, realName: '陆彪' }, //员工信息
+    // user: { userId: 194, deptId: 45, realName: '卢雄飞' }, //员工信息
+    // user: { userId: 9, deptId:27, realName: '郑开喜' }, //员工信息
+    // user: { userId: 4023, deptId:51, realName: '刘特' }, //员工信息
     token: '', // 登录令牌
     userSign: '', // 用户信息带参
     isLogin: 'error', //error/success, // 是否登陆
     // isLogin: 'success', //error/success, // 是否登陆
     isRouterAlive: true, // 控制页面刷新
     projectListNum: 1,
+    proExpertTime: ''
   },
   action: {
 
@@ -37,6 +41,10 @@ export default new Vuex.Store({
     // 项目列表我参与/我发起显示
     projectListShow(state, data){
       state.projectListNum = data
+    },
+    // 项目预计时间
+    proExpertTimeBan(state, data){
+      state.proExpertTime = data
     },
     /**
      * [reload 控制页面刷新]

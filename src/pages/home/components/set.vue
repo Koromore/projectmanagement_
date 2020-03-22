@@ -58,7 +58,7 @@
           <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column prop="businessList" label="业务">
             <template slot-scope="scope">
-              <span v-for="(items, index) in scope.row.businessList" :key="index" v-show="items != null">
+              <span v-for="(items, index) in scope.row.businessList" :key="index" v-if="items != null">
                 <span v-if="index != 0">、</span>
                 {{items.businessName}}
               </span>
@@ -181,7 +181,7 @@ export default {
         this.addBut= 'opacity: 0;'
       }
     },
-    // 业务类型列表获取
+    ///////// 业务类型列表获取 start /////////
     getBusinessListAjax(data) {
       this.loading = true
       if (data == undefined) {
@@ -191,7 +191,7 @@ export default {
         .post('/pmbs/api/business/listAjax', data)
         .then(this.getBusinessListAjaxSuss)
     },
-    // 业务类型列表获取回调
+    // 业务类型列表获取回调 //
     getBusinessListAjaxSuss(res) {
       this.loading = false
       if (res.status == 200) {
@@ -200,6 +200,8 @@ export default {
         // pageRows
       }
     },
+    ///////// 业务类型列表获取 end /////////
+
     ///////// 客户列表获取 start /////////
     getClientListAjax(data) {
       this.loading = true

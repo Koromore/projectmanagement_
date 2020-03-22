@@ -19,11 +19,11 @@
           <i class="el-icon-folder-opened"></i>
           文档管理
         </div>
-        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')">
+        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')" v-if="statisticsShow">
           <i class="el-icon-pie-chart"></i>
           统计
         </div>
-        <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5,'set')">
+        <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5,'set')" v-if="setShow">
           <i class="el-icon-setting"></i>
           设置
         </div>
@@ -277,7 +277,10 @@ export default {
       uploadUrl: '',
       fileList: [],
       // 新增项目时传值获取项目列表
-      update: 0
+      update: 0,
+      // 统计/设置显示
+      statisticsShow: false,
+      setShow: false
     }
   },
   // 侦听器
@@ -383,7 +386,7 @@ export default {
       // 点击新建项目时置空信息
       this.proData = {} // 项目详情
       this.proId = '' // 项目Id
-      this.clientId = '' // 分类 客户 
+      this.clientId = '' // 分类 客户
       this.businessId = '' // 分类 业务
       this.pasprojectId = '' // 分类 立项
       this.new_project.new_name = '' // 任务名称
@@ -401,29 +404,30 @@ export default {
     },
     getData(data) {
       // 获取新建项目分类
-      // this.getAllClientAndBusiness()
+      this.getClientapiListAjax()
       // 获取项目详情
       this.getProjectShowDetail(data)
       this.drawer = true
       // 编辑项目
       this.typeName = '编辑项目'
-      this.proData = data
+      // this.proData = data
+      // console.log(data)
     },
     ///////// 接受子组件数据 end /////////
 
     ///////// 用户列表获取 start /////////
     getClientapiListAjax(res) {
       let clientList = this.clientList
-      // let userId = this.userId
-      let userId = 113
+      let userId = this.userId
+      // let userId = 113
       if (clientList.length == 0) {
         // let data = {
         //   userId: userId
         // }
-      let data = `?userId=${userId}`
-      this.$axios
-        .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax'+ data)
-        .then(this.getClientapiListAjaxSuss)
+        let data = `?userId=${userId}`
+        this.$axios
+          .post('http://pms.guoxinad.com.cn/pas/clientapi/listAjax' + data)
+          .then(this.getClientapiListAjaxSuss)
       }
     },
     // 用户列表获取回调
@@ -434,15 +438,12 @@ export default {
         // console.log(data)
         let clientList = []
         data.forEach(element => {
-          // console.log(element)
           let clientListData = {
             value: element.clientId,
             label: element.clientName //,
-            // children: []
           }
           clientList.push(clientListData)
         })
-        // console.log(clientList)
         this.clientList = clientList
       }
     },
@@ -468,10 +469,7 @@ export default {
           businessList.push(businessListData)
         })
         this.businessList = businessList
-        // business_type: [], // 分类 客户-类型
-        // business_type_list: [], // 客户/类型列表
       }
-      // console.log(res)
     },
     ///////// 根据客户ID查业务 end /////////
 
@@ -505,7 +503,7 @@ export default {
     ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      console.log(data)
+      // console.log(data)
       // if (res.status == 200) {
       // let data = data
       // console.log(data)
@@ -513,7 +511,7 @@ export default {
       this.status = data.status
       this.new_project.new_name = data.proName
       this.clientId = data.clientId
-      this.businessId = data.businessId
+      this.businessId = data.serviceId
       this.pasprojectId = data.pasprojectId
       // this.new_project.business_type = [data.clientId, data.serviceId]
       if (data.isUsual == false) {
@@ -841,6 +839,29 @@ export default {
     messageError(message) {
       // 错误提示
       this.$message.error(message)
+    },
+    // 统计/设置显示判断
+    statisticsShowIf() {
+      let show = [6, 9, 24, 27, 28, 89, 134, 147, 153, 160, 194]
+      let userId = this.userId
+      let statisticsShow = false
+      show.forEach(element => {
+        if (element == userId) {
+          statisticsShow = true
+        }
+      })
+      this.statisticsShow = statisticsShow
+    },
+    setShowIf() {
+      let show = [9, 10, 266, 4001, 3985, 147, 4023]
+      let userId = this.userId
+      let setShow = false
+      show.forEach(element => {
+        if (element == userId) {
+          setShow = true
+        }
+      })
+      this.setShow = setShow
     }
   },
   // 钩子函数
@@ -855,6 +876,9 @@ export default {
     // 获取用户列表
     this.getListAjax()
     // this.restaurants = this.loadAll()
+    // 统计/设置显示判断
+    this.statisticsShowIf()
+    this.setShowIf()
   }
 }
 </script>

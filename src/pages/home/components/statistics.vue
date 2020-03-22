@@ -32,7 +32,9 @@ export default {
       // 客户状态数据
       // listClientData: [],
       clientNameData: [],
-      clientStatusData: []
+      clientStatusData: [],
+      // 客户列表
+      clientIdListData: []
     }
   },
   // 方法
@@ -50,7 +52,7 @@ export default {
       let userId = this.userId
       let data = `?userId=${userId}`
       this.$axios
-        .post('/pmbs/api/statistic/listAjax'+data)
+        .post('/pmbs/api/statistic/listAjax' + data)
         .then(this.getStatisticsDataSuss)
     },
     // 获取统计数据回调
@@ -63,20 +65,27 @@ export default {
         let listBusiness = statisticsData.listBusiness
         let businessNameData = []
         let businessListData = []
-        // console.log(listBusiness)
+        let clientIdListData = this.clientIdListData
+        // console.log(clientIdListData)
         for (let i = 0; i < listBusiness.length; i++) {
           let element = listBusiness[i]
           businessNameData.push(element.businessName)
           let clientList = []
           let listProject = element.listProject
-          // for (let i = 0; i < listProject.length; i++) {
-          //   let element_ = listProject[i];
-          //   clientList.push(element_.clientId)
-          // }
+          for (let i = 0; i < listProject.length; i++) {
+            let element_ = listProject[i]
+            clientIdListData.forEach(element1 => {
+              // console.log(element_)
+              if (element1.value == element_.clientId) {
+                clientList.push(element1.label)
+              }
+            })
+          }
+          let clientList_ = Array.from(new Set(clientList))
           let data = {
             value: element.listProject.length,
             name: element.businessName,
-            clientList: clientList
+            clientList: clientList_
           }
           businessListData.push(data)
           // console.log(data)
@@ -233,6 +242,7 @@ export default {
         ],
         tooltip: {
           trigger: 'item',
+          position: 'bottom',
           formatter: function(params, ticket, callback) {
             let clientList = ''
             for (let i = 0; i < params.data.clientList.length; i++) {
@@ -377,10 +387,10 @@ export default {
       clientStatusData[0].barWidth = 81
       // barWidth: 81
       let percent = 0
-      if (clientNameData.length <=3) {
+      if (clientNameData.length <= 3) {
         percent = 100
-      } else if(clientNameData.length > 3){
-        percent = 3/clientNameData.length * 100
+      } else if (clientNameData.length > 3) {
+        percent = (3 / clientNameData.length) * 100
       }
       // console.log(clientNameData)
       // 绘制图表
@@ -420,6 +430,15 @@ export default {
             type: 'category',
             clientNameData,
             data: clientNameData,
+            //  nameRotate: '36deg',
+            // nameTextStyle:{
+            //   width: '10%',
+            //   // rich:{
+            //   //   '<style_name>':{
+            //   //     color: black
+            //   //   }
+            //   // }
+            // },
             // [
             //   '客户1',
             //   '客户2',
@@ -442,7 +461,42 @@ export default {
             //   '客户4',
             //   '客户5'
             // ],
-            triggerEvent: true //让x轴可以点击
+            triggerEvent: true, //让x轴可以点击
+            axisLabel: {
+              //坐标轴刻度标签的相关设置。
+              formatter: function(params) {
+                var newParamsName = '' // 最终拼接成的字符串
+                var paramsNameNumber = params.length // 实际标签的个数
+                var provideNumber = 6 // 每行能显示的字的个数
+                var rowNumber = Math.ceil(paramsNameNumber / provideNumber) // 换行的话，需要显示几行，向上取整
+                /**
+                 * 判断标签的个数是否大于规定的个数， 如果大于，则进行换行处理 如果不大于，即等于或小于，就返回原标签
+                 */
+                // 条件等同于rowNumber>1
+                if (paramsNameNumber > provideNumber) {
+                  /** 循环每一行,p表示行 */
+                  for (var p = 0; p < rowNumber; p++) {
+                    var tempStr = '' // 表示每一次截取的字符串
+                    var start = p * provideNumber // 开始截取的位置
+                    var end = start + provideNumber // 结束截取的位置
+                    // 此处特殊处理最后一行的索引值
+                    if (p == rowNumber - 1) {
+                      // 最后一次不换行
+                      tempStr = params.substring(start, paramsNameNumber)
+                    } else {
+                      // 每一次拼接字符串并换行
+                      tempStr = params.substring(start, end) + '\n'
+                    }
+                    newParamsName += tempStr // 最终拼成的字符串
+                  }
+                } else {
+                  // 将旧标签的值赋给新标签
+                  newParamsName = params
+                }
+                //将最终的字符串返回
+                return newParamsName
+              }
+            }
           }
         ],
         yAxis: [
@@ -455,12 +509,14 @@ export default {
           {
             show: true,
             realtime: true,
+            zoomLock: true,
             start: 0,
             end: percent
           },
           {
             type: 'inside',
             realtime: true,
+            zoomOnMouseWheel: false,
             start: 0,
             end: percent
           }
@@ -504,7 +560,7 @@ export default {
           let name = ''
           if (params.name) {
             name = params.name
-          }else if(params.value){
+          } else if (params.value) {
             name = params.value
           }
           // console.log(name)
@@ -513,9 +569,35 @@ export default {
             query: { name: name }
           })
         })
+    },
+    ///////// 获取所有客户信息 start /////////
+    getAllClientapiList() {
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
+        .then(this.getAllClientapiListSuss)
+    },
+    // 获取所有客户信息回调
+    getAllClientapiListSuss(res) {
+      if (res.status == 200) {
+        let data = res.data
+        let clientIdList = []
+        data.forEach(element => {
+          let clientIdListDate = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListDate)
+        })
+        this.clientIdListData = clientIdList
+      }
+      // console.log(res)
     }
+    ///////// 获取所有客户信息 end /////////
   },
   // 钩子函数
+  beforeMount() {
+    this.getAllClientapiList()
+  },
   mounted() {
     this.widthheight()
     this.getStatisticsData()

@@ -6,7 +6,7 @@
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
-            <el-select v-model="clientId" clearable placeholder="全部" size="small">
+            <el-select v-model="clientId" filterable clearable placeholder="全部" size="small" class="filtrateClient">
               <el-option
                 v-for="item in clientIdList"
                 :key="item.value"
@@ -16,31 +16,45 @@
             </el-select>
           </el-col>
         </el-col>
-        <el-col :span="6" class="tab tab1">
+        <el-col :span="7" class="tab tab1">
           <el-button-group>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(1,22)"
-              :class="[tab1_act=='1' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+              @click="tab1_change(item.businessId)"
+              :class="[serviceId==item.businessId ? 'act' : '']"
+              v-for="(item, index) in businessList[0]"
+              :key="index"
+            >{{item.businessName}}</el-button>
             <el-button
               type="primary"
               plain
               size="small"
-              @click="tab1_change(2,18)"
-              :class="[tab1_act=='2' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(3,17)"
-              :class="[tab1_act=='3' ? 'act' : '']"
+              icon="el-icon-more"
+              @click="tab1_more()"
+              :class="[moreShow==true ? 'act more' : 'more']"
               style="border-left: 0;"
-            >数字营销</el-button>
+            ></el-button>
           </el-button-group>
+          <el-card class="box-card" v-show="moreShow">
+            <el-button-group
+              v-for="(items, index) in businessList"
+              :key="index"
+              v-show="index != 0"
+              class="moreBus"
+            >
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                @click="tab1_change(item.businessId)"
+                :class="[serviceId==item.businessId ? 'act' : '']"
+                v-for="(item, index) in items"
+                :key="index"
+              >{{item.businessName}}</el-button>
+            </el-button-group>
+          </el-card>
         </el-col>
         <el-col :span="4" class="tab tab2">
           <el-button-group>
@@ -407,22 +421,11 @@ export default {
         }
       ],
       // 客户列表
-      client_list: [
-        {
-          value: '广汽本田',
-          label: '广汽本田'
-        },
-        {
-          value: '吉利',
-          label: '吉利'
-        },
-        {
-          value: '沃尔沃',
-          label: '沃尔沃'
-        }
-      ],
+      client_list: [],
       // 客户列表选择结果
       client: '广汽本田',
+      businessList: [], // 业务列表
+      moreShow: false, // 显示更多业务
       // 1-执行中，2-审核中，3-完成，4-延期，5-延期完成
       projectListOriginate: [], // 项目列表我发起
       initiateProjectListTota: [], // 项目列表我发起总页数
@@ -601,43 +604,43 @@ export default {
       this.tabs_activity = this.$store.state.projectListNum
     },
     // 获取新建项目分类
-    getAllClientAndBusiness() {
-      this.$axios
-        .post('/pmbs/client/getAllClientAndBusiness')
-        .then(this.getAllClientAndBusinessSuss)
-    },
-    // 获取新建项目分类回调
-    getAllClientAndBusinessSuss(res) {
-      if (res.status == 200) {
-        let data = res.data.data
-        let clientIdList = []
-        // console.log(data)
-        // let business_type_list = []
-        let name = this.$route.query.name
-        let clientId = ''
-        // 循环提取名称和ID
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          let clientIdListData = {
-            value: element.clientId,
-            label: element.clientName
-          }
-          clientIdList.push(clientIdListData)
+    // getAllClientAndBusiness() {
+    //   this.$axios
+    //     .post('/pmbs/client/getAllClientAndBusiness')
+    //     .then(this.getAllClientAndBusinessSuss)
+    // },
+    // // 获取新建项目分类回调
+    // getAllClientAndBusinessSuss(res) {
+    //   if (res.status == 200) {
+    //     let data = res.data.data
+    //     let clientIdList = []
+    //     // console.log(data)
+    //     // let business_type_list = []
+    //     let name = this.$route.query.name
+    //     let clientId = ''
+    //     // 循环提取名称和ID
+    //     for (let i = 0; i < data.length; i++) {
+    //       let element = data[i]
+    //       let clientIdListData = {
+    //         value: element.clientId,
+    //         label: element.clientName
+    //       }
+    //       clientIdList.push(clientIdListData)
 
-          if (element.clientName == name) {
-            clientId = element.clientId
-          }
-        }
-        this.clientIdList = clientIdList
-        this.clientId = clientId
-        // let name = this.$route.query.name
-        // for (let i = 0; i < array.length; i++) {
-        //   const element = array[i];
+    //       if (element.clientName == name) {
+    //         clientId = element.clientId
+    //       }
+    //     }
+    //     this.clientIdList = clientIdList
+    //     this.clientId = clientId
+    //     // let name = this.$route.query.name
+    //     // for (let i = 0; i < array.length; i++) {
+    //     //   const element = array[i];
 
-        // }
-      }
-      // console.log(res)
-    },
+    //     // }
+    //   }
+    //   // console.log(res)
+    // },
     handleChange(value) {
       // console.log(value)
       // console.log(this.value)
@@ -653,19 +656,25 @@ export default {
       if (res.status == 200) {
         let data = res.data
         let clientIdList = []
+        let clientId = ''
+        let name = this.$route.query.name
         data.forEach(element => {
           let clientIdListDate = {
             value: element.clientId,
             label: element.clientName
           }
           clientIdList.push(clientIdListDate)
+          if (name && element.clientName == name) {
+            clientId = element.clientId
+          }
         })
         this.clientIdList = clientIdList
+        this.clientId = clientId
       }
-      // console.log(res)
     },
     ///////// 获取所有客户信息 end /////////
-    // 添加知晓人标签
+
+    ///////// 添加知晓人标签 start /////////
     showInput() {
       let list = this.new_project.dynamicTags
       let add_list = this.add_list
@@ -701,6 +710,8 @@ export default {
         1
       )
     },
+    ///////// 添加知晓人标签 end /////////
+
     ///////// 上传附件 start /////////
     handleRemoveFeedback(file) {
       console.log(file)
@@ -741,24 +752,50 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
-
-    // 查询按钮
-    tab1_change(e, id) {
+    ///////// 业务类型列表获取 start /////////
+    getBusinessListAjax() {
+      // this.loading = true
+      // if (data == undefined) {
+      let data = {
+        pageNum: 1,
+        pageSize: 100
+      }
+      // }
+      this.$axios
+        .post('/pmbs/api/business/listAjax', data)
+        .then(this.getBusinessListAjaxSuss)
+    },
+    // 业务类型列表获取回调 //
+    getBusinessListAjaxSuss(res) {
+      // this.loading = false
+      if (res.status == 200) {
+        let data = res.data.data.items
+        data.reverse()
+        let totalPages = Math.ceil(data.length / 3)
+        let businessList = []
+        for (let i = 0; i < totalPages; i++) {
+          let businessListData = data.slice(i * 3, i * 3 + 3)
+          businessList.push(businessListData)
+        }
+        this.businessList = businessList
+        // console.log(this.businessList)
+      }
+    },
+    ///////// 业务类型列表获取 end /////////
+    ///////// 查询按钮 start /////////
+    tab1_change(id) {
       // console.log(e)
       let serviceId = this.serviceId
+      // let tab1_act = this.tab1_act
       if (serviceId == id) {
-        this.tab1_act = ''
         this.serviceId = ''
-      } else if (e == 1) {
-        this.tab1_act = 1
-        this.serviceId = id
-      } else if (e == 2) {
-        this.tab1_act = 2
-        this.serviceId = id
-      } else if (e == 3) {
-        this.tab1_act = 3
+      } else {
         this.serviceId = id
       }
+    },
+    tab1_more(e) {
+      let moreShow = this.moreShow
+      this.moreShow = !moreShow
     },
     tab2_change(e, id) {
       // console.log(e)
@@ -783,6 +820,7 @@ export default {
         this.status = id
       }
     },
+    ///////// 查询按钮 end /////////
     // 选项卡
     table_tab(e) {
       this.tabs_activity = e
@@ -828,7 +866,9 @@ export default {
     achieve(proDate) {
       // console.log('完成' + proId)
       this.proId = proDate.proId
-      let expertTime = new Date(new Date(proDate.expertTime).getTime() + 24*60*60*1000)
+      let expertTime = new Date(
+        new Date(proDate.expertTime).getTime() + 24 * 60 * 60 * 1000
+      )
       let newTime = new Date()
       if (expertTime < newTime) {
         this.drawer3 = true
@@ -916,7 +956,7 @@ export default {
         // console.log(taskNameList)
       }
     },
-    // 项目反馈-任务批量反馈
+    ///////// 项目反馈-任务批量反馈 start /////////
     projectFeedback() {
       let updateTime = new Date()
       let checkListTask = this.checkListTask
@@ -955,6 +995,7 @@ export default {
         this.getProjectList()
       }
     },
+    ///////// 项目反馈-任务批量反馈 end /////////
     // /api/project/delProject?projectId=100
     // 项目删除
     delProject(id) {
@@ -1008,7 +1049,7 @@ export default {
       this.getProjectListAjax(data)
       this.getProjectUserjoinproject(data)
     },
-    // 获取项目列表
+    ///////// 获取项目列表 start /////////
     getProjectList() {
       // console.log(name)
       let userId = this.userId
@@ -1030,6 +1071,7 @@ export default {
       //   console.log('请求超时')
       // })
     },
+    
     // 项目管理-我发起获取回调
     getProjectListAjaxSuss(res) {
       // console.log(res)
@@ -1085,6 +1127,7 @@ export default {
         )
       }
     },
+    ///////// 获取项目列表 end /////////
     // 分页
     handleSizeChange() {},
     //下一页
@@ -1176,6 +1219,7 @@ export default {
     this.getProjectList() // 获取项目列表
     this.projectListNum() //
     this.getAllClientapiList() // 获取所有客户信息列表
+    this.getBusinessListAjax() // 获取业务类型
   }
 }
 </script>
@@ -1191,10 +1235,44 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+.project .top .filtrateClient{
+  width: 100%;
+}
 .project .top .title {
   height: 32px;
   line-height: 32px;
   text-align: center;
+}
+.project .top .tab1 {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.project .top .tab1 button:nth-of-type(3) {
+  border-left: 0;
+}
+.project .top .tab1 .box-card {
+  width: 271px;
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  margin-left: -136px;
+  z-index: 9999;
+}
+.project .top .tab1 .box-card >>> .el-card__body {
+  padding: 20px 0;
+}
+.project .top .tab1 .box-card .moreBus {
+  margin-bottom: 9px;
+}
+.project .top button {
+  width: 80px;
+}
+.project .top .more {
+  width: 32px;
+  padding: 9px;
 }
 .project .top .tab1 .el-button--primary.is-plain {
   border-color: #ddd;

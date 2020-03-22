@@ -184,16 +184,358 @@ export default {
   methods: {
     test() {
       let obj = {
-        clientList: [
-          {
-            clientId: 55,
-            clientName: '广汽'
+        business: {
+          businessId: 0,
+          businessName: 'string',
+          createTime: {
+            chronology: {
+              calendarType: 'string',
+              id: 'string'
+            },
+            dayOfMonth: 0,
+            dayOfWeek: 'MONDAY',
+            dayOfYear: 0,
+            hour: 0,
+            minute: 0,
+            month: 'JANUARY',
+            monthValue: 0,
+            nano: 0,
+            second: 0,
+            year: 0
           },
-          {
-            clientId: 57,
-            clientName: '丰田'
+          deleteFlag: true,
+          listProject: [
+            {
+              businessName: 'string',
+              clientId: 0,
+              clientName: 'string',
+              createTime: '2020-03-21T08:37:45.635Z',
+              delayReason: 'string',
+              deleteFlag: true,
+              department: 'string',
+              expertTime: '2020-03-21T08:37:45.635Z',
+              initUserId: 0,
+              isPro: 0,
+              isUsual: true,
+              knowUser: 'string',
+              listDept: [
+                {
+                  createTime: '2020-03-21T08:37:45.635Z',
+                  deleteFlag: true,
+                  deptCode: 'string',
+                  deptId: 0,
+                  deptName: 'string',
+                  ids: [0],
+                  isMaterial: true,
+                  isPlatform: true,
+                  isSubNode: true,
+                  layer: 0,
+                  predeptId: 0,
+                  principal: 'string',
+                  principalUserId: 0,
+                  updateTime: '2020-03-21T08:37:45.635Z'
+                }
+              ],
+              listKnowUser: [
+                {
+                  captcha: 'string',
+                  deleteFlag: true,
+                  deptId: 0,
+                  deptName: 'string',
+                  headImg: 'string',
+                  ids: [0],
+                  loginName: 'string',
+                  password: 'string',
+                  postId: 0,
+                  postName: 'string',
+                  realName: 'string',
+                  roleId: 0,
+                  roleList: [
+                    {
+                      id: 0,
+                      name: 'string',
+                      permissionSet: ['string'],
+                      permissions: [
+                        {
+                          childPerms: 'string',
+                          id: 0,
+                          name: 'string',
+                          permList: [{}],
+                          pid: 0,
+                          token: 'string'
+                        }
+                      ],
+                      pids: 'string',
+                      token: 'string'
+                    }
+                  ],
+                  updateTime: {
+                    chronology: {
+                      calendarType: 'string',
+                      id: 'string'
+                    },
+                    dayOfMonth: 0,
+                    dayOfWeek: 'MONDAY',
+                    dayOfYear: 0,
+                    hour: 0,
+                    minute: 0,
+                    month: 'JANUARY',
+                    monthValue: 0,
+                    nano: 0,
+                    second: 0,
+                    year: 0
+                  },
+                  userId: 0,
+                  userName: 'string'
+                }
+              ],
+              listProFile: [
+                {
+                  createTime: '2020-03-21T08:37:45.635Z',
+                  deleteFlag: true,
+                  fileId: 0,
+                  fileName: 'string',
+                  isPro: true,
+                  localPath: 'string',
+                  ptId: 0,
+                  suffix: 'string',
+                  updateTime: '2020-03-21T08:37:45.635Z'
+                }
+              ],
+              listTask: [
+                {
+                  createTime: {
+                    chronology: {
+                      calendarType: 'string',
+                      id: 'string'
+                    },
+                    dayOfMonth: 0,
+                    dayOfWeek: 'MONDAY',
+                    dayOfYear: 0,
+                    hour: 0,
+                    minute: 0,
+                    month: 'JANUARY',
+                    monthValue: 0,
+                    nano: 0,
+                    second: 0,
+                    year: 0
+                  },
+                  deleteFlag: true,
+                  deptId: 0,
+                  deptName: 'string',
+                  doUserId: 0,
+                  doUserName: 'string',
+                  expertTime: {
+                    chronology: {
+                      calendarType: 'string',
+                      id: 'string'
+                    },
+                    dayOfMonth: 0,
+                    dayOfWeek: 'MONDAY',
+                    dayOfYear: 0,
+                    era: {
+                      value: 0
+                    },
+                    leapYear: true,
+                    month: 0,
+                    monthValue: 0,
+                    year: 0
+                  },
+                  faTask: 0,
+                  faTaskName: 'string',
+                  feedbackList: [
+                    {
+                      deleteFlag: true,
+                      deptName: 'string',
+                      feedback: 'string',
+                      feedbackFileList: [
+                        {
+                          createTime: '2020-03-21T08:37:45.635Z',
+                          deleteFlag: true,
+                          feedbackId: 0,
+                          fileId: 0,
+                          fileName: 'string',
+                          localPath: 'string',
+                          suffix: 'string',
+                          taskId: 0,
+                          updateTime: '2020-03-21T08:37:45.635Z'
+                        }
+                      ],
+                      feedbackId: 0,
+                      feedbackUserName: 'string',
+                      initUserId: 0,
+                      moreTaskId: 'string',
+                      proId: 0,
+                      taskId: 0,
+                      updateTime: '2020-03-21T08:37:45.636Z'
+                    }
+                  ],
+                  ifUpdateStatus: true,
+                  ignore: true,
+                  initUserId: 0,
+                  initUserName: 'string',
+                  isIgnore: true,
+                  listOaUser: [
+                    {
+                      companyId: 0,
+                      companyName: 'string',
+                      deleteFlag: true,
+                      deptId: 0,
+                      deptName: 'string',
+                      email: 'string',
+                      headPortrait: 'string',
+                      isPass: true,
+                      isSubNode: true,
+                      jobDate: {
+                        date: 0,
+                        day: 0,
+                        hours: 0,
+                        minutes: 0,
+                        month: 0,
+                        nanos: 0,
+                        seconds: 0,
+                        time: 0,
+                        timezoneOffset: 0,
+                        year: 0
+                      },
+                      kqNumber: 'string',
+                      layer: 0,
+                      mail: 'string',
+                      postId: 0,
+                      postName: 'string',
+                      qq: 'string',
+                      realName: 'string',
+                      sex: true,
+                      telephone: 'string',
+                      unionId: 'string',
+                      userId: 0,
+                      userName: 'string',
+                      userPwd: 'string'
+                    }
+                  ],
+                  listUserId: [0],
+                  overDesc: 'string',
+                  overTime: {
+                    chronology: {
+                      calendarType: 'string',
+                      id: 'string'
+                    },
+                    dayOfMonth: 0,
+                    dayOfWeek: 'MONDAY',
+                    dayOfYear: 0,
+                    hour: 0,
+                    minute: 0,
+                    month: 'JANUARY',
+                    monthValue: 0,
+                    nano: 0,
+                    second: 0,
+                    year: 0
+                  },
+                  overUserId: 0,
+                  proFileList: [
+                    {
+                      createTime: '2020-03-21T08:37:45.636Z',
+                      deleteFlag: true,
+                      fileId: 0,
+                      fileName: 'string',
+                      isPro: true,
+                      localPath: 'string',
+                      ptId: 0,
+                      suffix: 'string',
+                      updateTime: '2020-03-21T08:37:45.636Z'
+                    }
+                  ],
+                  proId: 0,
+                  proName: 'string',
+                  remark: 'string',
+                  status: 0,
+                  taskId: 0,
+                  taskName: 'string',
+                  taskfileList: [
+                    {
+                      clientId: 0,
+                      clientName: 'string',
+                      createTime: '2020-03-21T08:37:45.636Z',
+                      deleteFlag: true,
+                      doUserId: 0,
+                      fileId: 'string',
+                      fileName: 'string',
+                      initUserId: 0,
+                      isHistory: 0,
+                      listUserId: [0],
+                      localPath: 'string',
+                      nowEdition: 'string',
+                      oldFileId: 'string',
+                      proId: 0,
+                      proName: 'string',
+                      realName: 'string',
+                      status: 0,
+                      suffix: 'string',
+                      taskId: 0,
+                      taskName: 'string',
+                      updateTime: '2020-03-21T08:37:45.636Z',
+                      updateUserId: 0,
+                      userName: 'string'
+                    }
+                  ],
+                  typeId: 0,
+                  typeName: 'string',
+                  updateTime: {
+                    chronology: {
+                      calendarType: 'string',
+                      id: 'string'
+                    },
+                    dayOfMonth: 0,
+                    dayOfWeek: 'MONDAY',
+                    dayOfYear: 0,
+                    hour: 0,
+                    minute: 0,
+                    month: 'JANUARY',
+                    monthValue: 0,
+                    nano: 0,
+                    second: 0,
+                    year: 0
+                  }
+                }
+              ],
+              listUserId: [0],
+              manager: 0,
+              overTime: '2020-03-21T08:37:45.637Z',
+              pasprojectId: 0,
+              proId: 0,
+              proName: 'string',
+              projectType: 'string',
+              realName: 'string',
+              remark: 'string',
+              serviceId: 0,
+              status: 0,
+              updateTime: '2020-03-21T08:37:45.637Z',
+              usual: true
+            }
+          ],
+          updateTime: {
+            chronology: {
+              calendarType: 'string',
+              id: 'string'
+            },
+            dayOfMonth: 0,
+            dayOfWeek: 'MONDAY',
+            dayOfYear: 0,
+            hour: 0,
+            minute: 0,
+            month: 'JANUARY',
+            monthValue: 0,
+            nano: 0,
+            second: 0,
+            year: 0
           }
-        ]
+        },
+        ids: 'string',
+        limit: 0,
+        offset: 0,
+        orderBys: 'string',
+        pageNum: 0,
+        pageSize: 0
       }
 
       // typeName typeId

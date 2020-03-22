@@ -6,7 +6,7 @@
           <el-col :span="5" class>
             <el-col :span="4" class="title">客户</el-col>
             <el-col :span="20">
-              <el-select v-model="clientId" clearable placeholder="全部" size="small">
+              <el-select v-model="clientId" filterable clearable placeholder="全部" size="small" class="filtrateClient">
                 <el-option
                   v-for="item in clientIdList"
                   :key="item.value"
@@ -16,31 +16,40 @@
               </el-select>
             </el-col>
           </el-col>
-          <el-col :span="6" class="tab tab1">
+          <el-col :span="7" class="tab tab1">
             <el-button-group>
-              <el-button
-                type="primary"
-                plain
-                size="small"
-                @click="tab1_change(1,22)"
-                :class="[tab1_act=='1' ? 'act' : '']"
-              >&nbsp;&nbsp;&nbsp;&nbsp;官网&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-              <el-button
-                type="primary"
-                plain
-                size="small"
-                @click="tab1_change(2,18)"
-                :class="[tab1_act=='2' ? 'act' : '']"
-              >&nbsp;&nbsp;&nbsp;&nbsp;口碑&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-              <el-button
-                type="primary"
-                plain
-                size="small"
-                @click="tab1_change(3,17)"
-                :class="[tab1_act=='3' ? 'act' : '']"
-                style="border-left: 0;"
-              >数字营销</el-button>
-            </el-button-group>
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              @click="tab1_change(item.businessId)"
+              :class="[serviceId==item.businessId ? 'act' : '']"
+              v-for="(item, index) in businessList[0]"
+              :key="index"
+            >{{item.businessName}}</el-button>
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              icon="el-icon-more"
+              @click="tab1_more()"
+              :class="[moreShow==true ? 'act more' : 'more']"
+              style="border-left: 0;"
+            ></el-button>
+          </el-button-group>
+          <el-card class="box-card" v-show="moreShow">
+            <el-button-group v-for="(items, index) in businessList" :key="index" v-show="index != 0" class="moreBus">
+            <el-button
+              type="primary"
+              plain
+              size="small"
+              @click="tab1_change(item.businessId)"
+              :class="[serviceId==item.businessId ? 'act' : '']"
+              v-for="(item, index) in items"
+              :key="index"
+            >{{item.businessName}}</el-button>
+          </el-button-group>
+          </el-card>
           </el-col>
           <el-col :span="4" class="tab tab2">
             <el-button-group>
@@ -213,307 +222,9 @@
       </el-scrollbar>
     </el-drawer>
 
-    <!-- 任务详情 -->
-    <!-- 抽屉 -->
-    <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
-      <el-scrollbar style="height: 100%"  v-loading="drawerLoading">
-        <el-row class="task_details">
-            <el-col :span="24" class="title">{{taskData.proName}}-{{taskData.taskName}}</el-col>
-            <el-col :span="6" class="title">执行部门：</el-col>
-            <el-col :span="18">{{taskData.deptName}}</el-col>
-            <el-col :span="6" class="title">任务类型：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-select v-model="taskData.typeId" placeholder="请选择任务类型" size="mini">
-                  <el-option
-                    v-for="item in task_type"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  ></el-option>
-                </el-select>
-              </template>
-              <template v-else>{{taskData.typeName}}</template>
-            </el-col>
-            <el-col :span="6" class="title">执行人：</el-col>
-            <el-col :span="18">
-              <span v-if="!changeNameShow">{{taskData.doUserName}}</span>
-              <el-select
-                v-if="changeNameShow"
-                v-model="taskData.doUserId"
-                filterable
-                placeholder="请选择"
-                size="mini"
-                clearable
-                style="width:99px;"
-              >
-                <el-option
-                  v-for="item in taskData.listOaUser"
-                  :key="item.userId"
-                  :label="item.realName"
-                  :value="item.userId"
-                ></el-option>
-              </el-select>
-              <el-link
-                type="primary"
-                @click="changeName()"
-                v-if="taskData.deptId == deptId && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
-              >更换</el-link>
-              <el-link
-                type="primary"
-                @click="changeName()"
-                v-else-if="deptId == 150 && taskData.deptId == 93 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
-              >更换</el-link>
-              <el-link
-                type="primary"
-                @click="changeName()"
-                v-else-if="deptId == 150 && taskData.deptId == 64 && taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
-              >更换</el-link>
-            </el-col>
-            <el-col :span="6" class="title">状态：</el-col>
-            <el-col :span="18">
-              <el-select
-                v-model="statusListValue"
-                size="mini"
-                :class="{'state_color1': taskData.status == 1,
-                  'state_color2': taskData.status == 2}"
-                placeholder="请选择"
-                v-if="taskData.status==1 && taskData.doUserId == userId"
-              >
-                <el-option
-                  v-for="item in statusList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-              <span
-                v-else-if="taskData.status==1 && taskData.doUserId != userId"
-                class="state_color1"
-              >执行中</span>
-              <span v-else-if="taskData.status==2" class="state_color2">审核中</span>
-              <span v-else-if="taskData.status==3" class="state_color3">已完成</span>
-              <el-select
-                v-model="statusListValue"
-                size="mini"
-                :class="{'state_color1': taskData.status == 1,
-                  'state_color2': taskData.status == 2,
-                  'state_color4': taskData.status == 4}"
-                placeholder="请选择"
-                v-if="taskData.status==4"
-              >
-                <el-option
-                  v-for="item in statusList_"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                ></el-option>
-              </el-select>
-              <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
-            </el-col>
-            <el-col :span="6" class="title">预计时间：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-date-picker
-                  v-model="taskData.expertTime"
-                  type="date"
-                  placeholder="选择日期"
-                  :picker-options="pickerOptions"
-                  size="mini"
-                ></el-date-picker>
-              </template>
-              <template v-else>{{taskData.expertTime_}}</template>
-            </el-col>
-            <el-col :span="6" class="title">完成时间：</el-col>
-            <el-col :span="18">{{taskData.overTime_}}</el-col>
-            <el-col :span="6" class="title">需求：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-input
-                  type="textarea"
-                  :autosize="{ minRows: 1, maxRows: 9}"
-                  placeholder="请输入内容"
-                  v-model="taskData.remark"
-                ></el-input>
-              </template>
-              <template v-else>{{taskData.remark}}</template>
-            </el-col>
-            <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18" class="proFileList">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
-              >
-                <el-upload
-                  :action="uploadUrl"
-                  :on-remove="handleRemove"
-                  :on-success="handleSuccess"
-                  :file-list="fileList0"
-                  class="elementUpload"
-                >
-                  <el-button size="mini" type="primary">点击上传附件</el-button>
-                </el-upload>
-              </template>
-              <template v-else>
-                <div
-                  class="smname"
-                  v-for="item in taskData.proFileList"
-                  :key="item.index"
-                  @click="download(item)"
-                >
-                  <img
-                    v-if="item.suffix == 'doc' || item.suffix == 'docx'"
-                    src="static/images/document/word.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img
-                    v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
-                    src="static/images/document/excle.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img
-                    v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
-                    src="static/images/document/ppt.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img v-else src="static/images/document/other.png" width="24" alt srcset />
-                  <div>{{item.fileName}}</div>
-                </div>
-              </template>
-            </el-col>
-            <el-divider content-position="right"></el-divider>
-            <el-col :span="6" class="title">完成结果：</el-col>
-            <el-col :span="18">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
-              >
-                <el-input
-                  type="textarea"
-                  :rows="3"
-                  placeholder="请输入内容"
-                  v-model="taskData.overDesc"
-                ></el-input>
-              </template>
-              <template v-else>{{taskData.overDesc}}</template>
-            </el-col>
-            <el-col :span="6" class="title">附件：</el-col>
-            <el-col :span="18" class="proFileList">
-              <template
-                v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
-              >
-                <el-upload
-                  action="/pmbs/file/upload?upType=1&demandType=1"
-                  :on-remove="handleRemoveResult"
-                  :on-success="handleSuccessResult"
-                  :disabled="updateBan"
-                  :fileList="fileList1"
-                  :limit="1"
-                  class="elementUpload"
-                >
-                  <el-button size="mini" type="primary">点击上传文档</el-button>
-                </el-upload>
-              </template>
-              <template v-else>
-                <div
-                  class="smname"
-                  v-for="item in taskData.taskfileList"
-                  :key="item.index"
-                  @click="download(item)"
-                >
-                  <img
-                    v-if="item.suffix == 'doc' || item.suffix == 'docx'"
-                    src="static/images/document/word.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img
-                    v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
-                    src="static/images/document/excle.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img
-                    v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
-                    src="static/images/document/ppt.png"
-                    width="24"
-                    alt
-                    srcset
-                  />
-                  <img v-else src="static/images/document/other.png" width="24" alt srcset />
-                  <div>{{item.fileName}}</div>
-                </div>
-              </template>
-            </el-col>
-            <el-divider content-position="right"></el-divider>
-            <el-col :span="6" class="title">反馈意见：</el-col>
-            <el-col :span="18" class="suggest">
-              <el-scrollbar style="height: 100%;">
-                <el-col
-                  :span="23"
-                  class="suggest_list"
-                  v-for="item in taskData.feedbackList"
-                  :key="item.index"
-                >
-                  <el-col :span="12" class="time">{{item.updateTime}}</el-col>
-                  <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
-                  <el-col :span="24" class="content">{{item.feedback}}</el-col>
-                  <el-col :span="24" class="fileListBox">
-                    <div
-                      class="fileList"
-                      v-for="items in item.feedbackFileList"
-                      :key="items.index"
-                      @click="download(items)"
-                    >
-                      <img
-                        v-if="item.suffix == 'doc' || item.suffix == 'docx'"
-                        src="static/images/document/word.png"
-                        width="24"
-                        alt
-                        srcset
-                      />
-                      <img
-                        v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
-                        src="static/images/document/excle.png"
-                        width="24"
-                        alt
-                        srcset
-                      />
-                      <img
-                        v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
-                        src="static/images/document/ppt.png"
-                        width="24"
-                        alt
-                        srcset
-                      />
-                      <img v-else src="static/images/document/other.png" width="24" alt srcset />
-                      <div>{{items.fileName}}</div>
-                    </div>
-                  </el-col>
-                </el-col>
-              </el-scrollbar>
-            </el-col>
-          </el-row>
-      </el-scrollbar>
-      <el-row class="batton_pa">
-        <el-col :span="12" :offset="7" class="batton">
-          <el-button size="small" type="info" @click="empty">取消</el-button>
-          <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
-        </el-col>
-      </el-row>
-    </el-drawer>
+    <!--------- 任务详情 start --------->
+    <taskDetail :taskId="taskId" @closeDrawer="closeDrawer"></taskDetail>
+    <!--------- 任务详情 end --------->
     <!-- 重新上传弹框 -->
     <el-dialog :close="fileClose" title="修改附件" :visible.sync="dialogFileVisible">
       <div>
@@ -536,12 +247,18 @@
   </div>
 </template>
 <script>
+import taskDetail from '@/pages/template/taskDetail'
+
 export default {
   name: 'document',
+  components: {
+    taskDetail
+  },
   data() {
     return {
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
+      taskId: '',
       openHistory: false, //控制文档历史记录侧栏状态
       editFileName: '', //修改的文件名
       clientId: '', //客户ID
@@ -553,6 +270,8 @@ export default {
       tab1_act: '',
       // 项目类型2选择
       tab2_act: '',
+      businessList: [], // 业务列表
+      moreShow: false, // 显示更多业务
       clientIdList: [], //客户列表
       client: '广汽本田',
       fileHistoryList: [], //文件历史数据
@@ -689,24 +408,6 @@ export default {
         this.listProFileResult = listProFileResult
       }
     },
-    ///////// 修改任务详情 start /////////
-    changeTaskDeil() {
-      // console.log('修改任务详情')
-      this.drawer1 = false
-      this.drawer5 = false
-      let taskData = this.taskData // 任务详情
-      let listProFile = this.listProFile // 需求文档
-      let listProFileResult = this.listProFileResult // 结果文档
-      let status = this.statusListValue
-      delete taskData.expertTime_
-      delete taskData.overTime_
-      delete taskData.feedbackList
-      taskData.proFileList = listProFile
-      taskData.taskfileList = listProFileResult
-      taskData.status = status
-      this.taskSave(taskData)
-    },
-    ///////// 修改任务详情 end /////////
     ///////// 任务新增/修改/完成 start /////////
     taskSave(data) {
       // console.log(this.new_task.presetTime)
@@ -749,183 +450,8 @@ export default {
       this.changeNameShow = true
     },
     enterDetail(taskData) {
-      this.drawer1 = true
-      // this.statusListValue = row.status.toString()
-      // this.getTaskShow(row.taskId)
-      // this.openTaskVisible = true;
-      let userId = this.userId
-      this.drawer1 = true
       this.taskId = taskData.taskId
-      let data = `?userId=${userId}&id=${taskData.taskId}`
-      this.getTaskDetail(data)
-      this.getDepTypeList()
     },
-    // 获取任务详情
-    getTaskDetail(data) {
-      this.drawerLoading = true
-      this.$axios
-        .post('/pmbs/api/task/show' + data)
-        .then(this.getTaskDetailSuss)
-    },
-    // 获取任务详情回调
-    getTaskDetailSuss(res) {
-      this.drawerLoading = false
-      console.log(res)
-      if (res.status == 200) {
-        let data = res.data.data
-        data.expertTime_ = this.$date(data.expertTime)
-        data.overTime_ = this.$time(data.overTime)
-        for (let i = 0; i < data.feedbackList.length; i++) {
-          let element = data.feedbackList[i]
-          data.feedbackList[i].updateTime = this.$time(element.updateTime)
-        }
-        this.taskData = data
-        this.listProFile_ = data.proFileList
-        this.listProFileResult = data.taskfileList
-        this.statusListValue = data.status
-        let fileList0 = []
-        for (let i = 0; i < data.proFileList.length; i++) {
-          let element = data.proFileList[i]
-          let fileList0Data = {
-            fileId: element.fileId,
-            name: element.fileName
-          }
-          fileList0.push(fileList0Data)
-        }
-        this.fileList0 = fileList0
-        let fileList1 = []
-        for (let i = 0; i < data.taskfileList.length; i++) {
-          let element = data.taskfileList[i]
-          let fileList1Data = {
-            fileId: element.fileId,
-            name: element.fileName
-          }
-          fileList1.push(fileList1Data)
-        }
-        this.fileList1 = fileList1
-      }
-    },
-    // 任务类型获取
-    getDepTypeList() {
-      let data = {}
-      this.$axios
-        .post('/pmbs/api/depType/listAjax', data)
-        .then(this.getDepTypeListSuss)
-    },
-    // 任务类型获取回调
-    getDepTypeListSuss(res) {
-      // console.log(res)
-      if (res.status == 200) {
-        // this.projectListJoin = res.data.data
-        let data = res.data.items
-        let task_type = []
-        let task_type_data = {}
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          task_type_data = {
-            value: element.typeId,
-            label: element.typeName
-          }
-          task_type.push(task_type_data)
-        }
-        this.task_type = task_type
-        // console.log(this.task_type)
-        // console.log(data)
-      }
-    },
-    ///////// 任务需求附件上传 start /////////
-    upload() {
-      let upType = 1
-      let demandType = 0
-      let uploadUrl = `
-      /pmbs/file/upload?upType=${upType}&demandType=${demandType}
-      `
-      this.uploadUrl = uploadUrl
-    },
-    // 上传回调
-    handleSuccess(res, file, fileList) {
-      // console.log('上传附件成功')
-      if (res.errcode == 0) {
-        let resData = res.data
-        let listProFile = this.listProFile_
-        // console.log(listProFile)
-        let listProFileData = {
-          proId: this.taskData.proId || '', // 项目ID
-          taskId: this.taskData.taskId || '', // 任务ID
-          fileId: '', // 文档ID
-          fileName: resData.fileName, //'附件名称',
-          isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
-          deleteFlag: false, // 是否删除
-          ptId: this.taskData.taskId || '', //所属任务ID
-          localPath: resData.path, //'本地路径',
-          suffix: resData.fileType //'文档后缀'
-        }
-        listProFile.push(listProFileData)
-        this.listProFile_ = listProFile
-        console.log(this.listProFile_)
-      }
-    },
-    // 删除
-    handleRemove(file) {
-      // console.log(file)
-      let data = file
-      let listProFile = this.listProFile_
-      for (let i = 0; i < listProFile.length; i++) {
-        let element = listProFile[i]
-        if (element.fileId == data.fileId) {
-          listProFile[i].deleteFlag = true
-          // console.log('删除')
-        }
-      }
-      this.listProFile_ = listProFile
-      // console.log(this.listProFile)
-    },
-    ///////// 任务需求附件上传 end /////////
-
-    ///////// 任务成果附件上传 start /////////
-    // 上传回调
-    handleSuccessResult(res, file, fileList) {
-      // console.log('上传附件成功')
-      if (res.errcode == 0) {
-        let resData = res.data
-        let listProFileResult = this.listProFileResult
-        // console.log(listProFile)
-        let listProFileResultData = {
-          proId: this.proId, // 项目ID
-          taskId: this.taskId, // 任务ID
-          fileId: '', // 文档ID
-          updateUserId: this.userId, // 上传人ID
-          fileName: resData.fileName, //'文档名称',
-          localPath: resData.path, //'本地路径',
-          suffix: resData.fileType, //'文档后缀'
-          oldFileId: this.oldFileId // 原文档ID
-        }
-        listProFileResult.push(listProFileResultData)
-        this.listProFileResult = listProFileResult
-        // this.updateBan = true
-        // console.log(this.listProFileResult)
-      }
-    },
-    // 删除
-    handleRemoveResult(file) {
-      // console.log(file)
-      let data = file
-      let listProFileResult = this.listProFileResult
-      if (listProFileResult.fileId) {
-        this.oldFileId = listProFileResult.fileId
-      } else {
-        this.listProFileResult = []
-      }
-      // for (let i = 0; i < listProFileResult.length; i++) {
-      //   let element = listProFileResult[i]
-      //   if (element.fileId == data.fileId) {
-      //     listProFileResult[i].deleteFlag = true
-      //   }
-      // }
-      // this.listProFileResult = listProFileResult
-      // console.log(this.listProFileResult)
-    },
-    ///////// 任务成果附件上传 end /////////
     //取消附件上传
     fileRemove: function() {
       this.dialogFileVisible = false
@@ -987,14 +513,50 @@ export default {
         this.listProFile = listProFile
       }
     },
-    tab1_change(e, id) {
-      if (this.tab1_act == e) {
-        this.tab1_act = ''
-        this.serviceId = '' //官网 口碑 数字营销
-      } else {
-        this.tab1_act = e
-        this.serviceId = id //官网 口碑 数字营销
+   ///////// 业务类型列表获取 start /////////
+    getBusinessListAjax() {
+      // this.loading = true
+      // if (data == undefined) {
+        let data = {
+          pageNum: 1,
+          pageSize: 100
+        }
+      // }
+      this.$axios
+        .post('/pmbs/api/business/listAjax', data)
+        .then(this.getBusinessListAjaxSuss)
+    },
+    // 业务类型列表获取回调 //
+    getBusinessListAjaxSuss(res) {
+      // this.loading = false
+      if (res.status == 200) {
+        let data = res.data.data.items
+        data.reverse()
+        let totalPages = Math.ceil(data.length/3)
+        let businessList = []
+        for (let i = 0; i < totalPages; i++) {
+          let businessListData = data.slice(i*3,i*3+3)
+          businessList.push(businessListData)
+        }
+        this.businessList = businessList
+        // console.log(this.businessList)
       }
+    },
+    ///////// 业务类型列表获取 end /////////
+    // 查询按钮
+    tab1_change(id) {
+      // console.log(e)
+      let serviceId = this.serviceId
+      // let tab1_act = this.tab1_act
+      if (serviceId == id) {
+        this.serviceId = ''
+      } else {
+        this.serviceId = id
+      }
+    },
+    tab1_more(e){
+      let moreShow = this.moreShow
+      this.moreShow = !moreShow
     },
     //
     tab2_change(e, id) {
@@ -1130,8 +692,45 @@ export default {
           data[i].updateTime = this.$time(element.updateTime)
         }
         this.totalnum = res.data.totalRows
+        let clientIdList = this.clientIdList
+        data.forEach((element,i) => {
+          clientIdList.forEach(element_ => {
+            if (element.clientId == element_.value) {
+              data[i].clientName = element_.label
+              // console.log(data[i])
+            }
+          });
+        });
         this.tableData = data
+        // console.log(data)
       }
+    },
+     // 关闭任务详情回调
+    closeDrawer(res){
+      // console.log(res)
+      this.taskId = ''
+      if (res == 1) {
+        this.getParams()
+      }
+    },
+    // 消息提示
+    messageWin(message) {
+      // 成功提示
+      this.$message({
+        message: message,
+        type: 'success'
+      })
+    },
+    messageWarning(message) {
+      // 警告提示
+      this.$message({
+        message: message,
+        type: 'warning'
+      })
+    },
+    messageError(message) {
+      // 错误提示
+      this.$message.error(message)
     }
   },
   watch: {
@@ -1148,9 +747,12 @@ export default {
     }
   },
   // 钩子函数
-  mounted() {
+  beforeMount() {
     //获取客户下拉数据
     this.getAllClientAndBusiness()
+  },
+  mounted() {
+    
     this.getTaskfilePageList()
 
     let upType = 0
@@ -1158,6 +760,7 @@ export default {
     let uploadUrl = `/pmbs/file/upload?upType=${upType}&demandType=${demandType}`
     this.uploadUrl = uploadUrl
     this.pickerOptionsTime() // 禁用时间函数
+    this.getBusinessListAjax() // 获取业务类型
     // console.log(this.$store.state)
   }
 }
@@ -1196,6 +799,9 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
+.document .top .filtrateClient{
+  width: 100%;
+}
 .document .top .title {
   height: 32px;
   line-height: 32px;
@@ -1212,7 +818,37 @@ export default {
   border: none;
   color: white;
 }
-
+.document .top .tab1{
+  position: relative;
+  display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.document .top .tab1 button:nth-of-type(3){
+  border-left: 0;
+}
+.document .top .tab1 .box-card{
+  width: 271px;
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  margin-left: -136px;
+  z-index: 9999;
+}
+.document .top .tab1 .box-card>>>.el-card__body{
+  padding: 20px 0;
+}
+.document .top .tab1 .box-card .moreBus{
+  margin-bottom: 9px;
+}
+.document .top button{
+  width: 80px;
+}
+.document .top .more{
+  width: 32px;
+  padding: 9px;
+}
 .document .top .tab1 .el-button--primary.is-plain {
   border-color: #ddd;
 }
