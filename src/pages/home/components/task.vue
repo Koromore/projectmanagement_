@@ -339,6 +339,7 @@
                 action="/pmbs/file/upload?upType=1&demandType=1"
                 :on-remove="handleRemoveFeedback"
                 :on-success="handleSuccessFeedback"
+                ref="upload"
                 :limit="1"
                 class="elementUpload"
               >
@@ -614,6 +615,12 @@ export default {
       this.drawer2_task = taskData.proName + '-' + taskData.taskName
       this.taskFeedbackId = taskData.taskId
       this.projFeedbackId = taskData.proId
+
+      let feedbackFileList = this.feedbackFileList
+      if (feedbackFileList.length != 0) {
+        this.$refs['upload'].clearFiles()
+        this.feedbackFileList = []
+      }
     },
     sponsor_achieve(taskData) {
       this.$confirm('是否确认此操作？', '确认信息', {
@@ -968,7 +975,7 @@ export default {
       let localPath = row.localPath
       // console.log("123")
       let a = document.createElement('a')
-      a.download = ''
+      a.download = row.fileName
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },

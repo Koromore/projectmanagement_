@@ -628,7 +628,7 @@ export default {
     download(row) {
       let localPath = row.localPath
       let a = document.createElement('a')
-      a.download = ''
+      a.download = row.fileName
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },

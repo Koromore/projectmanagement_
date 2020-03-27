@@ -296,6 +296,7 @@
                 :on-remove="handleRemoveFeedback"
                 :on-success="handleSuccessFeedback"
                 :limit="1"
+                ref="upload"
                 class="elementUpload"
               >
                 <el-button size="mini" type="primary">点击上传文档</el-button>
@@ -835,6 +836,12 @@ export default {
       let userId = this.userId
       let data = `?proId=${id}&userId=${userId}`
       this.getProjectTaskListInit(data)
+
+      let feedbackFileList = this.feedbackFileList
+      if (feedbackFileList.length != 0) {
+        this.$refs['upload'].clearFiles()
+        this.feedbackFileList = []
+      }
     },
     aredact(proDetail) {
       // console.log('编辑' + id)
@@ -1133,7 +1140,7 @@ export default {
     //下一页
     handleCurrentChange(page) {
       this.pageNum = page
-      console.log(page)
+      // console.log(page)
 
       this.totalnum = this.projectListOriginate.length
 
@@ -1144,7 +1151,7 @@ export default {
         (this.pageNum - 1) * 10 + 10
       )
 
-      console.log(this.currentData)
+      // console.log(this.currentData)
     },
 
     // 分页

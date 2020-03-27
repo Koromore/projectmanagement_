@@ -72,6 +72,9 @@ export default {
           businessNameData.push(element.businessName)
           let clientList = []
           let listProject = element.listProject
+          if (listProject == null) {
+            listProject = []
+          }
           for (let i = 0; i < listProject.length; i++) {
             let element_ = listProject[i]
             clientIdListData.forEach(element1 => {
@@ -81,9 +84,10 @@ export default {
               }
             })
           }
+
           let clientList_ = Array.from(new Set(clientList))
           let data = {
-            value: element.listProject.length,
+            value: listProject.length,
             name: element.businessName,
             clientList: clientList_
           }

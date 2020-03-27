@@ -8,9 +8,16 @@
             <i class="el-icon-folder-add"></i>
             创建
           </div>
-          <!-- <el-badge :value="3" class="item">
-            <i class="el-icon-bell"></i>
-          </el-badge>-->
+          <!-- <div class="add_du" @click="send">
+            <i class="el-icon-folder-add"></i>
+            发送消息
+          </div>-->
+          <!-- <div class="message" @click="message">
+            <el-badge :value="3" class="item">
+              <i class="el-icon-bell"></i>
+            </el-badge>
+            <span>消息</span>
+          </div> -->
           <!-- 头像 -->
           <div class="usual">
             <div class="portrait">
@@ -38,10 +45,52 @@ export default {
   name: 'topheader',
   data() {
     return {
-      drawer: true
+      drawer: true,
+      // drawer2: true,
+      path: 'ws://nwne722jqh.52http.com/websocket/admin',
+      socket: ''
     }
   },
+  // 钩子函数
+  mounted() {
+    // this.init()
+  },
   methods: {
+    init: function() {
+      if (typeof WebSocket === 'undefined') {
+        alert('您的浏览器不支持socket')
+      } else {
+        // 实例化socket
+        this.socket = new WebSocket(this.path)
+        // 监听socket连接
+        this.socket.onopen = this.open
+        // 监听socket错误信息
+        this.socket.onerror = this.error
+        // 监听socket消息
+        this.socket.onmessage = this.getMessage
+      }
+    },
+    open: function() {
+      console.log('socket连接成功')
+    },
+    error: function() {
+      console.log('连接错误')
+    },
+    getMessage: function(msg) {
+      console.log(msg.data)
+    },
+    send: function() {
+      // this.socket.send(params)
+      this.socket.send('test')
+      console.log('test')
+    },
+    close: function() {
+      console.log('socket已经关闭')
+    },
+    destroyed() {
+      // 销毁监听
+      this.socket.onclose = this.close
+    },
     logout() {
       //退出登录
       // this.$store.commit('logout');
@@ -61,13 +110,13 @@ export default {
           }
         })
     },
-    // 标签编辑
-    handleClose(tag) {
-      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
-    },
-    // 向父组件传值打开抽屉
+    // 向父组件传值打开新增项目抽屉
     add_box() {
       this.$emit('func', this.drawer)
+    },
+    // 向父组件传值打开消息面板抽屉
+    message() {
+      this.$emit('message', {})
     }
   }
 }
@@ -79,6 +128,10 @@ export default {
   position: fixed;
   top: 0;
 }
+.topheader .message{
+  font-size: 16px;
+  color: white;
+}
 .header-left {
   height: 75px;
   line-height: 75px;
@@ -87,7 +140,7 @@ export default {
   float: left;
 }
 .header-right {
-  width: 281px;
+  width: 320px;
   float: right;
   color: #555555;
   font-size: 18px;

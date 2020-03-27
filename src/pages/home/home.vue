@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <Header @func="getMsgFormSon"></Header>
+    <Header @func="getMsgFormSon" @message="getMessage"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
       <!-- 左菜单栏 start -->
       <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
@@ -19,11 +19,19 @@
           <i class="el-icon-folder-opened"></i>
           文档管理
         </div>
-        <div :class="[show_acti=='1'?'title act':'title']" @click="change_show(1,'statistics')" v-if="statisticsShow">
+        <div
+          :class="[show_acti=='1'?'title act':'title']"
+          @click="change_show(1,'statistics')"
+          v-if="statisticsShow"
+        >
           <i class="el-icon-pie-chart"></i>
           统计
         </div>
-        <div :class="[show_acti=='5'?'title act':'title']" @click="change_show(5,'set')" v-if="setShow">
+        <div
+          :class="[show_acti=='5'?'title act':'title']"
+          @click="change_show(5,'set')"
+          v-if="setShow"
+        >
           <i class="el-icon-setting"></i>
           设置
         </div>
@@ -37,7 +45,7 @@
         <!-- 内容 end -->
       </el-container>
     </el-container>
-    <!-- 抽屉添加任务 start -->
+    <!--------- 抽屉添加任务 start --------->
     <el-drawer title="添加任务" :visible.sync="drawer" :with-header="false">
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
@@ -199,7 +207,61 @@
         </el-col>
       </el-row>
     </el-drawer>
-    <!-- 抽屉添加任务 end -->
+    <!--------- 抽屉添加任务 end --------->
+
+    <!--------- 抽屉消息面板 start --------->
+    <el-drawer title="消息列表" :visible.sync="drawer2" :with-header="false">
+      <el-row class="messageBox">
+        <el-col :span="24" class="title">消息列表</el-col>
+        <el-col :span="24" class="tabsBox">
+          <el-col
+            :span="8"
+            :class="[tabs == 1 ? 'act' : '', 'tabs']"
+            @click.native="changeTabs(1)"
+          >项目</el-col>
+          <el-col
+            :span="8"
+            :class="[tabs == 2 ? 'act' : '', 'tabs']"
+            @click.native="changeTabs(2)"
+          >任务</el-col>
+          <el-col
+            :span="8"
+            :class="[tabs == 3 ? 'act' : '', 'tabs']"
+            @click.native="changeTabs(3)"
+          >审核</el-col>
+        </el-col>
+        <el-col :span="24" class="paneBox">
+          <el-col :span="24" class="pane" v-show="tabs == 1">
+            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
+              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
+                <el-col :span="8" class="time">20-03-01 13:11</el-col>
+                <el-col :span="16" class="title">项目创建{{i}}</el-col>
+                <el-col :span="16" class="content" :offset="8">收到一个项目创建{{i}}</el-col>
+              </el-col>
+            </el-col>
+          </el-col>
+          <el-col :span="24" class="pane" v-show="tabs == 2">
+            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
+              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
+                <el-col :span="8" class="time">20-03-01 13:11</el-col>
+                <el-col :span="16" class="title">任务创建{{i}}</el-col>
+                <el-col :span="16" class="content" :offset="8">收到一个任务创建{{i}}</el-col>
+              </el-col>
+            </el-col>
+          </el-col>
+          <el-col :span="24" class="pane" v-show="tabs == 3">
+            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
+              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
+                <el-col :span="8" class="time">20-03-01 13:11</el-col>
+                <el-col :span="16" class="title">项目审核{{i}}</el-col>
+                <el-col :span="16" class="content" :offset="8">收到一个项目审核{{i}}</el-col>
+              </el-col>
+            </el-col>
+          </el-col>
+        </el-col>
+      </el-row>
+    </el-drawer>
+    <!--------- 抽屉消息面板 end --------->
   </div>
 </template>
 <script>
@@ -220,20 +282,8 @@ export default {
       home_style: '',
       show_acti: 2,
       drawer: false,
-      restaurants: [
-        {
-          value: '测试1',
-          deptId: 'id1'
-        },
-        {
-          value: '测试2',
-          deptId: 'id2'
-        },
-        {
-          value: '测试3',
-          deptId: 'id3'
-        }
-      ],
+      drawer2: false,
+      restaurants: [], // 用户列表
       deptList: [], // 部门列表
       userList: [], // 用户列表
       radio2: '1', // 项目经理,执行部门 选择
@@ -280,7 +330,11 @@ export default {
       update: 0,
       // 统计/设置显示
       statisticsShow: false,
-      setShow: false
+      setShow: false,
+      // 消息面板默认显示
+      activeName: 'proj',
+      count: 0,
+      tabs: 1
     }
   },
   // 侦听器
@@ -413,7 +467,27 @@ export default {
       // this.proData = data
       // console.log(data)
     },
+    getMessage() {
+      this.drawer2 = true
+      console.log('消息面板')
+    },
     ///////// 接受子组件数据 end /////////
+
+    ///////// 消息面板选项卡 start /////////
+    // handleClick(tab, event) {
+    //   // console.log(tab, event)
+    // },
+    changeTabs(tabs) {
+      this.tabs = tabs
+      // console.log(1)
+    },
+    load() {
+      this.count += 2
+    },
+    // test(){
+    //   console.log("test")
+    // },
+    ///////// 消息面板选项卡 end /////////
 
     ///////// 用户列表获取 start /////////
     getClientapiListAjax(res) {
@@ -842,7 +916,7 @@ export default {
     },
     // 统计/设置显示判断
     statisticsShowIf() {
-      let show = [6, 9, 24, 27, 28, 89, 134, 147, 153, 160, 194]
+      let show = [6, 9, 24, 27, 28, 89, 134, 147, 152, 160, 194]
       let userId = this.userId
       let statisticsShow = false
       show.forEach(element => {
@@ -998,5 +1072,74 @@ export default {
 }
 .home >>> .el-main .cell {
   text-align: left;
+}
+.home .messageBox {
+  padding: 36px;
+}
+.home .messageBox .title {
+  font-weight: 600;
+  font-size: 18px;
+}
+.home .tabsBox {
+  /* height: 40px; */
+  margin-top: 24px;
+}
+.home .tabs {
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  border: 1px solid rgb(224, 227, 234);
+  /* border-radius: 3px; */
+  cursor: pointer;
+}
+.home .tabs:hover {
+  color: rgb(56, 148, 255);
+}
+.home .tabs.act {
+  height: 40px;
+  line-height: 40px;
+  color: rgb(56, 148, 255);
+  text-align: center;
+  border-bottom: none;
+}
+.home .tabs:nth-of-type(1),
+.home .tabs:nth-of-type(2) {
+  border-right: none;
+}
+.home .paneBox {
+  height: 300px;
+  margin-top: 32px;
+}
+.home .pane {
+  height: 300px;
+  margin-top: 32px;
+}
+.home .paneBox .infinite-list {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  scrollbar-width: none; /* Firefox */
+}
+.home .paneBox .infinite-list::-webkit-scrollbar {
+  display: none; /* Chrome Safari */
+}
+.home .paneBox .infinite-list .infinite-list-item{
+  height: 100px;
+  font-size: 16px;
+  box-sizing: border-box;
+  padding: 18px 0;
+  border-bottom: 1px solid rgb(224, 227, 234);
+}
+.home .paneBox .infinite-list .infinite-list-item>div{
+  height: 18px;
+  line-height: 18px;
+}
+.home .paneBox .infinite-list .infinite-list-item .title{
+  font-weight: bold;
+  font-size: 16px;
+}
+.home .paneBox .infinite-list .infinite-list-item .content{
+  margin-top: 9px;
 }
 </style>

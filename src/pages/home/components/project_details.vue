@@ -232,10 +232,15 @@
           </el-col>
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
-            <div v-for="item in projectShowDetail.listProFile" :key="item.index" class="fileList_" @click="download(item)">
+            <div
+              v-for="item in projectShowDetail.listProFile"
+              :key="item.index"
+              class="fileList_"
+              @click="download(item)"
+            >
               <!-- <div class="shade" @click="download(item)">
                 <i class="el-icon-download"></i>
-              </div> -->
+              </div>-->
               <img
                 v-if="item.suffix == 'doc' || item.suffix == 'docx'"
                 src="static/images/document/word.png"
@@ -423,6 +428,7 @@
                 :on-remove="handleRemoveFeedback"
                 :on-success="handleSuccessFeedback"
                 :limit="1"
+                ref="upload"
                 class="elementUpload"
               >
                 <el-button size="mini" type="primary">点击上传文档</el-button>
@@ -569,7 +575,7 @@ export default {
       // 详情内更换执行人
       changeNameShow: false,
       userValue: '', // 修改后执行人
-      knowUserShow: true, // 知晓人添加任务按钮判断
+      knowUserShow: true // 知晓人添加任务按钮判断
       // 任务详情页传递参数
       // transferTask: {
       //   taskId: '',
@@ -689,9 +695,16 @@ export default {
     },
     feedback(proId, taskId, pro, task) {
       this.drawer3 = true
+      let feedbackFileList = this.feedbackFileList
+      if (feedbackFileList.length != 0) {
+        this.$refs['upload'].clearFiles()
+        this.feedbackFileList = []
+      }
+
       this.drawer3_task = `${task}`
       this.taskFeedbackId = taskId
       this.projFeedbackId = proId
+      console.log(this.feedbackFileList)
     },
     achieve(id, status) {
       // console.log('完成' + id)
@@ -1237,7 +1250,7 @@ export default {
       this.result = ''
     },
     // 关闭任务详情回调
-    closeDrawer(res){
+    closeDrawer(res) {
       // console.log(res)
       this.taskId = ''
       if (res == 1) {
@@ -1249,7 +1262,7 @@ export default {
       let localPath = row.localPath
       // console.log("123")
       let a = document.createElement('a')
-      a.download = ''
+      a.download = row.fileName
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },

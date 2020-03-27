@@ -131,6 +131,7 @@
                 :on-remove="handleRemove"
                 :on-success="handleSuccess"
                 :fileList="fileList0"
+                :on-preview="handlePreview"
                 :limit="1"
                 class="elementUpload"
               >
@@ -195,6 +196,7 @@
                 action="/pmbs/file/upload?upType=1&demandType=1"
                 :on-remove="handleRemoveResult"
                 :on-success="handleSuccessResult"
+                :on-preview="handlePreview"
                 :fileList="fileList1"
                 :limit="1"
                 class="elementUpload"
@@ -368,7 +370,7 @@ export default {
       listProFileResult: [], // 上传文件信息列表
       fileList1: [],
       oldFileId: '',
-      taskFileId: '',
+      oldProFileId: '',
       // 更换执行人
       changeDoUserNameShow: 'true',
       nextuserList: [], // 下属信息
@@ -381,33 +383,33 @@ export default {
   },
   // 侦听器
   watch: {
-    taskId: function (newValue,oldValue){
+    taskId: function(newValue, oldValue) {
       // handler(newValue, oldValue) {
-        // console.log(newValue)
-        let taskId = this.taskId
-        // console.log(newValue)
-        if (taskId) {
-          this.getDepTypeList() // 任务类型获取
-          this.task_detail() // 任务详情
-          this.pickerOptionsTime()
-        }
+      // console.log(newValue)
+      let taskId = this.taskId
+      // console.log(newValue)
+      if (taskId) {
+        this.getDepTypeList() // 任务类型获取
+        this.task_detail() // 任务详情
+        this.pickerOptionsTime()
+      }
       // },
       // deep: true
     },
-    listProFile: function (newValue,oldValue){
+    listProFile: function(newValue, oldValue) {
       if (newValue.length == 0) {
         this.disabled0 = true
-      }else{
+      } else {
         this.disabled0 = false
       }
     },
-    listProFileResult: function (newValue,oldValue){
+    listProFileResult: function(newValue, oldValue) {
       if (newValue.length == 0) {
         this.disabled1 = true
-      }else{
+      } else {
         this.disabled1 = false
       }
-    },
+    }
   },
   // 方法
   methods: {
@@ -500,6 +502,8 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        // reverse
+        // data.feedbackList = data.feedbackList.reverse()
         this.taskData = data
         this.listProFile = data.proFileList
         this.listProFileResult = data.taskfileList
@@ -509,7 +513,9 @@ export default {
           let element = data.proFileList[i]
           let fileList0Data = {
             fileId: element.fileId,
-            name: element.fileName
+            fileName: element.fileName,
+            name: element.fileName,
+            localPath: element.localPath
           }
           fileList0.push(fileList0Data)
         }
@@ -519,7 +525,9 @@ export default {
           let element = data.taskfileList[i]
           let fileList1Data = {
             fileId: element.fileId,
-            name: element.fileName
+            fileName: element.fileName,
+            name: element.fileName,
+            localPath: element.localPath
           }
           fileList1.push(fileList1Data)
         }
@@ -544,9 +552,10 @@ export default {
         let listProFile = this.listProFile
         // console.log(listProFile)
         let listProFileData = {
+          oldProFileId: this.oldProFileId,
           proId: this.taskData.proId || '', // 项目ID
           taskId: this.taskData.taskId || '', // 任务ID
-          fileId: this.taskFileId, // 文档ID
+          fileId: '', // 文档ID
           fileName: resData.fileName, //'附件名称',
           isPro: 1, // '项目任务需求（0-项目需求，1-任务需求）',
           deleteFlag: false, // 是否删除
@@ -565,8 +574,9 @@ export default {
       let data = file
       // let listProFile = this.listProFile
       // if (listProFile.fileId) {
-        this.taskFileId = data.fileId
-        this.listProFile = []
+      this.taskFileId = data.fileId
+      this.oldProFileId = data.fileId
+      this.listProFile = []
       // } else {
       //   this.listProFile = []
       // }
@@ -612,24 +622,31 @@ export default {
       let data = file
       // let listProFileResult = this.listProFileResult
       // if (listProFileResult.fileId) {
-        this.oldFileId = file.fileId
-        this.listProFileResult = []
+      this.oldFileId = file.fileId
+      this.listProFileResult = []
       // } else {
       //   this.listProFileResult = []
       // }
     },
     ///////// 任务成果附件上传 end /////////
 
+    ///////// 附件下载 start /////////
+    handlePreview(file) {
+      // console.log(file)
+      this.download(file)
+    },
+    ///////// 附件下载 end /////////
+
     ///////// 上传附件判断 start /////////
-    uploadIf(type){
+    uploadIf(type) {
       let listProFile = this.listProFile
       let listProFileResult = this.listProFileResult
-      if(type == 0){
+      if (type == 0) {
         if (listProFile.length != 0) {
           this.messageWarning('只能上传一个文件')
           // return false
         }
-      }else if(type == 1){
+      } else if (type == 1) {
         if (listProFileResult.length != 0) {
           this.messageWarning('只能上传一个文件')
           // return false
@@ -649,6 +666,7 @@ export default {
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
+      // taskData.oldFileId = this.taskId
       delete taskData.feedbackList
       // console.log(taskData)
       this.taskSave(taskData)
@@ -675,6 +693,16 @@ export default {
       }
     },
     ///////// 任务新增/修改/完成 end /////////
+    /////////  [download 下载附件] start /////////
+    download(row) {
+      let localPath = row.localPath
+      // console.log("123")
+      let a = document.createElement('a')
+      a.download = row.fileName
+      a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
+      a.click()
+    },
+    /////////  [download 下载附件] end /////////
     // 取消按钮
     empty() {
       this.drawer5 = false
@@ -683,7 +711,7 @@ export default {
       let closeType = this.closeType
       this.$emit('closeDrawer', closeType)
       // console.log('关闭抽屉')
-      this.taskFileId = ''
+      this.oldProFileId = ''
       this.oldFileId = ''
       this.closeType = 0
       this.changeNameShow = false
@@ -771,6 +799,11 @@ export default {
   color: rgb(162, 162, 162);
   cursor: pointer;
 }
+.taskDetail .task_details .smname div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .taskDetail .task_details .suggest {
   height: 172px;
 }
@@ -781,6 +814,19 @@ export default {
 .taskDetail .task_details .suggest .suggest_list {
   /* height: 48px; */
   margin-bottom: 12px;
+}
+.taskDetail .task_details .fileListBox .fileList {
+  width: 81px;
+  margin-top: 9px;
+  text-align: center;
+  font-size: 13px;
+  color: rgb(162, 162, 162);
+  cursor: pointer;
+}
+.taskDetail .task_details .fileListBox .fileList div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .taskDetail .task_details .suggest .suggest_list .pop,
 .taskDetail .task_details .suggest .suggest_list .time {
