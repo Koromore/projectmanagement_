@@ -876,7 +876,7 @@ export default {
         this.proName = data.proName
         this.proExpertTime = data.expertTime
         // this.transferTask.proExpertTime = data.expertTime
-        this.$store.commit('proExpertTimeBan', data.expertTime)
+        // this.$store.commit('proExpertTimeBan', data.expertTime)
         this.manager = data.manager // 项目经理
         this.proInitUserId = data.initUserId // 项目发起人
         this.pickerOptionsTime() // 禁用时间函数

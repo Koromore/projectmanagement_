@@ -12,12 +12,12 @@
             <i class="el-icon-folder-add"></i>
             发送消息
           </div>-->
-          <!-- <div class="message" @click="message">
-            <el-badge :value="3" class="item">
+          <div class="message" @click="message">
+            <el-badge :value="3" class="item" :hidden="true">
               <i class="el-icon-bell"></i>
             </el-badge>
             <span>消息</span>
-          </div> -->
+          </div>
           <!-- 头像 -->
           <div class="usual">
             <div class="portrait">
@@ -47,50 +47,13 @@ export default {
     return {
       drawer: true,
       // drawer2: true,
-      path: 'ws://nwne722jqh.52http.com/websocket/admin',
-      socket: ''
     }
   },
   // 钩子函数
   mounted() {
-    // this.init()
+    
   },
   methods: {
-    init: function() {
-      if (typeof WebSocket === 'undefined') {
-        alert('您的浏览器不支持socket')
-      } else {
-        // 实例化socket
-        this.socket = new WebSocket(this.path)
-        // 监听socket连接
-        this.socket.onopen = this.open
-        // 监听socket错误信息
-        this.socket.onerror = this.error
-        // 监听socket消息
-        this.socket.onmessage = this.getMessage
-      }
-    },
-    open: function() {
-      console.log('socket连接成功')
-    },
-    error: function() {
-      console.log('连接错误')
-    },
-    getMessage: function(msg) {
-      console.log(msg.data)
-    },
-    send: function() {
-      // this.socket.send(params)
-      this.socket.send('test')
-      console.log('test')
-    },
-    close: function() {
-      console.log('socket已经关闭')
-    },
-    destroyed() {
-      // 销毁监听
-      this.socket.onclose = this.close
-    },
     logout() {
       //退出登录
       // this.$store.commit('logout');

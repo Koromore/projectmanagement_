@@ -480,7 +480,7 @@ export default {
     },
     ///////// 禁止时间 start /////////
     pickerOptionsTime() {
-      let expertTime = this.$store.state.proExpertTime
+      let expertTime = this.taskData.proExpertTime
       this.pickerOptions = {
         disabledDate(time) {
           return (
@@ -505,6 +505,7 @@ export default {
         // reverse
         // data.feedbackList = data.feedbackList.reverse()
         this.taskData = data
+        this.pickerOptionsTime()
         this.listProFile = data.proFileList
         this.listProFileResult = data.taskfileList
         this.statusListValue = data.status

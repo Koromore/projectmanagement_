@@ -191,7 +191,6 @@
               :on-success="handleSuccess"
               :file-list="fileList"
             >
-              <!-- <i class="el-icon-plus"></i> -->
               <el-button size="mini" type="primary">点击上传附件</el-button>
             </el-upload>
             <el-dialog :visible.sync="dialogVisible" class="upload_list">
@@ -231,31 +230,68 @@
           >审核</el-col>
         </el-col>
         <el-col :span="24" class="paneBox">
-          <el-col :span="24" class="pane" v-show="tabs == 1">
-            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
-              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
-                <el-col :span="8" class="time">20-03-01 13:11</el-col>
-                <el-col :span="16" class="title">项目创建{{i}}</el-col>
-                <el-col :span="16" class="content" :offset="8">收到一个项目创建{{i}}</el-col>
+          <el-col :span="24" class="pane" v-if="tabs == 1" v-loading="loading">
+            <el-col
+              :span="24"
+              class="infinite-list"
+              v-infinite-scroll="load"
+              :infinite-scroll-disabled="scrollDisabled"
+              style="overflow:auto"
+            >
+              <el-col
+                :span="24"
+                v-for="(items,index) in messageData"
+                class="infinite-list-item"
+                :key="index"
+                @click.native="NotificationInfo(index)"
+              >
+                <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
+              <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
             </el-col>
           </el-col>
-          <el-col :span="24" class="pane" v-show="tabs == 2">
-            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
-              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
-                <el-col :span="8" class="time">20-03-01 13:11</el-col>
-                <el-col :span="16" class="title">任务创建{{i}}</el-col>
-                <el-col :span="16" class="content" :offset="8">收到一个任务创建{{i}}</el-col>
+          <el-col :span="24" class="pane" v-else-if="tabs == 2" v-loading="loading">
+            <el-col
+              :span="24"
+              class="infinite-list"
+              v-infinite-scroll="load"
+              :infinite-scroll-disabled="scrollDisabled"
+              style="overflow:auto"
+            >
+              <el-col
+                :span="24"
+                v-for="(items,index) in messageData"
+                class="infinite-list-item"
+                :key="index"
+              >
+                <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
+              <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
             </el-col>
           </el-col>
-          <el-col :span="24" class="pane" v-show="tabs == 3">
-            <el-col :span="24" class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
-              <el-col :span="24" v-for="i in count" class="infinite-list-item" :key="i">
-                <el-col :span="8" class="time">20-03-01 13:11</el-col>
-                <el-col :span="16" class="title">项目审核{{i}}</el-col>
-                <el-col :span="16" class="content" :offset="8">收到一个项目审核{{i}}</el-col>
+          <el-col :span="24" class="pane" v-else-if="tabs == 3" v-loading="loading">
+            <el-col
+              :span="24"
+              class="infinite-list"
+              v-infinite-scroll="load"
+              :infinite-scroll-disabled="scrollDisabled"
+              style="overflow:auto"
+            >
+              <el-col
+                :span="24"
+                v-for="(items,index) in messageData"
+                class="infinite-list-item"
+                :key="index"
+              >
+                <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
+              <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
             </el-col>
           </el-col>
         </el-col>
@@ -332,9 +368,16 @@ export default {
       statisticsShow: false,
       setShow: false,
       // 消息面板默认显示
-      activeName: 'proj',
+      scrollDisabled: false, // 禁用加载
+      loading: false,
+      messageData: [],
       count: 0,
-      tabs: 1
+      tabs: 1,
+      messagePage: 1,
+      // WebSocket
+      path: 'ws://218.106.254.122:8084/pmbs/websocket/',
+      // //218.106.254.122:8084/pmbs/websocket/266
+      socket: ''
     }
   },
   // 侦听器
@@ -362,8 +405,137 @@ export default {
     },
     $route: 'router_url'
   },
+  // 钩子函数
+  mounted() {
+    this.init()
+    this.widthheight()
+    sessionStorage.setItem('refresh', 0)
+    this.router_url()
+    this.upload()
+    // this.getProjectFeedbackDetail()
+    // 获取部门列表
+    this.getDeptList()
+    // 获取用户列表
+    this.getListAjax()
+    // this.restaurants = this.loadAll()
+    // 统计/设置显示判断
+    this.statisticsShowIf()
+    this.setShowIf()
+    // 消息列表获取
+    // this.getMessageListAjax(1)
+  },
   // 方法
   methods: {
+    ///////// WebSocket start /////////
+    init: function() {
+      if (typeof WebSocket === 'undefined') {
+        alert('您的浏览器不支持socket')
+      } else {
+        let userId = this.userId
+        // let path = this.path + userId
+        let path = `ws:218.106.254.122:8084/pmbs/websocket/${userId}`
+        // let path = `ws://nwne722jqh.52http.com/websocket/266`
+        // ws://218.106.254.122:8084/pmbs/websocket/
+        // 实例化socket
+        this.socket = new WebSocket(path)
+        // 监听socket连接
+        this.socket.onopen = this.open
+        // 监听socket错误信息
+        this.socket.onerror = this.error
+        // 监听监听socket消息消息
+        this.socket.onmessage = this.getMessageSocket
+      }
+    },
+    open: function(res) {
+      // console.log(res)
+      console.log('socket连接成功')
+      // this.send()
+    },
+    error: function() {
+      console.log('连接错误')
+    },
+    getMessageSocket: function(msg) {
+      // console.log(msg)
+      let data = JSON.parse(msg.data)
+      // console.log(data)
+      this.NotificationInfo(data)
+    },
+    send: function() {
+      // this.socket.send(params)
+      this.socket.send('test')
+      console.log('test')
+    },
+    close: function() {
+      console.log('socket已经关闭')
+    },
+    destroyed() {
+      // 销毁监听
+      this.socket.onclose = this.close
+    },
+    ///////// WebSocket end /////////
+
+    ///////// 信息列表 start /////////
+    getMessageListAjax(type) {
+      this.loading = true
+      let pageNum = this.messagePage
+      let userId = this.userId
+      let data = {
+        message: {
+          type: type,
+          userId: userId
+        },
+        pageNum: pageNum,
+        pageSize: 10
+      }
+      this.$axios
+        .post('/pmbs/api/message/listAjax', data)
+        .then(this.getMessageListAjaxSuss)
+    },
+    // 信息列表获取回调
+    getMessageListAjaxSuss(res) {
+      this.loading = false
+      // console.log(res)
+      if (res.status == 200) {
+        // 列表数据追加
+        let data = res.data.items
+        if (data.length < 10) {
+          this.scrollDisabled = true
+        }
+        let messageData = this.messageData
+        this.messageData = messageData.concat(data)
+        // 页码加一
+        let messagePage = this.messagePage + 1
+        this.messagePage = messagePage
+        // console.log(this.messagePage)
+      }
+    },
+    ///////// 信息列表 end /////////
+
+    ///////// 消息面板选项卡 start /////////
+    // handleClick(tab, event) {
+    //   // console.log(tab, event)
+    // },
+    changeTabs(tabs) {
+      this.tabs = tabs
+      this.messagePage = 1 // 页码重置
+      this.messageData = [] // 消息列表重置
+      this.getMessageListAjax(tabs) // 消息列表获取
+      // console.log(1)
+    },
+    load() {
+      let tabs = this.tabs
+      // let messageData = this.messageData
+      // if (messageData.length >= 10) {
+        this.getMessageListAjax(tabs)
+      // }
+
+      // this.count += 2
+    },
+    // test(){
+    //   console.log("test")
+    // },
+    ///////// 消息面板选项卡 end /////////
+
     matchType, // 文件格式判断
     // 分类二级联动
     handleChange(value) {
@@ -469,25 +641,11 @@ export default {
     },
     getMessage() {
       this.drawer2 = true
-      console.log('消息面板')
+      this.messageData = []
+      this.getMessageListAjax(1)
+      // console.log('消息面板')
     },
     ///////// 接受子组件数据 end /////////
-
-    ///////// 消息面板选项卡 start /////////
-    // handleClick(tab, event) {
-    //   // console.log(tab, event)
-    // },
-    changeTabs(tabs) {
-      this.tabs = tabs
-      // console.log(1)
-    },
-    load() {
-      this.count += 2
-    },
-    // test(){
-    //   console.log("test")
-    // },
-    ///////// 消息面板选项卡 end /////////
 
     ///////// 用户列表获取 start /////////
     getClientapiListAjax(res) {
@@ -549,14 +707,9 @@ export default {
 
     ///////// 立项列表获取 start /////////
     getProjectapiListAjax(data) {
-      // let list = this.userList
-      // let userId = this.userId
-      // if (list.length == 0) {
-      // let data = `?userId=${userId}`
       this.$axios
         .post('http://pms.guoxinad.com.cn/pas/projectapi/listAjax' + data)
         .then(this.getProjectapiListAjaxSuss)
-      // }
     },
     // 立项列表获取回调
     getProjectapiListAjaxSuss(res) {
@@ -700,7 +853,7 @@ export default {
         }
         listProFile.push(listProFileData)
         this.listProFile = listProFile
-        console.log(this.listProFile)
+        // console.log(this.listProFile)
       }
     },
     // 删除
@@ -750,7 +903,7 @@ export default {
         // console.log(deptList)
       }
     },
-    // 用户列表获取
+    ///////// 用户列表获取 start /////////
     getListAjax(res) {
       let list = this.userList
       if (list.length == 0) {
@@ -776,6 +929,7 @@ export default {
         // console.log(restaurants)
       }
     },
+    ///////// 用户列表获取 end /////////
 
     ///////// 新增项目 start /////////
     addProject() {
@@ -829,7 +983,7 @@ export default {
         changeId = department
         data.department = changeId // '参与部门ID',
       }
-      console.log(data)
+      // console.log(data)
       if (
         data.proName == '' ||
         this.new_project.business_type == [] ||
@@ -914,6 +1068,17 @@ export default {
       // 错误提示
       this.$message.error(message)
     },
+    NotificationInfo(data) {
+      // 消息实时提示
+      this.$notify.info({
+        title: data.header,
+        message: data.contents
+      })
+      // this.$notify.info({
+      //   title: `项目创建${data}`,
+      //   message: `收到一个项目测试创建${data}`
+      // })
+    },
     // 统计/设置显示判断
     statisticsShowIf() {
       let show = [6, 9, 24, 27, 28, 89, 134, 147, 152, 160, 194]
@@ -937,22 +1102,6 @@ export default {
       })
       this.setShow = setShow
     }
-  },
-  // 钩子函数
-  mounted() {
-    this.widthheight()
-    sessionStorage.setItem('refresh', 0)
-    this.router_url()
-    this.upload()
-    // this.getProjectFeedbackDetail()
-    // 获取部门列表
-    this.getDeptList()
-    // 获取用户列表
-    this.getListAjax()
-    // this.restaurants = this.loadAll()
-    // 统计/设置显示判断
-    this.statisticsShowIf()
-    this.setShowIf()
   }
 }
 </script>
@@ -1074,6 +1223,7 @@ export default {
   text-align: left;
 }
 .home .messageBox {
+  height: 100%;
   padding: 36px;
 }
 .home .messageBox .title {
@@ -1081,7 +1231,7 @@ export default {
   font-size: 18px;
 }
 .home .tabsBox {
-  /* height: 40px; */
+  height: 40px;
   margin-top: 24px;
 }
 .home .tabs {
@@ -1107,12 +1257,13 @@ export default {
   border-right: none;
 }
 .home .paneBox {
-  height: 300px;
+  /* height: 100vh; */
+  height: calc(100% - 120px);
   margin-top: 32px;
 }
 .home .pane {
-  height: 300px;
-  margin-top: 32px;
+  height: 100%;
+  /* margin-top: 32px; */
 }
 .home .paneBox .infinite-list {
   height: 100%;
@@ -1124,22 +1275,23 @@ export default {
 .home .paneBox .infinite-list::-webkit-scrollbar {
   display: none; /* Chrome Safari */
 }
-.home .paneBox .infinite-list .infinite-list-item{
+.home .paneBox .infinite-list .infinite-list-item {
   height: 100px;
-  font-size: 16px;
+  font-size: 14px;
   box-sizing: border-box;
   padding: 18px 0;
   border-bottom: 1px solid rgb(224, 227, 234);
 }
-.home .paneBox .infinite-list .infinite-list-item>div{
-  height: 18px;
+.home .paneBox .infinite-list .infinite-list-item > div {
+  /* height: 18px; */
   line-height: 18px;
 }
-.home .paneBox .infinite-list .infinite-list-item .title{
+.home .paneBox .infinite-list .infinite-list-item .title {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 15px;
 }
-.home .paneBox .infinite-list .infinite-list-item .content{
+.home .paneBox .infinite-list .infinite-list-item .content {
   margin-top: 9px;
 }
+.noData{text-align: center;}
 </style>

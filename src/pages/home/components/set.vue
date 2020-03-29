@@ -290,7 +290,7 @@ export default {
       this.drawer = true
       this.operation = 1
       this.transferId = ''
-      this.new_name = name
+      this.new_name = ''
       this.businessListCheck = []
     },
     ///////// 业务类型修改 start /////////
