@@ -4,6 +4,10 @@
       <el-header style="height: 75px;">
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
         <div class="header-right">
+          <div class="add_du" @click="problemList">
+            <i class="el-icon-warning-outline"></i>
+            反馈列表
+          </div>
           <div class="add_du" @click="add_box">
             <i class="el-icon-folder-add"></i>
             创建
@@ -13,7 +17,7 @@
             发送消息
           </div>-->
           <div class="message" @click="message">
-            <el-badge :value="3" class="item" :hidden="true">
+            <el-badge :value="messageNum" class="item" :hidden="messageShow">
               <i class="el-icon-bell"></i>
             </el-badge>
             <span>消息</span>
@@ -43,15 +47,30 @@
 <script>
 export default {
   name: 'topheader',
+  props: {
+    unread: Number
+  },
   data() {
     return {
+      userId: this.$store.state.user.userId,
       drawer: true,
+      // 未读消息数据
+      messageNum: 0,
+      messageShow: false
       // drawer2: true,
+    }
+  },
+  // 侦听器
+  watch: {
+    // 如果 `question` 发生改变，这个函数就会运行
+    unread: function(newQuestion, oldQuestion) {
+      console.log(this.unread)
+      this.countIsRead()
     }
   },
   // 钩子函数
   mounted() {
-    
+    this.countIsRead()
   },
   methods: {
     logout() {
@@ -80,6 +99,30 @@ export default {
     // 向父组件传值打开消息面板抽屉
     message() {
       this.$emit('message', {})
+      console.log(1)
+    },
+    // 
+    // 未读消息数量
+    countIsRead(){
+      let userId = this.userId
+      let data =`?userId=${userId}`
+      this.$axios
+        .post('/pmbs/api/message/countIsRead' + data)
+        .then(res => {
+          if (res.status == 200) {
+            let data = res.data
+            this.messageNum = data
+            if (data == 0) {
+              this.messageShow = true
+            }else{
+              this.messageShow = false
+            }
+          }
+        })
+    },
+    // 跳转问题反馈页面
+    problemList(){
+      this.$router.push({ path: '/problem'})
     }
   }
 }
@@ -103,7 +146,7 @@ export default {
   float: left;
 }
 .header-right {
-  width: 320px;
+  width: 432px;
   float: right;
   color: #555555;
   font-size: 18px;

@@ -64,46 +64,46 @@
               size="small"
               @click="tab2_change(1,1)"
               :class="[tab2_act=='1' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+            >专项</el-button>
             <el-button
               type="primary"
               plain
               size="small"
               @click="tab2_change(2,0)"
               :class="[tab2_act=='2' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+            >日常</el-button>
           </el-button-group>
         </el-col>
         <el-col :span="8" class="tab tab3">
           <el-button-group>
-            <el-tooltip class="item" effect="dark" content="新项目" placement="bottom">
+            <!-- <el-tooltip class="item" effect="dark" content="新项目" placement="bottom"> -->
               <el-button
                 type="primary"
                 size="small"
                 @click="tab3_change(1)"
-              >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="延期" placement="bottom">
+              >新项目</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="延期" placement="bottom"> -->
               <el-button
                 type="danger"
                 size="small"
                 @click="tab3_change(4)"
-              >&nbsp;&nbsp;2&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
+              >延期</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="审核中" placement="bottom"> -->
               <el-button
                 type="warning"
                 size="small"
                 @click="tab3_change(2)"
-              >&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
+              >审核中</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="执行中" placement="bottom"> -->
               <el-button
                 type="success"
                 size="small"
                 @click="tab3_change(1)"
-              >&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
-            </el-tooltip>
+              >执行中</el-button>
+            <!-- </el-tooltip> -->
           </el-button-group>
         </el-col>
         <!-- </div> -->
@@ -275,7 +275,6 @@
                   :key="item.deptId"
                 >{{item.deptName}}</el-checkbox>
               </el-checkbox-group>
-              <!-- {{checkListdept}} -->
             </el-col>
             <el-col :span="6" class="title">任务</el-col>
             <el-col :span="19">
@@ -285,7 +284,6 @@
                   v-for="item in taskNameListShow"
                   :key="item.index"
                 >{{item.taskName}}</el-checkbox>
-                <!-- <el-checkbox label="网页交互"></el-checkbox> -->
               </el-checkbox-group>
             </el-col>
 
@@ -299,7 +297,7 @@
                 ref="upload"
                 class="elementUpload"
               >
-                <el-button size="mini" type="primary">点击上传文档</el-button>
+                <el-button size="mini" type="primary" v-show="disabled0">点击上传文档</el-button>
               </el-upload>
             </el-col>
           </el-col>
@@ -439,15 +437,6 @@ export default {
       tab1_act: '',
       // 项目类型2选择
       tab2_act: '',
-      // 反馈内容
-      //        TABLE `feedback` (
-      //   `feedbackId`   '反馈ID',
-      //   `taskId`    '所属客户ID，与task表对应',
-      //   `initUserId`    '任务发起人，对应user表ID',
-      //   `feedback`    '反馈详情',
-      //   `updateTime`   '更新时间',
-      //   `deleteFlag`   '删除标识',
-      // )
       feedbackObj: {
         feedbackId: '',
         taskId: '',
@@ -455,6 +444,7 @@ export default {
       },
       feedbackContent: '',
       // 反馈时项目下的所有任务
+      disabled0: true,
       projectTaskLisInit: [], // 我发起
       deptNameList: [], // 反馈项目任务参与的部门
       taskNameList: [], // 反馈项目包含的任务列表
@@ -604,44 +594,6 @@ export default {
     projectListNum() {
       this.tabs_activity = this.$store.state.projectListNum
     },
-    // 获取新建项目分类
-    // getAllClientAndBusiness() {
-    //   this.$axios
-    //     .post('/pmbs/client/getAllClientAndBusiness')
-    //     .then(this.getAllClientAndBusinessSuss)
-    // },
-    // // 获取新建项目分类回调
-    // getAllClientAndBusinessSuss(res) {
-    //   if (res.status == 200) {
-    //     let data = res.data.data
-    //     let clientIdList = []
-    //     // console.log(data)
-    //     // let business_type_list = []
-    //     let name = this.$route.query.name
-    //     let clientId = ''
-    //     // 循环提取名称和ID
-    //     for (let i = 0; i < data.length; i++) {
-    //       let element = data[i]
-    //       let clientIdListData = {
-    //         value: element.clientId,
-    //         label: element.clientName
-    //       }
-    //       clientIdList.push(clientIdListData)
-
-    //       if (element.clientName == name) {
-    //         clientId = element.clientId
-    //       }
-    //     }
-    //     this.clientIdList = clientIdList
-    //     this.clientId = clientId
-    //     // let name = this.$route.query.name
-    //     // for (let i = 0; i < array.length; i++) {
-    //     //   const element = array[i];
-
-    //     // }
-    //   }
-    //   // console.log(res)
-    // },
     handleChange(value) {
       // console.log(value)
       // console.log(this.value)
@@ -714,8 +666,8 @@ export default {
     ///////// 添加知晓人标签 end /////////
 
     ///////// 上传附件 start /////////
-    handleRemoveFeedback(file) {
-      console.log(file)
+    handleRemoveFeedback(file, fileList) {
+      // console.log(file)
       let feedbackFileList = this.feedbackFileList
       let data = file.response.data
       for (let i = 0; i < feedbackFileList.length; i++) {
@@ -726,9 +678,14 @@ export default {
       }
       this.feedbackFileList = feedbackFileList
       // console.log(feedbackFileList)
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = false
+      }
     },
-    handleSuccessFeedback(file) {
-      let data = file.data
+    handleSuccessFeedback(response, file, fileList) {
+      let data = response.data
       console.log(data)
       let feedbackFileList = this.feedbackFileList
       let time = new Date()
@@ -744,6 +701,11 @@ export default {
         updateTime: time
       }
       feedbackFileList.push(feedbackFileListData)
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = false
+      }
     },
     ///////// 上传附件 start /////////
     // 获取浏览器宽高

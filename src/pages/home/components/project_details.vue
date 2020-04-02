@@ -86,7 +86,7 @@
                 <el-link
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                  v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5 && scope.row.deptId == subordinate"
                 >更换</el-link>
                 <!-- doUserId -->
               </div>
@@ -264,8 +264,11 @@
               <span>{{item.fileName}}</span>
             </div>
           </el-col>
-          <el-col :span="24" class="span">延期原因</el-col>
-          <el-col :span="24">{{projectShowDetail.delayReason}}</el-col>
+          <el-col :span="24" class="span" v-if="projectShowDetail.delayReason != unll">延期原因</el-col>
+          <el-col
+            :span="24"
+            v-if="projectShowDetail.delayReason != unll"
+          >{{projectShowDetail.delayReason}}</el-col>
         </el-col>
       </el-col>
       <!--------- 项目需求 end --------->
@@ -375,8 +378,7 @@
             <!-- 上传 -->
             <el-col :span="13" :offset="6" class="upload">
               <el-upload :action="uploadUrl" :on-remove="handleRemove" :on-success="handleSuccess">
-                <el-button size="small" type="primary">点击上传</el-button>
-                <span class="text">上传附件</span>
+                <el-button size="small" type="primary" v-show="disabled1">点击上传附件</el-button>
               </el-upload>
             </el-col>
             <!-- 上传 -->
@@ -431,7 +433,7 @@
                 ref="upload"
                 class="elementUpload"
               >
-                <el-button size="mini" type="primary">点击上传文档</el-button>
+                <el-button size="mini" type="primary" v-show="disabled0">点击上传文档</el-button>
               </el-upload>
             </el-col>
           </el-col>
@@ -475,6 +477,7 @@ export default {
     return {
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
+      subordinate: this.$store.state.user.subordinate, // 大部门ID
       manager: '', // 项目经理
       proInitUserId: '', // 项目发起人
       loading: false,
@@ -561,6 +564,8 @@ export default {
       suggest_list: [], // 任务反馈意见列表
       fileList0: [],
       // 上传文档
+      disabled0: true,
+      disabled1: true,
       updateBan: false, // 上传文档禁止
       dialogImageUrlResult: '',
       dialogVisibleResult: false,
@@ -779,9 +784,14 @@ export default {
         this.listProFile = listProFile
         console.log(this.listProFile)
       }
+      if (fileList.length == 0) {
+        this.disabled1 = true
+      }else{
+        this.disabled1 = false
+      }
     },
     // 删除
-    handleRemove(file) {
+    handleRemove(file, fileList) {
       // console.log(file)
       let data = file
       let listProFile = this.listProFile
@@ -793,6 +803,11 @@ export default {
         }
       }
       this.listProFile = listProFile
+      if (fileList.length == 0) {
+        this.disabled1 = true
+      }else{
+        this.disabled1 = false
+      }
       // console.log(this.listProFile)
     },
     // ///////// 任务需求附件上传 end /////////
@@ -1018,16 +1033,20 @@ export default {
         typeId: this.task_type_value //'任务类型id'
       }
       // data.taskName[0].oldFileId = this.oldFileId
-      this.taskSave(data)
-      this.drawer1 = false
-      this.new_task.presetTime = ''
-      this.new_task.faTask = ''
-      this.new_task.department = ''
-      this.new_task.new_name = ''
-      this.new_task.presetTime = ''
-      this.task_type_value = ''
-      this.new_task.remark = ''
-      this.listProFile = []
+      if (data == '') {
+        this.messageError('信息不能为空')
+      } else {
+        this.taskSave(data)
+        this.drawer1 = false
+        this.new_task.presetTime = ''
+        this.new_task.faTask = ''
+        this.new_task.department = ''
+        this.new_task.new_name = ''
+        this.new_task.presetTime = ''
+        this.task_type_value = ''
+        this.new_task.remark = ''
+        this.listProFile = []
+      }
     },
     ///////// 任务新增/修改/完成 start /////////
     taskSave(data) {
@@ -1051,8 +1070,9 @@ export default {
     },
     ///////// 任务新增/修改/完成 end /////////
     ///////// 上传附件 start /////////
-    handleRemoveFeedback(file) {
+    handleRemoveFeedback(file,fileList) {
       // console.log(file)
+      // console.log(fileList)
       let feedbackFileList = this.feedbackFileList
       let data = file.response.data
       for (let i = 0; i < feedbackFileList.length; i++) {
@@ -1062,10 +1082,18 @@ export default {
         }
       }
       this.feedbackFileList = feedbackFileList
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = false
+      }
       // console.log(feedbackFileList)
     },
-    handleSuccessFeedback(file) {
-      let data = file.data
+    handleSuccessFeedback(esponse, file, fileList) {
+      // console.log(esponse)
+      // console.log(file)
+      // console.log(fileList)
+      let data = esponse.data
       // console.log(data)
       let feedbackFileList = this.feedbackFileList
       let time = new Date()
@@ -1081,6 +1109,11 @@ export default {
         updateTime: time
       }
       feedbackFileList.push(feedbackFileListData)
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = false
+      }
     },
     ///////// 上传附件 end /////////
     // 任务反馈

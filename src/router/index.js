@@ -5,7 +5,7 @@ import store from '../store/index'
 import Login from '@/pages/login/login'
 import Home from '@/pages/home/home'
 import Gantti from '@/pages/gantti/gantti'
-import TaskDetail from '@/pages/template/taskDetail'
+import Problem from '@/pages/problem/problem'
 
 Vue.prototype.$axios = axios;
 Vue.use(Router)
@@ -155,9 +155,9 @@ const router = new Router({
     component: Gantti
   },
   {
-    path: '/taskDetail',
-    name: "taskDetail",
-    component: TaskDetail
+    path: '/problem',
+    name: "problem",
+    component: Problem
   }
   ]
 })

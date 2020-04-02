@@ -70,46 +70,46 @@
               size="small"
               @click="tab2_change(1,1)"
               :class="[tab2_act=='1' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;专项&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+            >专项</el-button>
             <el-button
               type="primary"
               plain
               size="small"
               @click="tab2_change(2,0)"
               :class="[tab2_act=='2' ? 'act' : '']"
-            >&nbsp;&nbsp;&nbsp;&nbsp;日常&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
+            >日常</el-button>
           </el-button-group>
         </el-col>
         <el-col :span="8" class="tab tab3">
           <el-button-group>
-            <el-tooltip class="item" effect="dark" content="新任务" placement="bottom">
+            <!-- <el-tooltip class="item" effect="dark" content="新任务" placement="bottom"> -->
               <el-button
                 type="primary"
                 size="small"
                 @click="tab3_change(1)"
-              >&nbsp;&nbsp;1&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="延期" placement="bottom">
+              >新任务</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="延期" placement="bottom"> -->
               <el-button
                 type="danger"
                 size="small"
                 @click="tab3_change(4)"
-              >&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="审核中" placement="bottom">
+              >延期</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="审核中" placement="bottom"> -->
               <el-button
                 type="warning"
                 size="small"
                 @click="tab3_change(2)"
-              >&nbsp;&nbsp;3&nbsp;&nbsp;</el-button>
-            </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="执行中" placement="bottom">
+              >审核中</el-button>
+            <!-- </el-tooltip> -->
+            <!-- <el-tooltip class="item" effect="dark" content="执行中" placement="bottom"> -->
               <el-button
                 type="success"
                 size="small"
                 @click="tab3_change(1)"
-              >&nbsp;&nbsp;4&nbsp;&nbsp;</el-button>
-            </el-tooltip>
+              >执行中</el-button>
+            <!-- </el-tooltip> -->
           </el-button-group>
         </el-col>
       </el-col>

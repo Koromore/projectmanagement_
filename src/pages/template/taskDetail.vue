@@ -45,7 +45,7 @@
             <el-link
               type="primary"
               @click="changeName()"
-              v-if="taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+              v-if="taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5 && taskData.deptId == subordinate"
             >更换</el-link>
           </el-col>
           <el-col :span="6" class="title">状态：</el-col>
@@ -313,6 +313,7 @@ export default {
     return {
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
+      subordinate: this.$store.state.user.subordinate, // 大部门ID
       // taskId: 173, // 任务ID
       // 任务详情
       taskData: {
@@ -772,7 +773,7 @@ export default {
   text-align: left;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  padding-left: 18px;
+  /* padding-left: 18px; */
   font-weight: 600;
   font-size: 18px;
 }

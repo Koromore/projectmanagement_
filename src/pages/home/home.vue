@@ -1,9 +1,9 @@
 <template>
   <div class="home">
-    <Header @func="getMsgFormSon" @message="getMessage"></Header>
+    <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
       <!-- 左菜单栏 start -->
-      <el-aside width="200px" style="background-color: rgb(238, 241, 246)">
+      <el-aside width="200px" style="background-color: rgb(238, 241, 246);position: relative;">
         <div
           :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
           @click="change_show(2,'project')"
@@ -35,6 +35,11 @@
           <i class="el-icon-setting"></i>
           设置
         </div>
+        <div class="bottom">
+          <el-link @click="operator" type="primary">操作文档</el-link>|
+          <el-link @click="problemFeedback" type="primary">问题反馈</el-link>
+        </div>
+        <!-- http://218.106.254.122:8084/doc/123.pdf  operator-->
       </el-aside>
       <!-- 左菜单栏 end -->
       <el-container>
@@ -191,11 +196,11 @@
               :on-success="handleSuccess"
               :file-list="fileList"
             >
-              <el-button size="mini" type="primary">点击上传附件</el-button>
+              <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
             </el-upload>
-            <el-dialog :visible.sync="dialogVisible" class="upload_list">
+            <!-- <el-dialog :visible.sync="dialogVisible" class="upload_list">
               <img width="100%" :src="dialogImageUrl" alt />
-            </el-dialog>
+            </el-dialog>-->
           </el-col>
         </el-row>
       </el-scrollbar>
@@ -243,7 +248,6 @@
                 v-for="(items,index) in messageData"
                 class="infinite-list-item"
                 :key="index"
-                @click.native="NotificationInfo(index)"
               >
                 <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
                 <el-col :span="16" class="title">{{items.typeName}}</el-col>
@@ -298,6 +302,45 @@
       </el-row>
     </el-drawer>
     <!--------- 抽屉消息面板 end --------->
+
+    <!--------- 抽屉问题反馈 start --------->
+    <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false">
+      <el-row class="problemFeedback">
+        <el-col :span="24">
+          <el-col :span="6" class="title title1">问题反馈</el-col>
+        </el-col>
+        <el-col :span="6" class="title">问题面板</el-col>
+        <el-col :span="13">
+          <el-select v-model="feedbackType" filterable placeholder="请选择" style="width:100%">
+            <el-option
+              v-for="item in feedbackTypeList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+              clearable
+            ></el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="6" class="title">问题描述</el-col>
+        <el-col :span="13">
+          <el-input type="textarea" :rows="6" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+        </el-col>
+        <el-col :span="13" :offset="6">
+          <el-upload
+            action="/pmbs/file/upload?upType=0&demandType=1"
+            :on-success="handleFeedbackSuccess"
+            :on-remove="handleFeedbackRemove"
+          >
+            <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
+          </el-upload>
+        </el-col>
+        <el-col :span="12" :offset="7" class="batton">
+          <el-button size="small" type="info" @click="closeProblem">取消</el-button>
+          <el-button size="small" type="primary" @click="problemSave">提交</el-button>
+        </el-col>
+      </el-row>
+    </el-drawer>
+    <!--------- 抽屉问题反馈 end --------->
   </div>
 </template>
 <script>
@@ -305,7 +348,7 @@ import Header from '@/pages/header'
 import { matchType } from '@/utils/matchType' // 引入文件格式判断方法
 
 export default {
-  name: 'login',
+  name: 'home',
   components: {
     Header
   },
@@ -319,6 +362,7 @@ export default {
       show_acti: 2,
       drawer: false,
       drawer2: false,
+      drawer3: false,
       restaurants: [], // 用户列表
       deptList: [], // 部门列表
       userList: [], // 用户列表
@@ -357,6 +401,7 @@ export default {
       dialogImageUrl: '123',
       dialogVisible: false,
       disabled: false,
+      disabled0: true,
       listProFile: [], // 上传文件信息列表
       type: '',
       clientList: [],
@@ -377,7 +422,31 @@ export default {
       // WebSocket
       path: 'ws://218.106.254.122:8084/pmbs/websocket/',
       // //218.106.254.122:8084/pmbs/websocket/266
-      socket: ''
+      socket: '',
+      // 未读消息
+      unread: 0,
+      // 问题反馈
+      feedbackType: '',
+      feedbackTypeList: [
+        {
+          value: '1',
+          label: '项目/任务'
+        },
+        {
+          value: '2',
+          label: '文档管理'
+        },
+        {
+          value: '3',
+          label: '统计'
+        },
+        {
+          value: '4',
+          label: '设置'
+        }
+      ],
+      feedbackContent: '',
+      feedbackFileList: []
     }
   },
   // 侦听器
@@ -421,8 +490,6 @@ export default {
     // 统计/设置显示判断
     this.statisticsShowIf()
     this.setShowIf()
-    // 消息列表获取
-    // this.getMessageListAjax(1)
   },
   // 方法
   methods: {
@@ -500,12 +567,17 @@ export default {
         let data = res.data.items
         if (data.length < 10) {
           this.scrollDisabled = true
+        } else {
+          this.scrollDisabled = false
         }
+        console.log(this.scrollDisabled)
         let messageData = this.messageData
         this.messageData = messageData.concat(data)
         // 页码加一
         let messagePage = this.messagePage + 1
         this.messagePage = messagePage
+        let unread = this.unread
+        this.unread = unread + 1
         // console.log(this.messagePage)
       }
     },
@@ -526,7 +598,7 @@ export default {
       let tabs = this.tabs
       // let messageData = this.messageData
       // if (messageData.length >= 10) {
-        this.getMessageListAjax(tabs)
+      this.getMessageListAjax(tabs)
       // }
 
       // this.count += 2
@@ -642,7 +714,7 @@ export default {
     getMessage() {
       this.drawer2 = true
       this.messageData = []
-      this.getMessageListAjax(1)
+      // this.getMessageListAjax(1)
       // console.log('消息面板')
     },
     ///////// 接受子组件数据 end /////////
@@ -1049,6 +1121,78 @@ export default {
       this.file_list = []
       this.new_project.radio1 = '0'
     },
+    // 操作文档链接
+    operator() {
+      let newPage = window.open() // 防止浏览器拦截
+      newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
+    },
+    ///////// 问题反馈 start /////////
+    problemFeedback() {
+      this.drawer3 = true
+    },
+    // 问题反馈文件上传回调
+    handleFeedbackSuccess(response, file, fileList) {
+      // console.log(fileList)
+      if (response.errcode == 0) {
+        // let data = response.data
+        // let fileData = {
+        //   picName: data.fileName,
+        //   localPath: data.path
+        // }
+        // let feedbackFileList = this.feedbackFileList
+        // feedbackFileList.push(fileData)
+        let feedbackFileList = []
+        fileList.forEach(element => {
+          let data = element.response.data
+          let fileData = {
+            picName: data.fileName,
+            localPath: data.path
+          }
+          feedbackFileList.push(fileData)
+        })
+        this.feedbackFileList = feedbackFileList
+        console.log(feedbackFileList)
+      }
+    },
+    // 问题反馈文件删除回调
+    handleFeedbackRemove(file, fileList) {
+      // console.log(fileList)
+      let feedbackFileList = []
+      fileList.forEach(element => {
+        let data = element.response.data
+        let fileData = {
+          picName: data.fileName,
+          localPath: data.path
+        }
+        feedbackFileList.push(fileData)
+      })
+      this.feedbackFileList = feedbackFileList
+      console.log(feedbackFileList)
+    },
+    // 取消按钮
+    closeProblem() {},
+    // 问题反馈新增
+    problemSave() {
+      let data = {
+        description: this.feedbackContent,
+        moduleType: this.feedbackType,
+        pictureList: this.feedbackFileList,
+        userId: this.userId
+      }
+      // console.log(data)
+      if (
+        data.description == '' ||
+        data.moduleType == '' ||
+        data.pictureList.length == 0
+      ) {
+        this.messageError('信息不能为空')
+      } else {
+        // this.$axios.post('/pmbs/api/problem/save', data).then(res => {
+        //   console.log(res)
+        // })
+      }
+    },
+    ///////// 问题反馈 end /////////
     // 消息提示
     messageWin(message) {
       // 成功提示
@@ -1072,7 +1216,8 @@ export default {
       // 消息实时提示
       this.$notify.info({
         title: data.header,
-        message: data.contents
+        message: data.contents,
+        duration: 10000
       })
       // this.$notify.info({
       //   title: `项目创建${data}`,
@@ -1293,5 +1438,39 @@ export default {
 .home .paneBox .infinite-list .infinite-list-item .content {
   margin-top: 9px;
 }
-.noData{text-align: center;}
+.home .problemFeedback {
+  height: 100%;
+  padding: 36px;
+}
+.home .problemFeedback > div {
+  margin-top: 13px;
+}
+.home .problemFeedback .title.title1 {
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0 0 13px;
+}
+.home .problemFeedback .title {
+  text-align: right;
+  box-sizing: border-box;
+  padding-right: 18px;
+}
+.noData {
+  text-align: center;
+}
+.home .bottom {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 13px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  position: absolute;
+  left: 0;
+  bottom: 36px;
+}
+.home .bottom a {
+  font-size: 14px;
+}
 </style>
