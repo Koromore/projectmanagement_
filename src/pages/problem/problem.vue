@@ -7,8 +7,8 @@
       <el-col :span="18" :offset="3" class="title">问题反馈列表</el-col>
       <el-col :span="18" :offset="3">
         <el-table :data="tableData" style="width: 100%" border :header-cell-style="{color:'#000'}" v-loading="loading">
-          <el-table-column prop="date" label="姓名" width="180"></el-table-column>
-          <el-table-column prop="name" label="部门" width="180"></el-table-column>
+          <el-table-column prop="realName" label="姓名" width="180"></el-table-column>
+          <el-table-column prop="deptName" label="部门" width="180"></el-table-column>
           <el-table-column prop="moduleType" label="问题版块">
             <template slot-scope="scope">
               <span v-if="scope.row.moduleType == 1">项目/任务</span>
@@ -21,7 +21,13 @@
           <el-table-column prop="createTime" label="日期">
             <template slot-scope="scope">{{$time(scope.row.createTime)}}</template>
           </el-table-column>
-          <el-table-column prop="date" label="截图"></el-table-column>
+          <el-table-column prop="pictureList" label="截图">
+            <template slot-scope="scope">
+              <el-link type="primary" v-for="(items, index) in scope.row.pictureList" :key="index" @click="download(items)">
+                <span v-if="index != 0">,</span>{{items.picName}}
+              </el-link>
+            </template>
+          </el-table-column>
           <el-table-column prop="status" label="状态">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="fontRed">修复中</span>
@@ -104,17 +110,30 @@ export default {
         }
       })
       
-    }
+    },
+    /////////  [download 下载附件] start /////////
+    download(row) {
+      let localPath = row.localPath
+      // console.log("123")
+      let a = document.createElement('a')
+      a.download = row.picName
+      a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
+      a.click()
+    },
+    /////////  [download 下载附件] end /////////
   }
 }
 </script>
 <style scoped>
 .problem .return {
-  font-size: 64px;
+  padding-top: 49px;
+  font-size: 49px;
+  cursor:pointer;
 }
 .problem .title {
   font-size: 18px;
   font-weight: bold;
+  margin-top: 36px;
   margin-bottom: 36px;
 }
 .problem .fontRed {

@@ -28,11 +28,11 @@ export default new Vuex.Store({
     // user: { userId: 9, deptId:27, realName: '郑开喜' }, //员工信息
     // user: { userId: 4023, deptId:51, realName: '刘特' }, //员工信息
     // user: { userId: 3714, deptId:91, realName: '杨梦倩' }, //员工信息
-    user: { userId: 3820, deptId:91, realName: '黄震宇' }, //员工信息
+    // user: { userId: 3820, deptId:91, realName: '黄震宇' }, //员工信息
     token: '', // 登录令牌
     userSign: '', // 用户信息带参
-    // isLogin: 'error', //error/success, // 是否登陆
-    isLogin: 'success', //error/success, // 是否登陆
+    isLogin: 'error', //error/success, // 是否登陆
+    // isLogin: 'success', //error/success, // 是否登陆
     isRouterAlive: true, // 控制页面刷新
     projectListNum: 1,
     proExpertTime: ''
@@ -78,12 +78,12 @@ export default new Vuex.Store({
      */
     clearToken(state, data) {
       console.log('拦截错误信息,应该跳登录了');
-      // window.sessionStorage.setItem('isLogin','error');
-      // state.isLogin = 'error';
-      // localStorage.removeItem('user');
-      // localStorage.removeItem('token');
-      // localStorage.removeItem('userSign');
-      // window.location.replace('http://guoxin.insun-china.com/hrm');
+      window.sessionStorage.setItem('isLogin','error');
+      state.isLogin = 'error';
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userSign');
+      window.location.replace('http://guoxin.insun-china.com/hrm');
 
     },
     //退出登录

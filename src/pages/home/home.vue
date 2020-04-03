@@ -2,7 +2,7 @@
   <div class="home">
     <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
-      <!-- 左菜单栏 start -->
+      <!--------- 左菜单栏 start --------->
       <el-aside width="200px" style="background-color: rgb(238, 241, 246);position: relative;">
         <div
           :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
@@ -39,15 +39,14 @@
           <el-link @click="operator" type="primary">操作文档</el-link>|
           <el-link @click="problemFeedback" type="primary">问题反馈</el-link>
         </div>
-        <!-- http://218.106.254.122:8084/doc/123.pdf  operator-->
       </el-aside>
-      <!-- 左菜单栏 end -->
+      <!--------- 左菜单栏 end --------->
       <el-container>
-        <!-- 内容 start -->
+        <!--------- 内容 start --------->
         <el-main>
           <router-view @getData="getData" ref="project" :update="update"></router-view>
         </el-main>
-        <!-- 内容 end -->
+        <!---------- 内容 end --------->
       </el-container>
     </el-container>
     <!--------- 抽屉添加任务 start --------->
@@ -157,7 +156,6 @@
                 :disabled="checkListBan"
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
-            <!-- {{new_project.checkList}} -->
           </el-col>
           <el-col :span="24">
             <el-col :span="6" class="title">知晓人</el-col>
@@ -305,11 +303,11 @@
 
     <!--------- 抽屉问题反馈 start --------->
     <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false">
-      <el-row class="problemFeedback">
+      <el-row class="problemFeedback" v-loading="loadingFeedback">
         <el-col :span="24">
           <el-col :span="6" class="title title1">问题反馈</el-col>
         </el-col>
-        <el-col :span="6" class="title">问题面板</el-col>
+        <el-col :span="6" class="title">问题版块</el-col>
         <el-col :span="13">
           <el-select v-model="feedbackType" filterable placeholder="请选择" style="width:100%">
             <el-option
@@ -327,9 +325,10 @@
         </el-col>
         <el-col :span="13" :offset="6">
           <el-upload
-            action="/pmbs/file/upload?upType=0&demandType=1"
+            action="/pmbs/file/upload?upType=0&demandType=0"
             :on-success="handleFeedbackSuccess"
             :on-remove="handleFeedbackRemove"
+            :file-list="fileListFeedback"
           >
             <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
           </el-upload>
@@ -413,7 +412,7 @@ export default {
       statisticsShow: false,
       setShow: false,
       // 消息面板默认显示
-      scrollDisabled: false, // 禁用加载
+      scrollDisabled: true, // 禁用加载
       loading: false,
       messageData: [],
       count: 0,
@@ -426,27 +425,29 @@ export default {
       // 未读消息
       unread: 0,
       // 问题反馈
+      loadingFeedback: false,
       feedbackType: '',
       feedbackTypeList: [
         {
-          value: '1',
+          value: 1,
           label: '项目/任务'
         },
         {
-          value: '2',
+          value: 2,
           label: '文档管理'
         },
         {
-          value: '3',
+          value: 3,
           label: '统计'
         },
         {
-          value: '4',
+          value: 4,
           label: '设置'
         }
       ],
       feedbackContent: '',
-      feedbackFileList: []
+      feedbackFileList: [],
+      fileListFeedback: []
     }
   },
   // 侦听器
@@ -526,6 +527,8 @@ export default {
       let data = JSON.parse(msg.data)
       // console.log(data)
       this.NotificationInfo(data)
+      let unread = this.unread
+      this.unread = unread + 1
     },
     send: function() {
       // this.socket.send(params)
@@ -570,7 +573,7 @@ export default {
         } else {
           this.scrollDisabled = false
         }
-        console.log(this.scrollDisabled)
+        // console.log(this.scrollDisabled)
         let messageData = this.messageData
         this.messageData = messageData.concat(data)
         // 页码加一
@@ -584,24 +587,15 @@ export default {
     ///////// 信息列表 end /////////
 
     ///////// 消息面板选项卡 start /////////
-    // handleClick(tab, event) {
-    //   // console.log(tab, event)
-    // },
     changeTabs(tabs) {
       this.tabs = tabs
       this.messagePage = 1 // 页码重置
       this.messageData = [] // 消息列表重置
       this.getMessageListAjax(tabs) // 消息列表获取
-      // console.log(1)
     },
     load() {
       let tabs = this.tabs
-      // let messageData = this.messageData
-      // if (messageData.length >= 10) {
       this.getMessageListAjax(tabs)
-      // }
-
-      // this.count += 2
     },
     // test(){
     //   console.log("test")
@@ -714,8 +708,8 @@ export default {
     getMessage() {
       this.drawer2 = true
       this.messageData = []
-      // this.getMessageListAjax(1)
-      // console.log('消息面板')
+      let tabs = this.tabs
+      this.getMessageListAjax(tabs)
     },
     ///////// 接受子组件数据 end /////////
 
@@ -1170,9 +1164,16 @@ export default {
       console.log(feedbackFileList)
     },
     // 取消按钮
-    closeProblem() {},
+    closeProblem() {
+      this.feedbackContent = ''
+      this.feedbackType = ''
+      this.feedbackFileList = []
+      this.fileListFeedback = []
+      this.drawer3 = false
+    },
     // 问题反馈新增
     problemSave() {
+      this.loadingFeedback = true
       let data = {
         description: this.feedbackContent,
         moduleType: this.feedbackType,
@@ -1187,9 +1188,14 @@ export default {
       ) {
         this.messageError('信息不能为空')
       } else {
-        // this.$axios.post('/pmbs/api/problem/save', data).then(res => {
-        //   console.log(res)
-        // })
+        this.$axios.post('/pmbs/api/problem/save', data).then(res => {
+          this.loadingFeedback = false
+          console.log(res)
+          if (res.status == 200) {
+            this.closeProblem()
+            this.messageWin(res.data.msg)
+          }
+        })
       }
     },
     ///////// 问题反馈 end /////////
@@ -1441,6 +1447,7 @@ export default {
 .home .problemFeedback {
   height: 100%;
   padding: 36px;
+  position: relative;
 }
 .home .problemFeedback > div {
   margin-top: 13px;
@@ -1454,6 +1461,11 @@ export default {
   text-align: right;
   box-sizing: border-box;
   padding-right: 18px;
+}
+.home .problemFeedback .batton {
+  position: absolute;
+  bottom: 108px;
+  left: 0;
 }
 .noData {
   text-align: center;

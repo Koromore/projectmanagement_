@@ -1033,7 +1033,7 @@ export default {
         typeId: this.task_type_value //'任务类型id'
       }
       // data.taskName[0].oldFileId = this.oldFileId
-      if (data == '') {
+      if (data.department == '' || data.taskName == '' || data.expertTime == '' || data.remark == '' || data.deptId == '') {
         this.messageError('信息不能为空')
       } else {
         this.taskSave(data)

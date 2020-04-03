@@ -4,7 +4,11 @@
     <el-drawer title="任务" :visible.sync="drawer5" :with-header="false" @close="close">
       <el-scrollbar style="height: 100%" v-loading="drawerLoading">
         <el-row class="task_details">
-          <el-col :span="24" class="title">{{taskData.proName}}-{{taskData.taskName}}</el-col>
+          <el-col :span="24" class="title">{{taskData.proName}}</el-col>
+          <el-col :span="6" class="title">任务名称：</el-col>
+          <el-col :span="13">
+            <el-input placeholder="请输入内容" v-model="taskData.taskName" clearable></el-input>
+          </el-col>
           <el-col :span="6" class="title">执行部门：</el-col>
           <el-col :span="18">{{taskData.deptName}}</el-col>
           <el-col :span="6" class="title">任务类型：</el-col>
@@ -135,7 +139,7 @@
                 :limit="1"
                 class="elementUpload"
               >
-                <el-button size="mini" type="primary" @click="uploadIf(0)" v-show="disabled0">点击上传附件</el-button>
+                <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
               </el-upload>
             </template>
             <template v-else>
@@ -201,7 +205,7 @@
                 :limit="1"
                 class="elementUpload"
               >
-                <el-button size="mini" type="primary" @click="uploadIf(1)" v-show="disabled1">点击上传文档</el-button>
+                <el-button size="mini" type="primary" v-show="disabled1">点击上传文档</el-button>
               </el-upload>
             </template>
             <template v-else>
@@ -397,20 +401,20 @@ export default {
       // },
       // deep: true
     },
-    listProFile: function(newValue, oldValue) {
-      if (newValue.length == 0) {
-        this.disabled0 = true
-      } else {
-        this.disabled0 = false
-      }
-    },
-    listProFileResult: function(newValue, oldValue) {
-      if (newValue.length == 0) {
-        this.disabled1 = true
-      } else {
-        this.disabled1 = false
-      }
-    }
+    // listProFile: function(newValue, oldValue) {
+    //   if (newValue.length == 0) {
+    //     this.disabled0 = true
+    //   } else {
+    //     this.disabled0 = false
+    //   }
+    // },
+    // listProFileResult: function(newValue, oldValue) {
+    //   if (newValue.length == 0) {
+    //     this.disabled1 = true
+    //   } else {
+    //     this.disabled1 = false
+    //   }
+    // }
   },
   // 方法
   methods: {
@@ -549,6 +553,11 @@ export default {
     // 上传回调
     handleSuccess(res, file, fileList) {
       // console.log('上传附件成功')
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = fals
+      }
       if (res.errcode == 0) {
         let resData = res.data
         let listProFile = this.listProFile
@@ -571,28 +580,20 @@ export default {
       }
     },
     // 删除
-    handleRemove(file) {
-      // console.log(file)
+    handleRemove(file, fileList) {
       let data = file
-      // let listProFile = this.listProFile
-      // if (listProFile.fileId) {
+      if (fileList.length == 0) {
+        this.disabled0 = true
+      }else{
+        this.disabled0 = false
+      }
       this.taskFileId = data.fileId
       this.oldProFileId = data.fileId
-      this.listProFile = []
-      // } else {
-      //   this.listProFile = []
-      // }
-      // console.log(file)
-      // for (let i = 0; i < listProFile.length; i++) {
-      //   let element = listProFile[i]
-      //   if (element.fileId == data.fileId) {
-      //     // listProFile[i].deleteFlag = true
-      //     listProFile.splice(i, 1)
-      //     // console.log('删除')
-      //   }
-      // }
-      // this.listProFile = listProFile
-      // console.log(this.listProFile)
+      this.listProFile = [
+        {
+          oldFileId: data.fileId // 原文档ID
+        }
+      ]
     },
     ///////// 任务需求附件上传 end /////////
 
@@ -600,6 +601,11 @@ export default {
     // 上传回调
     handleSuccessResult(res, file, fileList) {
       // console.log('上传附件成功')
+      if (fileList.length == 0) {
+        this.disabled1 = true
+      }else{
+        this.disabled1 = false
+      }
       if (res.errcode == 0) {
         let resData = res.data
         let listProFileResult = this.listProFileResult
@@ -619,16 +625,16 @@ export default {
       }
     },
     // 删除
-    handleRemoveResult(file) {
+    handleRemoveResult(file,fileList) {
+      if (fileList.length == 0) {
+        this.disabled1 = true
+      }else{
+        this.disabled1 = false
+      }
       // console.log(file)
       let data = file
-      // let listProFileResult = this.listProFileResult
-      // if (listProFileResult.fileId) {
       this.oldFileId = file.fileId
       this.listProFileResult = []
-      // } else {
-      //   this.listProFileResult = []
-      // }
     },
     ///////// 任务成果附件上传 end /////////
 
@@ -640,21 +646,21 @@ export default {
     ///////// 附件下载 end /////////
 
     ///////// 上传附件判断 start /////////
-    uploadIf(type) {
-      let listProFile = this.listProFile
-      let listProFileResult = this.listProFileResult
-      if (type == 0) {
-        if (listProFile.length != 0) {
-          this.messageWarning('只能上传一个文件')
-          // return false
-        }
-      } else if (type == 1) {
-        if (listProFileResult.length != 0) {
-          this.messageWarning('只能上传一个文件')
-          // return false
-        }
-      }
-    },
+    // uploadIf(type) {
+    //   let listProFile = this.listProFile
+    //   let listProFileResult = this.listProFileResult
+    //   if (type == 0) {
+    //     if (listProFile.length != 0) {
+    //       this.messageWarning('只能上传一个文件')
+    //       // return false
+    //     }
+    //   } else if (type == 1) {
+    //     if (listProFileResult.length != 0) {
+    //       this.messageWarning('只能上传一个文件')
+    //       // return false
+    //     }
+    //   }
+    // },
     ///////// 上传附件判断 end /////////
 
     ///////// 修改任务详情 start /////////
@@ -668,16 +674,21 @@ export default {
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
       taskData.status = status
+      taskData.expertTime = this.$date0(taskData.expertTime)
       // taskData.oldFileId = this.taskId
       delete taskData.feedbackList
+      if (taskData.proFileList.length!=0&&taskData.proFileList[0].oldProFileId == null) {
+        taskData.proFileList = []
+      }
+      if (taskData.taskfileList.length!=0&&taskData.taskfileList[0].oldFileId == null) {
+        taskData.taskfileList = []
+      }
       // console.log(taskData)
       this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
     ///////// 任务修改/完成 start /////////
     taskSave(data) {
-      // console.log(this.new_task.presetTime)
-      // console.log(expertTime)
       this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
     },
     // 任务修改/完成回调

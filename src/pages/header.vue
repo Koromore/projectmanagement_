@@ -4,7 +4,7 @@
       <el-header style="height: 75px;">
         <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
         <div class="header-right">
-          <div class="add_du" @click="problemList">
+          <div class="add_du problemList" @click="problemList" :style="problemListStyle">
             <i class="el-icon-warning-outline"></i>
             反馈列表
           </div>
@@ -54,6 +54,7 @@ export default {
     return {
       userId: this.$store.state.user.userId,
       drawer: true,
+      problemListStyle: '', // 反馈列表按钮样式
       // 未读消息数据
       messageNum: 0,
       messageShow: false
@@ -64,13 +65,14 @@ export default {
   watch: {
     // 如果 `question` 发生改变，这个函数就会运行
     unread: function(newQuestion, oldQuestion) {
-      console.log(this.unread)
+      // console.log(this.unread)
       this.countIsRead()
     }
   },
   // 钩子函数
   mounted() {
     this.countIsRead()
+    this.problemListStyleCange()
   },
   methods: {
     logout() {
@@ -99,7 +101,7 @@ export default {
     // 向父组件传值打开消息面板抽屉
     message() {
       this.$emit('message', {})
-      console.log(1)
+      // console.log(1)
     },
     // 
     // 未读消息数量
@@ -121,8 +123,34 @@ export default {
         })
     },
     // 跳转问题反馈页面
+    problemListStyleCange(){
+      let userId = this.userId
+      let userIdList = [4001, 147, 4023, 820, 10, 9, 3985, 266, 3962]
+      let show = false
+      userIdList.forEach(element => {
+        if (element == userId) {
+          show = true
+        }
+      })
+      if (show) {
+        this.problemListStyle = 'opacity: 100;'
+      }else{
+        this.problemListStyle = 'opacity: 0;'
+      }
+    },
     problemList(){
-      this.$router.push({ path: '/problem'})
+      let userId = this.userId
+      let userIdList = [4001, 147, 4023, 820, 10, 9, 3985, 266, 3962]
+      let show = false
+      userIdList.forEach(element => {
+        if (element == userId) {
+          show = true
+        }
+      })
+      if (show) {
+        this.$router.push({ path: '/problem'})
+      }else{
+      }
     }
   }
 }
@@ -155,6 +183,9 @@ export default {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+}
+.header-right .problemList{
+  opacity: 0;
 }
 .header-right .add_du {
   color: white;
