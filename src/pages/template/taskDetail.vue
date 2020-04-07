@@ -7,7 +7,7 @@
           <el-col :span="24" class="title">{{taskData.proName}}</el-col>
           <el-col :span="6" class="title">任务名称：</el-col>
           <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="taskData.taskName" clearable></el-input>
+            <el-input placeholder="请输入内容" v-model="taskData.taskName" clearable size="mini"></el-input>
           </el-col>
           <el-col :span="6" class="title">执行部门：</el-col>
           <el-col :span="18">{{taskData.deptName}}</el-col>
@@ -358,8 +358,8 @@ export default {
       result: '', // 完成结果
       resultBan: false, // 完成成果禁止输入
       // 上传附件
-      disabled0: false,
-      disabled1: false,
+      disabled0: true,
+      disabled1: true,
       dialogImageUrl: '',
       dialogVisible: false,
       disabled: false,
@@ -394,13 +394,13 @@ export default {
       let taskId = this.taskId
       // console.log(newValue)
       if (taskId) {
-        this.getDepTypeList() // 任务类型获取
+        // this.getDepTypeList() // 任务类型获取
         this.task_detail() // 任务详情
         this.pickerOptionsTime()
       }
       // },
       // deep: true
-    },
+    }
     // listProFile: function(newValue, oldValue) {
     //   if (newValue.length == 0) {
     //     this.disabled0 = true
@@ -418,9 +418,29 @@ export default {
   },
   // 方法
   methods: {
+    ///////// fileList0 start /////////
+    fileListShow() {
+      let fileList0 = this.fileList0
+      let fileList1 = this.fileList1
+      if (fileList0.length == 0) {
+        this.disabled0 = true
+      } else {
+        this.disabled0 = false
+      }
+      if (fileList1.length == 0) {
+        this.disabled1 = true
+      } else {
+        this.disabled1 = false
+      }
+    },
+    ///////// fileList0 start /////////
     ///////// 任务类型获取 start /////////
-    getDepTypeList() {
-      let data = {}
+    getDepTypeList(id) {
+      let data = {
+        depType: {
+          deptId: id
+        }
+      }
       this.$axios
         .post('/pmbs/api/depType/listAjax', data)
         .then(this.getDepTypeListSuss)
@@ -507,8 +527,6 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
-        // reverse
-        // data.feedbackList = data.feedbackList.reverse()
         this.taskData = data
         this.pickerOptionsTime()
         this.listProFile = data.proFileList
@@ -538,6 +556,8 @@ export default {
           fileList1.push(fileList1Data)
         }
         this.fileList1 = fileList1
+        this.getDepTypeList(data.deptId)
+        this.fileListShow()
       }
     },
     ///////// 获取任务详情 end /////////
@@ -555,8 +575,8 @@ export default {
       // console.log('上传附件成功')
       if (fileList.length == 0) {
         this.disabled0 = true
-      }else{
-        this.disabled0 = fals
+      } else {
+        this.disabled0 = false
       }
       if (res.errcode == 0) {
         let resData = res.data
@@ -584,7 +604,7 @@ export default {
       let data = file
       if (fileList.length == 0) {
         this.disabled0 = true
-      }else{
+      } else {
         this.disabled0 = false
       }
       this.taskFileId = data.fileId
@@ -603,7 +623,7 @@ export default {
       // console.log('上传附件成功')
       if (fileList.length == 0) {
         this.disabled1 = true
-      }else{
+      } else {
         this.disabled1 = false
       }
       if (res.errcode == 0) {
@@ -625,10 +645,10 @@ export default {
       }
     },
     // 删除
-    handleRemoveResult(file,fileList) {
+    handleRemoveResult(file, fileList) {
       if (fileList.length == 0) {
         this.disabled1 = true
-      }else{
+      } else {
         this.disabled1 = false
       }
       // console.log(file)
@@ -677,10 +697,16 @@ export default {
       taskData.expertTime = this.$date0(taskData.expertTime)
       // taskData.oldFileId = this.taskId
       delete taskData.feedbackList
-      if (taskData.proFileList.length!=0&&taskData.proFileList[0].oldProFileId == null) {
+      if (
+        taskData.proFileList.length != 0 &&
+        taskData.proFileList[0].oldProFileId == null
+      ) {
         taskData.proFileList = []
       }
-      if (taskData.taskfileList.length!=0&&taskData.taskfileList[0].oldFileId == null) {
+      if (
+        taskData.taskfileList.length != 0 &&
+        taskData.taskfileList[0].oldFileId == null
+      ) {
         taskData.taskfileList = []
       }
       // console.log(taskData)
@@ -697,7 +723,6 @@ export default {
       if (res.status == 200) {
         // this.projectListJoin = res.data.data
         this.messageWin(res.data.msg)
-
         this.result = ''
         this.listProFile = []
         this.listProFileResult = []

@@ -120,16 +120,16 @@
           :data="currentData"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
+          
         >
-          <el-table-column prop="proName" label="名称">
+          <el-table-column prop="proName" label="名称" width="280">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态">
+          <el-table-column prop="status" label="状态" width="90">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -148,24 +148,24 @@
             <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
           </el-table-column>
           <el-table-column prop="realName" label="下达人"></el-table-column>
-          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
-                size="small"
+                size="mini"
                 type="info"
                 slot="reference"
                 v-if="scope.row.status == 2"
                 @click="feedback(scope.row.proId,scope.row.proName)"
               >反馈</el-button>
               <el-button
-                size="small"
+                size="mini"
                 type="primary"
                 slot="reference"
                 v-if="scope.row.status == 2"
                 @click="achieve(scope.row)"
               >完成</el-button>
               <el-button
-                size="small"
+                size="mini"
                 type="info"
                 slot="reference"
                 v-if="scope.row.status == 1 || scope.row.status == 4"
@@ -173,7 +173,7 @@
               >编辑</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="expurgate(scope.row.proId)">
                 <el-button
-                  size="small"
+                  size="mini"
                   type="info"
                   slot="reference"
                   v-if="scope.row.status == 1|| scope.row.status == 4"
@@ -196,6 +196,7 @@
             @current-change="handleCurrentChange"
             :current-page="pageNum"
             layout="total, prev, pager, next"
+            :page-size="30"
             :total="totalnum"
             background
           ></el-pagination>
@@ -210,9 +211,8 @@
           :data="currentData_"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
         >
-          <el-table-column prop="name" label="名称">
+          <el-table-column prop="name" label="名称" width="320">
             <el-link
               type="primary"
               slot-scope="scope"
@@ -248,6 +248,7 @@
             @size-change="handleSizeChange_"
             @current-change="handleCurrentChange_"
             :current-page="pageNum_"
+            :page-size="30"
             layout="total, prev, pager, next"
             :total="totalnum_"
             background
@@ -1091,9 +1092,14 @@ export default {
         this.totalnum_ = this.projectListJoin.length
         var json = JSON.parse(JSON.stringify(this.projectListJoin)) //拷贝数据 避免影响原始数据
         this.currentData_ = json.splice(
-          (this.pageNum - 1) * 10,
-          (this.pageNum - 1) * 10 + 10
+          (this.pageNum - 1) * 30,
+          (this.pageNum - 1) * 30 + 30
         )
+        // slice
+        // this.currentData_ = json.slice(
+        //   (this.pageNum - 1) * 30,
+        //   (this.pageNum - 1) * 30 + 30
+        // )
       }
     },
     ///////// 获取项目列表 end /////////
@@ -1109,8 +1115,8 @@ export default {
       var json = JSON.parse(JSON.stringify(this.projectListOriginate)) //拷贝数据 避免影响原始数据
 
       this.currentData = json.splice(
-        (this.pageNum - 1) * 10,
-        (this.pageNum - 1) * 10 + 10
+        (this.pageNum - 1) * 30,
+        (this.pageNum - 1) * 30 + 30
       )
 
       // console.log(this.currentData)

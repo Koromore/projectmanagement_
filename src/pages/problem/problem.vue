@@ -6,7 +6,7 @@
       </el-col>
       <el-col :span="18" :offset="3" class="title">问题反馈列表</el-col>
       <el-col :span="18" :offset="3">
-        <el-table :data="tableData" style="width: 100%" border :header-cell-style="{color:'#000'}" v-loading="loading">
+        <el-table :data="tableData" style="width: 100%" border stripe height="540" :header-cell-style="{color:'#000'}" v-loading="loading">
           <el-table-column prop="realName" label="姓名" width="180"></el-table-column>
           <el-table-column prop="deptName" label="部门" width="180"></el-table-column>
           <el-table-column prop="moduleType" label="问题版块">

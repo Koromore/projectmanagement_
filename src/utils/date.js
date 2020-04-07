@@ -1,7 +1,13 @@
 // 修改时间格式
 export function date(data) {
   if (data) {
-    let date = new Date(data)
+    let date = ''
+    if (typeof(data) == 'string') {
+      date = new Date(data.replace(/-/g,'/'))
+    }else{
+      date = new Date(data)
+    }
+    // let date = new Date(data.replace(/-/g,'/'))
     let year = date.getYear()
     let month = date.getMonth() + 1
     let strDate = date.getDate()
@@ -23,7 +29,12 @@ export function date(data) {
 
 export function date_(data) {
   if (data) {
-    let date = new Date(data)
+    let date = ''
+    if (typeof(data) == 'string') {
+      date = new Date(data.replace(/-/g,'/'))
+    }else{
+      date = new Date(data)
+    }
     let year = date.getYear()
     let month = date.getMonth() + 1
     let strDate = date.getDate()
@@ -45,7 +56,12 @@ export function date_(data) {
 
 export function time(data) {
   if (data) {
-    let date = new Date(data)
+    let date = ''
+    if (typeof(data) == 'string') {
+      date = new Date(data.replace(/-/g,'/'))
+    }else{
+      date = new Date(data)
+    }
     let year = date.getYear()
     let month = date.getMonth() + 1
     let strDate = date.getDate()

@@ -83,32 +83,16 @@
         <el-col :span="8" class="tab tab3">
           <el-button-group>
             <!-- <el-tooltip class="item" effect="dark" content="新任务" placement="bottom"> -->
-              <el-button
-                type="primary"
-                size="small"
-                @click="tab3_change(1)"
-              >新任务</el-button>
+            <el-button type="primary" size="small" @click="tab3_change(1)">新任务</el-button>
             <!-- </el-tooltip> -->
             <!-- <el-tooltip class="item" effect="dark" content="延期" placement="bottom"> -->
-              <el-button
-                type="danger"
-                size="small"
-                @click="tab3_change(4)"
-              >延期</el-button>
+            <el-button type="danger" size="small" @click="tab3_change(4)">延期</el-button>
             <!-- </el-tooltip> -->
             <!-- <el-tooltip class="item" effect="dark" content="审核中" placement="bottom"> -->
-              <el-button
-                type="warning"
-                size="small"
-                @click="tab3_change(2)"
-              >审核中</el-button>
+            <el-button type="warning" size="small" @click="tab3_change(2)">审核中</el-button>
             <!-- </el-tooltip> -->
             <!-- <el-tooltip class="item" effect="dark" content="执行中" placement="bottom"> -->
-              <el-button
-                type="success"
-                size="small"
-                @click="tab3_change(1)"
-              >执行中</el-button>
+            <el-button type="success" size="small" @click="tab3_change(1)">执行中</el-button>
             <!-- </el-tooltip> -->
           </el-button-group>
         </el-col>
@@ -126,7 +110,7 @@
           :data="tasklist"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{'height': '57px','text_aling':'left'}"
+          :row-style="{'text_aling':'left'}"
         >
           <el-table-column
             prop="proName"
@@ -134,6 +118,7 @@
             column-key="name"
             :filters="filtratePro"
             :filter-method="filterName"
+            width="300"
           ></el-table-column>
           <el-table-column
             prop="deptName"
@@ -160,16 +145,16 @@
           </el-table-column>
           <el-table-column prop="faTaskName" label="父任务"></el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
-                size="small"
+                size="mini"
                 type="info"
                 @click="feedback(scope.row)"
                 v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
               >反馈</el-button>
               <el-button
-                size="small"
+                size="mini"
                 v-if="scope.row.isIgnore != true && scope.row.status == 2"
                 type="primary"
                 slot="reference"
@@ -183,6 +168,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
+            :page-size="30"
             :total="initiateTaskListTota"
             @current-change="initiateTaskList"
           ></el-pagination>
@@ -197,11 +183,10 @@
           :data="tasklist_"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{'height': '57px'}"
           align="left"
         >
-          <el-table-column prop="proName" label="所属项目"></el-table-column>
-          <el-table-column prop="taskName" label="任务">
+          <el-table-column prop="proName" label="所属项目" width="160"></el-table-column>
+          <el-table-column prop="taskName" label="任务" width="160">
             <el-link
               type="primary"
               slot-scope="scope"
@@ -292,17 +277,17 @@
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="operation" label="操作" width="210" filter-placement="bottom-end">
+          <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
-                size="small"
+                size="mini"
                 v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 type="info"
                 slot="reference"
                 @click="join_redact(scope.row.proId,scope.row.taskId)"
               >忽略</el-button>
               <el-button
-                size="small"
+                size="mini"
                 v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 type="primary"
                 slot="reference"
@@ -316,6 +301,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
+            :page-size="30"
             :total="participateTaskListTota"
             @current-change="participateTaskList"
           ></el-pagination>
@@ -780,14 +766,16 @@ export default {
         task: {
           initUserId: this.userId
         },
-        pageNum: 1
+        pageNum: 1,
+        pageSize: 30
       }
       let data1 = {
         type: 1,
         task: {
           initUserId: this.userId
         },
-        pageNum: 1
+        pageNum: 1,
+        pageSize: 30
       }
       this.getTasklistAjax(data0)
       this.getTasklistAjax_(data1)

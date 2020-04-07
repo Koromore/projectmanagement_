@@ -18,19 +18,18 @@
           :data="businessList"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
         >
           <el-table-column prop="businessName" label="名称"></el-table-column>
 
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
-                size="small"
+                size="mini"
                 type="info"
                 @click="business_change(scope.row.businessId,scope.row.businessName)"
               >修改</el-button>
               <el-popconfirm title="确认执行此操作吗？" @onConfirm="delete_but(scope.row.businessId)">
-                <el-button size="small" type="primary" slot="reference">删除</el-button>
+                <el-button size="mini" type="primary" slot="reference">删除</el-button>
               </el-popconfirm>
             </template>
           </el-table-column>
@@ -53,7 +52,6 @@
           :data="clientList"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
         >
           <el-table-column prop="clientName" label="客户"></el-table-column>
           <el-table-column prop="businessList" label="业务">
@@ -66,7 +64,7 @@
           </el-table-column>
           <el-table-column prop="tag" label="操作" width="210" filter-placement="bottom-end">
             <template slot-scope="scope">
-              <el-button size="small" type="info" @click="client_change(scope.row)">修改</el-button>
+              <el-button size="mini" type="info" @click="client_change(scope.row)">修改</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -75,6 +73,7 @@
           <el-pagination
             background
             layout="total, prev, pager, next"
+            :page-size="30"
             :total="clientPage"
             @current-change="clientListPage"
           ></el-pagination>
@@ -175,10 +174,10 @@ export default {
       this.tabs_activity = e
       if (e == 1) {
         this.disabled = false
-        this.addBut= 'opacity: 1;'
+        this.addBut= 'display: block;'
       } else if (e == 2) {
         this.disabled = true
-        this.addBut= 'opacity: 0;'
+        this.addBut= 'display: none;'
       }
     },
     ///////// 业务类型列表获取 start /////////
@@ -239,20 +238,12 @@ export default {
             businessList: []
           }
           clientList.push(clientListData)
-          if (index <= 9) {
+          if (index <= 29) {
             clientListPageData.page1.push(clientListData)
-          } else if (index > 9 && index <= 19) {
+          } else if (index > 29 && index <= 59) {
             clientListPageData.page2.push(clientListData)
-          } else if (index > 19 && index <= 29) {
+          } else if (index > 59 && index <= 89) {
             clientListPageData.page3.push(clientListData)
-          } else if (index > 29 && index <= 39) {
-            clientListPageData.page4.push(clientListData)
-          } else if (index > 39 && index <= 49) {
-            clientListPageData.page5.push(clientListData)
-          } else if (index > 49 && index <= 59) {
-            clientListPageData.page6.push(clientListData)
-          } else if (index > 59 && index <= 69) {
-            clientListPageData.page7.push(clientListData)
           }
         })
         // this.clientList = clientListPageData['page1']

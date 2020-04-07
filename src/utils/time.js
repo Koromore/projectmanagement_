@@ -1,13 +1,15 @@
 // 修改时间格式
 export function date0(data) {
   if (data) {
-    let date = new Date(data)
+    let date = ''
+    if (typeof(data) == 'string') {
+      date = new Date(data.replace(/-/g,'/'))
+    }else{
+      date = new Date(data)
+    }
     let year = date.getFullYear()
     let month = date.getMonth() + 1
     let strDate = date.getDate()
-    if (year >= 1 && year <= 9) {
-      year = "0" + year
-    }
     if (month >= 1 && month <= 9) {
       month = "0" + month
     }
@@ -22,16 +24,18 @@ export function date0(data) {
 
 export function time0(data) {
   if (data) {
-    let date = new Date(data)
+    let date = ''
+    if (typeof(data) == 'string') {
+      date = new Date(data.replace(/-/g,'/'))
+    }else{
+      date = new Date(data)
+    }
     let year = date.getFullYear()
     let month = date.getMonth() + 1
     let strDate = date.getDate()
     let hours = date.getHours()
     let minutes = date.getMinutes()
     let seconds = date.getSeconds()
-    if (year >= 1 && year <= 9) {
-      year = "0" + year
-    }
     if (month >= 1 && month <= 9) {
       month = "0" + month
     }

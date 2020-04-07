@@ -155,7 +155,7 @@
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="210">
+          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="180">
             <template slot-scope="scope">
               <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
@@ -167,7 +167,7 @@
               </div>
               <div class="linblo" v-else-if="userId == proInitUserId || userId == manager">
                 <el-button
-                  size="small"
+                  size="mini"
                   v-if="scope.row.isIgnore != true && scope.row.status == 1"
                   type="info"
                   @click="feedback(scope.row.proId,scope.row.taskId,scope.row.proName,scope.row.taskName)"
@@ -175,7 +175,7 @@
               </div>
               <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
-                  size="small"
+                  size="mini"
                   v-if="scope.row.isIgnore != true && scope.row.status == 2"
                   type="primary"
                   slot="reference"
@@ -184,14 +184,14 @@
               </div>
               <div class="linblo" v-else-if="userId == scope.row.doUserId">
                 <el-button
-                  size="small"
+                  size="mini"
                   v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
                   type="info"
                   slot="reference"
                   @click="redact(scope.row.proId,scope.row.taskId)"
                 >忽略</el-button>
                 <el-button
-                  size="small"
+                  size="mini"
                   v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
                   type="primary"
                   slot="reference"
@@ -312,7 +312,6 @@
             </el-col>
             <el-col :span="6" class="title">父任务</el-col>
             <el-col :span="13">
-              <!-- <el-input placeholder="请输入内容" v-model="new_task.parent_task" clearable></el-input> -->
               <el-select
                 v-model="new_task.faTask"
                 filterable
@@ -320,6 +319,7 @@
                 class="parent_task"
                 clearable
                 :disabled="faTaskDisabled"
+                ref="input"
               >
                 <el-option
                   v-for="item in faTaskList"
@@ -328,7 +328,6 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
-              <!-- {{new_task.faTask}} -->
             </el-col>
             <el-col :span="24">
               <el-col :span="6" class="title title2">执行部门</el-col>
@@ -338,6 +337,7 @@
                   :label="items.id"
                   v-for="items in deptList"
                   :key="items.index"
+                  @change="getDepTypeList"
                 >{{items.name}}</el-radio>
               </el-col>
             </el-col>
@@ -357,7 +357,7 @@
             </el-col>
             <el-col :span="6" class="title">任务类型</el-col>
             <el-col :span="13" class="task_type">
-              <el-select v-model="task_type_value" placeholder="请选择任务类型">
+              <el-select v-model="task_type_value" placeholder="请选择任务类型" no-data-text="请先选择部门">
                 <el-option
                   v-for="item in task_type"
                   :key="item.value"
@@ -659,6 +659,9 @@ export default {
       let height1 = winHeight - 100
       this.style1 = 'height:' + height1 + 'px;'
     },
+    blur() {
+      this.$refs['input'].blur()
+    },
     addtask() {
       this.drawer1 = true
       this.taskData = {
@@ -668,13 +671,13 @@ export default {
       this.getDepTypeList()
       // 部门列表获取
       this.getDeptList()
+      setTimeout(this.blur, 100)
     },
     // 选项卡
     table_tab(e) {
       this.tabs_activity = e
     },
     redact(proId, taskId) {
-      // console.log('忽略' + taskId)
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
@@ -712,12 +715,8 @@ export default {
       console.log(this.feedbackFileList)
     },
     achieve(id, status) {
-      // console.log('完成' + id)
       if (status == 1) {
-        // let updateTime = this.formatData2(new Date())
         let data = {
-          // updateTime: updateTime,
-          // proId: this.proId,
           taskId: id,
           status: 2
         }
@@ -786,7 +785,7 @@ export default {
       }
       if (fileList.length == 0) {
         this.disabled1 = true
-      }else{
+      } else {
         this.disabled1 = false
       }
     },
@@ -805,7 +804,7 @@ export default {
       this.listProFile = listProFile
       if (fileList.length == 0) {
         this.disabled1 = true
-      }else{
+      } else {
         this.disabled1 = false
       }
       // console.log(this.listProFile)
@@ -960,7 +959,6 @@ export default {
         }
         this.deptList = deptList
         this.departmentList = data
-        // console.log(deptList)
       }
     },
     // 父任务列表获取
@@ -999,9 +997,8 @@ export default {
       // 预计时间
       let expertTime = ''
       if (this.new_task.presetTime) {
-        expertTime = this.formatData(this.new_task.presetTime)
+        expertTime = this.$date0(this.new_task.presetTime)
       }
-
       // 创建时间
       let createTime = this.formatData2(new Date())
       // 选择的执行部门ID
@@ -1033,10 +1030,16 @@ export default {
         typeId: this.task_type_value //'任务类型id'
       }
       // data.taskName[0].oldFileId = this.oldFileId
-      if (data.department == '' || data.taskName == '' || data.expertTime == '' || data.remark == '' || data.deptId == '') {
+      if (
+        data.department == '' ||
+        data.taskName == '' ||
+        data.expertTime == '' ||
+        data.remark == '' ||
+        data.deptId == ''
+      ) {
         this.messageError('信息不能为空')
       } else {
-        this.taskSave(data)
+        // this.taskSave(data)
         this.drawer1 = false
         this.new_task.presetTime = ''
         this.new_task.faTask = ''
@@ -1070,7 +1073,7 @@ export default {
     },
     ///////// 任务新增/修改/完成 end /////////
     ///////// 上传附件 start /////////
-    handleRemoveFeedback(file,fileList) {
+    handleRemoveFeedback(file, fileList) {
       // console.log(file)
       // console.log(fileList)
       let feedbackFileList = this.feedbackFileList
@@ -1084,17 +1087,13 @@ export default {
       this.feedbackFileList = feedbackFileList
       if (fileList.length == 0) {
         this.disabled0 = true
-      }else{
+      } else {
         this.disabled0 = false
       }
       // console.log(feedbackFileList)
     },
     handleSuccessFeedback(esponse, file, fileList) {
-      // console.log(esponse)
-      // console.log(file)
-      // console.log(fileList)
       let data = esponse.data
-      // console.log(data)
       let feedbackFileList = this.feedbackFileList
       let time = new Date()
       let feedbackFileListData = {
@@ -1111,7 +1110,7 @@ export default {
       feedbackFileList.push(feedbackFileListData)
       if (fileList.length == 0) {
         this.disabled0 = true
-      }else{
+      } else {
         this.disabled0 = false
       }
     },
@@ -1157,17 +1156,22 @@ export default {
       }
     },
     // 任务类型获取
-    getDepTypeList() {
-      let data = {}
-      this.$axios
-        .post('/pmbs/api/depType/listAjax', data)
-        .then(this.getDepTypeListSuss)
+    getDepTypeList(res) {
+      if (res != undefined) {
+        let deptId = this.new_task.department
+        let data = {
+          depType: {
+            deptId: res
+          }
+        }
+        this.$axios
+          .post('/pmbs/api/depType/listAjax', data)
+          .then(this.getDepTypeListSuss)
+      }
     },
     // 任务类型获取回调
     getDepTypeListSuss(res) {
-      // console.log(res)
       if (res.status == 200) {
-        // this.projectListJoin = res.data.data
         let data = res.data.items
         let task_type = []
         let task_type_data = {}
@@ -1180,8 +1184,6 @@ export default {
           task_type.push(task_type_data)
         }
         this.task_type = task_type
-        // console.log(this.task_type)
-        // console.log(data)
       }
     },
     // 修改执行人
@@ -1284,7 +1286,6 @@ export default {
     },
     // 关闭任务详情回调
     closeDrawer(res) {
-      // console.log(res)
       this.taskId = ''
       if (res == 1) {
         this.getParams()

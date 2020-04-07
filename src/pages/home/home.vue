@@ -309,7 +309,13 @@
         </el-col>
         <el-col :span="6" class="title">问题版块</el-col>
         <el-col :span="13">
-          <el-select v-model="feedbackType" filterable placeholder="请选择" style="width:100%">
+          <el-select
+            v-model="feedbackType"
+            filterable
+            placeholder="请选择"
+            style="width:100%"
+            ref="input"
+          >
             <el-option
               v-for="item in feedbackTypeList"
               :key="item.value"
@@ -664,11 +670,6 @@ export default {
     getMsgFormSon(data) {
       this.drawer = true
       this.getClientapiListAjax()
-      // 获取客户列表
-      // this.getClientListAjax()
-      // 获取新建项目分类
-      // this.getAllClientAndBusiness()
-      // this.$refs.router.getProjectList()
       // 新建项目
       this.typeName = '创建项目'
       // this.$router.push({ path: '/home/components/project' })
@@ -1075,12 +1076,9 @@ export default {
         this.drawer = false
         this.radio2 = 1
         // 重置信息
-
         this.empty()
         let update = this.update
         this.update = update + 1
-        // console.log(this.update)
-        // this.$refs[projeck].getProjectList()
       }
     },
     ///////// 新增项目 end /////////
@@ -1121,8 +1119,12 @@ export default {
       newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
     },
     ///////// 问题反馈 start /////////
+    blur() {
+      this.$refs['input'].blur()
+    },
     problemFeedback() {
       this.drawer3 = true
+      setTimeout(this.blur, 100)
     },
     // 问题反馈文件上传回调
     handleFeedbackSuccess(response, file, fileList) {
@@ -1243,7 +1245,7 @@ export default {
       this.statisticsShow = statisticsShow
     },
     setShowIf() {
-      let show = [9, 10, 266, 4001, 3985, 147, 4023]
+      let show = [9, 10, 266, 4001, 3985, 147, 4023, 6, 28, 3820, 194, 527, 134]
       let userId = this.userId
       let setShow = false
       show.forEach(element => {
@@ -1484,5 +1486,8 @@ export default {
 }
 .home .bottom a {
   font-size: 14px;
+}
+.home >>> .el-table td,.home >>> .el-table th{
+  padding: 9px 0;
 }
 </style>

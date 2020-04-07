@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     user: {}, // 员工信息
     // user: { userId: 152 }, //员工信息
-    // user: { userId: 89 }, //员工信息
+    // user: { userId: 231 }, //员工信息
     // user: { userId: 527, deptId: 91, subordinate:91, realName: '付德全' }, //员工信息
     // user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
     // user: { userId: 6, deptId: 41, subordinate:41, realName: '宋秀' }, //员工信息

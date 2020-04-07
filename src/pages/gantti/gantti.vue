@@ -18,14 +18,15 @@
           </svg>
         </el-col>
 
-        <el-col v-if="taskList && projectShowDetail" :span="22" :offset="2" class="title">{{projectShowDetail.proName}}</el-col>
+        <el-col
+          v-if="taskList && projectShowDetail"
+          :span="22"
+          :offset="2"
+          class="title"
+        >{{projectShowDetail.proName}}</el-col>
         <el-col v-if="taskList && projectShowDetail" :span="20" :offset="2" class="gantt_time"></el-col>
-        <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2" >
-        <el-alert
-          title="暂无数据..."
-          type="success"
-          :closable="false">
-        </el-alert>
+        <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2">
+          <el-alert title="暂无数据..." type="success" :closable="false"></el-alert>
         </el-col>
       </el-col>
     </el-row>
@@ -141,9 +142,9 @@ export default {
       let taskList = this.taskList
       // console.log(taskList)
       let ganttList = []
-      
+
       for (let i = 0; i < taskList.length; i++) {
-        let element = taskList[i];
+        let element = taskList[i]
         let ganttListData = {
           gunter_id: i,
           params: {
@@ -159,42 +160,43 @@ export default {
           bg_color: '',
           level: 1
         }
-        // that.formatData(new Date(element.updateTime))
-        ganttListData.params.start_time = that.formatData(new Date(element.createTime))
+        ganttListData.params.start_time = that.$date0(element.createTime)
         // for (let i = 0; i < data.length; i++) {
-      //   const element = data[i]
-      //   if (element.params.state == 1) {
-      //     element.bg_color = 'rgb(1, 176, 114)'
-      //   } else if (element.params.state == 2) {
-      //     element.bg_color = 'rgb(236, 185, 21)'
-      //   } else if (element.params.state == 3) {
-      //     element.bg_color = 'rgb(172, 171, 171)'
-      //   } else if (element.params.state == 4) {
-      //     element.bg_color = 'rgb(255, 0, 0)'
-      //   }
-      // }
+        //   const element = data[i]
+        //   if (element.params.state == 1) {
+        //     element.bg_color = 'rgb(1, 176, 114)'
+        //   } else if (element.params.state == 2) {
+        //     element.bg_color = 'rgb(236, 185, 21)'
+        //   } else if (element.params.state == 3) {
+        //     element.bg_color = 'rgb(172, 171, 171)'
+        //   } else if (element.params.state == 4) {
+        //     element.bg_color = 'rgb(255, 0, 0)'
+        //   }
+        // }
         if (element.status == 1) {
           ganttListData.bg_color = 'rgb(1, 176, 114)'
           ganttListData.params.state_text = '执行中'
-        }else if (element.status == 2) {
+        } else if (element.status == 2) {
           ganttListData.bg_color = 'rgb(236, 185, 21)'
           ganttListData.params.state_text = '审核中'
-        }else if (element.status == 3) {
+        } else if (element.status == 3) {
           ganttListData.bg_color = 'rgb(172, 171, 171)'
           ganttListData.params.state_text = '已完成'
-        }else if (element.status == 4) {
+        } else if (element.status == 4) {
           ganttListData.bg_color = 'rgb(255, 0, 0)'
           ganttListData.params.state_text = '延期'
-        }else if (element.status == 5) {
+        } else if (element.status == 5) {
           ganttListData.bg_color = 'rgb(172, 171, 171)'
           ganttListData.params.state_text = '延期完成'
         }
         if (element.overTime == null) {
-          ganttListData.params.end_time = that.formatData(new Date())
+          ganttListData.params.end_time = that.$date0(new Date())
           ganttListData.end_time = new Date().getTime()
-        }else{
-          ganttListData.params.end_time = that.formatData(new Date(element.overTime))
-          ganttListData.end_time = new Date(element.expertTime).getTime()
+        } else {
+          ganttListData.params.end_time = that.$date0(element.overTime)
+          ganttListData.end_time = new Date(
+            element.expertTime.replace(/-/g, '/')
+          ).getTime()
         }
         ganttList.push(ganttListData)
       }
@@ -293,7 +295,7 @@ export default {
       //     level: 1
       //   }
       // ]
-      
+
       // console.log(data)
       let th_data = {
         title: {
@@ -327,7 +329,7 @@ export default {
       } else {
         end_time = new Date(projectShowDetail.overTime).getTime()
       }
-      
+
       this.$gante({
         container: '.gantt_time',
         ganteData: data,

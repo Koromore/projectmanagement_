@@ -92,7 +92,6 @@
         :row-class-name="tableRowClassName"
         @row-click="rowClick"
         :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-        :row-style="{height: '57px'}"
       >
         <el-table-column label="文档">
           <template slot-scope="scope">
@@ -163,6 +162,7 @@
             @current-change="handleCurrentChange"
             :current-page="pageNum"
             layout="total, prev, pager, next"
+            :page-size="30"
             :total="totalnum"
             background
           ></el-pagination>
@@ -671,7 +671,7 @@ export default {
         let data = {
           userid: this.userId,
           pageNum: this.pageNum,
-          pageSize: 10,
+          pageSize: 30,
           clientId: this.clientId, //客户ID
           serviceId: this.serviceId, //
           isUsual: this.isUsual, //是否是专项
