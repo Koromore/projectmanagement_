@@ -99,11 +99,11 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="tabs" v-if="userId != 152">
-        <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我发起</div>
-        <div @click="table_tab(2)" :class="[tabs_activity==2 ? 'act' : '']">我参与</div>
+        <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
+        <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
       </el-col>
       <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-show="tabs_activity==1">
+      <el-col :span="24" class="table table1" v-show="tabs_activity==0">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -118,6 +118,7 @@
             column-key="name"
             :filters="filtratePro"
             :filter-method="filterName"
+            show-overflow-tooltip
             width="300"
           ></el-table-column>
           <el-table-column
@@ -126,7 +127,7 @@
             :filters="filtrateDep"
             :filter-method="filterDepartment"
           ></el-table-column>
-          <el-table-column prop="taskName" label="任务">
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
             <el-link
               type="primary"
               slot-scope="scope"
@@ -176,7 +177,7 @@
       </el-col>
       <!--  -->
       <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-show="tabs_activity==2">
+      <el-col :span="24" class="table table2" v-show="tabs_activity==1">
         <el-table
           v-loading="loading"
           ref="filterTable"
@@ -185,15 +186,15 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           align="left"
         >
-          <el-table-column prop="proName" label="所属项目" width="160"></el-table-column>
-          <el-table-column prop="taskName" label="任务" width="160">
+          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
             <el-link
               type="primary"
               slot-scope="scope"
               @click="task_detail(scope.row,1)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态">
+          <el-table-column prop="status" label="状态" width="81">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -203,7 +204,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="doUserName" label="执行人" width="180">
+          <el-table-column prop="doUserName" label="执行人" width="90">
             <template slot-scope="scope">
               <div v-show="changeDoUserNameShow != scope.$index">
                 {{scope.row.doUserName}}
@@ -238,13 +239,13 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable>
+          <el-table-column prop="expertTime" label="预计时间" sortable width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable>
+          <el-table-column prop="overTime" label="完成时间" sortable width="110">
             <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人"></el-table-column>
+          <el-table-column prop="initUserName" label="下达人" width="110"></el-table-column>
           <el-table-column prop="taskfileList" label="成果">
             <div
               class="taskfile"
@@ -379,9 +380,9 @@ export default {
       // 查询条件
       pageNum0: 1,
       pageNum1: 1,
-      businessList: [], // 业务列表
+      businessList: this.$store.state.businessList, // 业务列表
       moreShow: false, // 显示更多业务
-      clientIdList: [], // 用户列表
+      clientIdList: this.$store.state.clientIdList, // 用户列表
       clientId: '', // 用户ID
       serviceId: '', // 业务ID
       isUsual: '', // 专项-1/日常-0
@@ -410,7 +411,7 @@ export default {
       result: '', // 完成成果
       resultBan: false, // 完成成果禁止输入
       cause: '', // 延期原因
-      tabs_activity: 1,
+      tabs_activity: 0,
       // 项目类型1选择
       tab1_act: '',
       // 项目类型2选择
@@ -463,19 +464,27 @@ export default {
   watch: {
     // 用户选择侦听
     clientId: function(newQuestion, oldQuestion) {
-      this.findTaskList()
+      let id = this.tabs_activity
+      this.findTaskList(id)
     },
     // 业务类型侦听
     serviceId: function(newQuestion, oldQuestion) {
-      this.findTaskList()
+      let id = this.tabs_activity
+      this.findTaskList(id)
     },
     // 专项/日常侦听
     isUsual: function(newQuestion, oldQuestion) {
-      this.findTaskList()
+      let id = this.tabs_activity
+      this.findTaskList(id)
     },
     // 任务状态侦听
     status: function(newQuestion, oldQuestion) {
-      this.findTaskList()
+      let id = this.tabs_activity
+      this.findTaskList(id)
+    },
+    tabs_activity: function(newQuestion, oldQuestion) {
+      let id = this.tabs_activity
+      this.findTaskList(id)
     }
   },
   // 方法
@@ -498,64 +507,10 @@ export default {
       let height = winHeight - 75
       // this.project_style = 'height:' + height + 'px;'
     },
-    // 获取新建项目分类
-    getAllClientAndBusiness() {
-      this.$axios
-        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
-        .then(this.getAllClientAndBusinessSuss)
-    },
-    // 获取新建项目分类回调
-    getAllClientAndBusinessSuss(res) {
-      if (res.status == 200) {
-        let data = res.data
-        let clientIdList = []
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          let clientIdListData = {
-            value: element.clientId,
-            label: element.clientName
-          }
-          clientIdList.push(clientIdListData)
-        }
-        this.clientIdList = clientIdList
-      }
-      // console.log(res)
-    },
     // 选项卡
     table_tab(e) {
       this.tabs_activity = e
     },
-    //
-    ///////// 业务类型列表获取 start /////////
-    getBusinessListAjax() {
-      // this.loading = true
-      // if (data == undefined) {
-      let data = {
-        pageNum: 1,
-        pageSize: 100
-      }
-      // }
-      this.$axios
-        .post('/pmbs/api/business/listAjax', data)
-        .then(this.getBusinessListAjaxSuss)
-    },
-    // 业务类型列表获取回调 //
-    getBusinessListAjaxSuss(res) {
-      // this.loading = false
-      if (res.status == 200) {
-        let data = res.data.data.items
-        data.reverse()
-        let totalPages = Math.ceil(data.length / 3)
-        let businessList = []
-        for (let i = 0; i < totalPages; i++) {
-          let businessListData = data.slice(i * 3, i * 3 + 3)
-          businessList.push(businessListData)
-        }
-        this.businessList = businessList
-        // console.log(this.businessList)
-      }
-    },
-    ///////// 业务类型列表获取 end /////////
     tab1_change(id) {
       // console.log(e)
       let serviceId = this.serviceId
@@ -643,10 +598,6 @@ export default {
         cancelButtonText: '取消'
       })
         .then(() => {
-          // this.$message({
-          //   type: 'info',
-          //   message: '保存修改'
-          // });
           let data = {
             proId: proId,
             taskId: taskId,
@@ -723,12 +674,12 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         this.messageWin('执行人修改成功')
-        this.getTasklist()
+        this.getTasklist(1)
         this.changeDoUserNameShow = 'true'
       }
     },
     // 查询任务列表
-    findTaskList() {
+    findTaskList(id) {
       // let userId = this.$store.state.user.userId
       let data0 = {
         type: 0,
@@ -752,14 +703,17 @@ export default {
         },
         pageNum: 1
       }
-      this.getTasklistAjax(data0)
-      this.getTasklistAjax_(data1)
+      if (id == 0) {
+        this.getTasklistAjax(data0)
+      } else if(id == 1){
+        this.getTasklistAjax_(data1)
+      }
     },
     unique(arr) {
       return Array.from(new Set(arr))
     },
     // 获取任务列表
-    getTasklist() {
+    getTasklist(id) {
       // console.log("123")
       let data0 = {
         type: 0,
@@ -777,8 +731,11 @@ export default {
         pageNum: 1,
         pageSize: 30
       }
-      this.getTasklistAjax(data0)
-      this.getTasklistAjax_(data1)
+      if (id == 0) {
+        this.getTasklistAjax(data0)
+      }else if (id == 1) {
+        this.getTasklistAjax_(data1)
+      }
     },
     // 获取我发起任务列表
     getTasklistAjax(data0) {
@@ -829,7 +786,7 @@ export default {
         this.result = ''
         this.listProFile = []
         this.listProFileResult = []
-        this.getTasklist()
+        this.getTasklist(0)
         // console.log(this.projectListJoin)
       }
     },
@@ -916,7 +873,7 @@ export default {
         this.feedbackContent = ''
         this.taskFeedbackId = ''
         // 重新获取任务列表
-        this.getTasklist() // 重新获取任务列表
+        this.getTasklist(0) // 重新获取任务列表
       }
     },
     // 取消按钮
@@ -980,7 +937,7 @@ export default {
       this.taskId = ''
       let tabs_activity = this.tabs_activity
       if (res == 1) {
-        if (tabs_activity == 1) {
+        if (tabs_activity == 0) {
           let data0 = {
             type: 0,
             clientId: this.clientId,
@@ -993,7 +950,7 @@ export default {
             pageNum: this.pageNum0
           }
           this.getTasklistAjax(data0)
-        } else if (tabs_activity == 2) {
+        } else if (tabs_activity == 1) {
           let data1 = {
             type: 1,
             clientId: this.clientId,
@@ -1047,10 +1004,10 @@ export default {
   // 钩子函数
   mounted() {
     this.widthheight()
-    this.getAllClientAndBusiness() // 获取客户和业务
-    this.getTasklist() // 获取任务列表
+    // this.getAllClientAndBusiness() // 获取客户和业务
+    this.getTasklist(0) // 获取任务列表
     // this.upload() // 上传附件地址
-    this.getBusinessListAjax() // 获取业务类型
+    // this.getBusinessListAjax() // 获取业务类型
   }
 }
 </script>

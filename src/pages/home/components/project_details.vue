@@ -63,8 +63,8 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           :row-style="{height: '57px'}"
         >
-          <el-table-column prop="deptName" label="部门"></el-table-column>
-          <el-table-column prop="taskName" label="任务">
+          <el-table-column prop="deptName" label="部门" show-overflow-tooltip></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
             <template slot-scope="scope">
               <el-link type="primary" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
             </template>
@@ -115,13 +115,13 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable>
+          <el-table-column prop="expertTime" label="预计时间" sortable width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable>
+          <el-table-column prop="overTime" label="完成时间" sortable width="110">
             <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人"></el-table-column>
+          <el-table-column prop="initUserName" label="下达人" width="81"></el-table-column>
           <el-table-column prop="overDesc" label="成果">
             <div
               class="taskfile"
@@ -204,7 +204,7 @@
       </el-col>
       <!--------- 任务列表 end --------->
       <!--------- 项目需求 start --------->
-      <el-col :span="24" class="table table2" v-if="tabs_activity == 2">
+      <el-col :span="24" class="table table2" v-if="tabs_activity == 2" v-loading="loading">
         <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
           <el-col :span="24">{{projectShowDetail.proName}}</el-col>
@@ -264,16 +264,16 @@
               <span>{{item.fileName}}</span>
             </div>
           </el-col>
-          <el-col :span="24" class="span" v-if="projectShowDetail.delayReason != unll">延期原因</el-col>
+          <el-col :span="24" class="span" v-if="projectShowDetail.delayReason != null">延期原因</el-col>
           <el-col
             :span="24"
-            v-if="projectShowDetail.delayReason != unll"
+            v-if="projectShowDetail.delayReason != null"
           >{{projectShowDetail.delayReason}}</el-col>
         </el-col>
       </el-col>
       <!--------- 项目需求 end --------->
       <!--------- 立项背景 start --------->
-      <el-col :span="24" class="table table3" v-if="tabs_activity == 3">
+      <el-col :span="24" class="table table3" v-if="tabs_activity == 3" v-loading="loading">
         <el-col :span="24">立项名称：{{pasProjectapiDetai.projectName}}</el-col>
         <el-col :span="24">
           项目类别：
@@ -499,7 +499,7 @@ export default {
       taskList: [], // 任务列表
       deptList: [], // 部门列表
       departmentList: [], // 部门列表未处理
-      projectShowDetail: {}, // 项目详情
+      projectShowDetail: {delayReason: null}, // 项目详情
       pasProjectapiDetai: {}, // 立项详情
       // 1执行中 2审核中 3已完成 4延期
       // 我参与 我发起选项卡
@@ -667,6 +667,8 @@ export default {
       this.taskData = {
         listOaUser: []
       }
+      // 获取父任务列表
+      this.getParentTask()
       // 任务类型获取
       this.getDepTypeList()
       // 部门列表获取
@@ -676,6 +678,15 @@ export default {
     // 选项卡
     table_tab(e) {
       this.tabs_activity = e
+      if (e == 1) {
+        this.getParams()
+      } else if (e == 2) {
+        let proId = this.proId
+        this.getProjectShowDetail(proId)
+      } else if (e == 3) {
+        let pasprojectId = this.projectShowDetail.pasprojectId
+        this.getProjectapiDetai(pasprojectId)
+      }
     },
     redact(proId, taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
@@ -824,8 +835,6 @@ export default {
       } else if (type == 1) {
         this.getProjectOfUserTask(proId, sousuo)
       }
-      let data = `?proId=${proId}`
-      this.getProjectShowDetail(data)
     },
 
     // 获取项目详情-我发起
@@ -875,13 +884,16 @@ export default {
       }
     },
     ///////// 获取项目需求 start /////////
-    getProjectShowDetail(data) {
+    getProjectShowDetail(proId) {
+      this.loading = true
+      let data = `?proId=${proId}`
       this.$axios
         .post('/pmbs/api/project/showDetail' + data)
         .then(this.getProjectShowDetailSuss)
     },
     // 获取项目需求回调/api/project/projectOfUserTask
     getProjectShowDetailSuss(res) {
+      this.loading = false
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
@@ -894,9 +906,6 @@ export default {
         this.manager = data.manager // 项目经理
         this.proInitUserId = data.initUserId // 项目发起人
         this.pickerOptionsTime() // 禁用时间函数
-        if (data.pasprojectId) {
-          this.getProjectapiDetai(data.pasprojectId)
-        }
         let knowUserID = data.knowUser.split(',')
         let knowUserShow = true
         let userId = this.userId
@@ -913,6 +922,7 @@ export default {
 
     ///////// 获取立项背景 start /////////
     getProjectapiDetai(pasprojectId) {
+      this.loading = true
       // let proId = pasprojectId
       let data = `?projectId=${pasprojectId}`
       this.$axios
@@ -923,6 +933,7 @@ export default {
     },
     // 获取项目需求回调/api/project/projectOfUserTask
     getProjectapiDetaiSuss(res) {
+      this.loading = false
       // console.log(res)
       if (res.status == 200) {
         let data = res.data
@@ -1039,7 +1050,7 @@ export default {
       ) {
         this.messageError('信息不能为空')
       } else {
-        // this.taskSave(data)
+        this.taskSave(data)
         this.drawer1 = false
         this.new_task.presetTime = ''
         this.new_task.faTask = ''
@@ -1162,7 +1173,9 @@ export default {
         let data = {
           depType: {
             deptId: res
-          }
+          },
+          pageSize: 100,
+          pageNum: 1
         }
         this.$axios
           .post('/pmbs/api/depType/listAjax', data)
@@ -1330,7 +1343,7 @@ export default {
     // 获取页面传参
     this.getParams()
     this.upload()
-    this.getParentTask()
+
     // this.getProjectapiDetai() // 获取立项背景
     // console.log(Date.now('2030-03-17 00:00:00'))
   }

@@ -10,7 +10,7 @@ export default new Vuex.Store({
   state: {
     user: {}, // 员工信息
     // user: { userId: 152 }, //员工信息
-    // user: { userId: 231 }, //员工信息
+    // user: { userId: 28 }, //员工信息
     // user: { userId: 527, deptId: 91, subordinate:91, realName: '付德全' }, //员工信息
     // user: { userId: 134, deptId: 150, realName: '成志朋' }, //员工信息
     // user: { userId: 6, deptId: 41, subordinate:41, realName: '宋秀' }, //员工信息
@@ -29,13 +29,18 @@ export default new Vuex.Store({
     // user: { userId: 4023, deptId:51, realName: '刘特' }, //员工信息
     // user: { userId: 3714, deptId:91, realName: '杨梦倩' }, //员工信息
     // user: { userId: 3820, deptId:91, realName: '黄震宇' }, //员工信息
+    // user: { userId: 830, deptId:91, realName: '唐攀' }, //员工信息
     token: '', // 登录令牌
     userSign: '', // 用户信息带参
     isLogin: 'error', //error/success, // 是否登陆
     // isLogin: 'success', //error/success, // 是否登陆
     isRouterAlive: true, // 控制页面刷新
-    projectListNum: 1,
-    proExpertTime: ''
+    projectListNum: 0,
+    proExpertTime: '',
+    // 客户列表
+    clientIdList: [],
+    // 业务类型列表
+    businessList: []
   },
   action: {
 
@@ -44,6 +49,16 @@ export default new Vuex.Store({
     // 项目列表我参与/我发起显示
     projectListShow(state, data){
       state.projectListNum = data
+    },
+    // 获取所有用户
+    getClientIdList(state, data){
+      state.clientIdList = data
+      // console.log(data)
+    },
+    // 获取业务类型
+    getBusinessList(state, data){
+      state.businessList = data
+      // console.log(data)
     },
     /**
      * [reload 控制页面刷新]
@@ -78,12 +93,12 @@ export default new Vuex.Store({
      */
     clearToken(state, data) {
       console.log('拦截错误信息,应该跳登录了');
-      window.sessionStorage.setItem('isLogin','error');
-      state.isLogin = 'error';
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('userSign');
-      window.location.replace('http://guoxin.insun-china.com/hrm');
+      // window.sessionStorage.setItem('isLogin','error');
+      // state.isLogin = 'error';
+      // localStorage.removeItem('user');
+      // localStorage.removeItem('token');
+      // localStorage.removeItem('userSign');
+      // window.location.replace('http://guoxin.insun-china.com/hrm');
 
     },
     //退出登录

@@ -49,8 +49,8 @@
         <!---------- 内容 end --------->
       </el-container>
     </el-container>
-    <!--------- 抽屉添加任务 start --------->
-    <el-drawer title="添加任务" :visible.sync="drawer" :with-header="false">
+    <!--------- 抽屉添加项目 start --------->
+    <el-drawer title="添加项目" :visible.sync="drawer" :with-header="false">
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
           <el-col :span="24">
@@ -209,7 +209,7 @@
         </el-col>
       </el-row>
     </el-drawer>
-    <!--------- 抽屉添加任务 end --------->
+    <!--------- 抽屉添加项目 end --------->
 
     <!--------- 抽屉消息面板 start --------->
     <el-drawer title="消息列表" :visible.sync="drawer2" :with-header="false">
@@ -362,6 +362,7 @@ export default {
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
       typeName: '', // 创建项目/编辑项目
+      initUserId: '', // 项目发起人
       proData: {},
       home_style: '',
       show_acti: 2,
@@ -482,21 +483,22 @@ export default {
     $route: 'router_url'
   },
   // 钩子函数
+  beforeMount(){
+    // 获取所有用户
+    this.getAllClientapiList()
+    // 获取业务类型
+    this.getBusinessListAjax()
+  },
   mounted() {
     this.init()
     this.widthheight()
     sessionStorage.setItem('refresh', 0)
     this.router_url()
     this.upload()
-    // this.getProjectFeedbackDetail()
-    // 获取部门列表
-    this.getDeptList()
-    // 获取用户列表
-    this.getListAjax()
-    // this.restaurants = this.loadAll()
     // 统计/设置显示判断
     this.statisticsShowIf()
     this.setShowIf()
+    
   },
   // 方法
   methods: {
@@ -549,6 +551,68 @@ export default {
       this.socket.onclose = this.close
     },
     ///////// WebSocket end /////////
+
+    ///////// 获取所有客户信息 start /////////
+    getAllClientapiList() {
+      this.$axios
+        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
+        .then(this.getAllClientapiListSuss)
+    },
+    // 获取所有客户信息回调
+    getAllClientapiListSuss(res) {
+      if (res.status == 200) {
+        let data = res.data
+        let clientIdList = []
+        let clientId = ''
+        let name = this.$route.query.name
+        data.forEach(element => {
+          let clientIdListDate = {
+            value: element.clientId,
+            label: element.clientName
+          }
+          clientIdList.push(clientIdListDate)
+          if (name && element.clientName == name) {
+            clientId = element.clientId
+          }
+        })
+        // this.clientIdList = clientIdList
+        // this.clientId = clientId
+        this.$store.commit('getClientIdList', clientIdList)
+      }
+    },
+    ///////// 获取所有客户信息 end /////////
+
+    ///////// 业务类型列表获取 start /////////
+    getBusinessListAjax() {
+      // this.loading = true
+      // if (data == undefined) {
+      let data = {
+        pageNum: 1,
+        pageSize: 100
+      }
+      // }
+      this.$axios
+        .post('/pmbs/api/business/listAjax', data)
+        .then(this.getBusinessListAjaxSuss)
+    },
+    // 业务类型列表获取回调 //
+    getBusinessListAjaxSuss(res) {
+      // this.loading = false
+      if (res.status == 200) {
+        let data = res.data.data.items
+        data.reverse()
+        let totalPages = Math.ceil(data.length / 3)
+        let businessList = []
+        for (let i = 0; i < totalPages; i++) {
+          let businessListData = data.slice(i * 3, i * 3 + 3)
+          businessList.push(businessListData)
+        }
+        this.$store.commit('getBusinessList', businessList)
+        // this.businessList = businessList
+        // console.log(this.businessList)
+      }
+    },
+    ///////// 业务类型列表获取 end /////////
 
     ///////// 信息列表 start /////////
     getMessageListAjax(type) {
@@ -669,7 +733,12 @@ export default {
     ///////// 接受子组件数据 start /////////
     getMsgFormSon(data) {
       this.drawer = true
+      // 获取立项用户列表
       this.getClientapiListAjax()
+      // 获取部门列表
+      this.getDeptList()
+      // 获取用户列表
+      this.getListAjax()
       // 新建项目
       this.typeName = '创建项目'
       // this.$router.push({ path: '/home/components/project' })
@@ -677,6 +746,7 @@ export default {
       //   console.log(err)
       // })
       // 点击新建项目时置空信息
+      this.initUserId = '' // 项目发起人
       this.proData = {} // 项目详情
       this.proId = '' // 项目Id
       this.clientId = '' // 分类 客户
@@ -696,8 +766,12 @@ export default {
       this.checkListBan = false
     },
     getData(data) {
-      // 获取新建项目分类
+      // 获取立项用户列表
       this.getClientapiListAjax()
+      // 获取部门列表
+      this.getDeptList()
+      // 获取用户列表
+      this.getListAjax()
       // 获取项目详情
       this.getProjectShowDetail(data)
       this.drawer = true
@@ -797,10 +871,8 @@ export default {
     ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      // console.log(data)
-      // if (res.status == 200) {
-      // let data = data
-      // console.log(data)
+      console.log(data)
+      this.initUserId = data.initUserId
       this.proId = data.proId
       this.status = data.status
       this.new_project.new_name = data.proName
@@ -1040,6 +1112,9 @@ export default {
         remark: this.new_project.remark, // '需求',
         knowUser: knowUser, // '知晓人id，多个用逗号隔开',
         listProFile: this.listProFile // 需求文档列表
+      }
+      if (this.initUserId != '') {
+        data.initUserId = this.initUserId
       }
       // console.log(data)
       let changeId = ''
@@ -1487,7 +1562,8 @@ export default {
 .home .bottom a {
   font-size: 14px;
 }
-.home >>> .el-table td,.home >>> .el-table th{
+.home >>> .el-table td,
+.home >>> .el-table th {
   padding: 9px 0;
 }
 </style>

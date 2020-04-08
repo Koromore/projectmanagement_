@@ -7,14 +7,19 @@
           <el-col :span="24" class="title">{{taskData.proName}}</el-col>
           <el-col :span="6" class="title">任务名称：</el-col>
           <el-col :span="13">
-            <el-input placeholder="请输入内容" v-model="taskData.taskName" clearable size="mini"></el-input>
+            <template
+              v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
+            >
+              <el-input placeholder="请输入内容" v-model="taskData.taskName" clearable size="mini"></el-input>
+            </template>
+            <template v-else>{{taskData.taskName}}</template>
           </el-col>
           <el-col :span="6" class="title">执行部门：</el-col>
           <el-col :span="18">{{taskData.deptName}}</el-col>
           <el-col :span="6" class="title">任务类型：</el-col>
           <el-col :span="18">
             <template
-              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
             >
               <el-select v-model="taskData.typeId" placeholder="请选择任务类型" size="mini">
                 <el-option
@@ -83,7 +88,7 @@
                   'state_color2': taskData.status == 2,
                   'state_color4': taskData.status == 4}"
               placeholder="请选择"
-              v-if="taskData.status==4"
+              v-if="taskData.status==4 && taskData.doUserId == userId"
             >
               <el-option
                 v-for="item in statusList_"
@@ -92,12 +97,13 @@
                 :value="item.value"
               ></el-option>
             </el-select>
+            <span v-else-if="taskData.status==4 && taskData.doUserId != userId" class="state_color4">延期</span>
             <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
           </el-col>
           <el-col :span="6" class="title">预计时间：</el-col>
           <el-col :span="18">
             <template
-              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
             >
               <el-date-picker
                 v-model="taskData.expertTime"
@@ -114,7 +120,7 @@
           <el-col :span="6" class="title">需求：</el-col>
           <el-col :span="18">
             <template
-              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
             >
               <el-input
                 type="textarea"
@@ -128,7 +134,7 @@
           <el-col :span="6" class="title">附件：</el-col>
           <el-col :span="18" class="proFileList">
             <template
-              v-if="taskData.doUserId == userId && taskData.status == 1 || taskData.status == 4"
+              v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
             >
               <el-upload
                 action="/pmbs/file/upload?upType=1&demandType=0"
@@ -439,7 +445,9 @@ export default {
       let data = {
         depType: {
           deptId: id
-        }
+        },
+        pageSize: 100,
+        pageNum: 1
       }
       this.$axios
         .post('/pmbs/api/depType/listAjax', data)
@@ -527,6 +535,13 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         let data = res.data.data
+        // let userId = this.userId
+        // console.log(userId)
+        // if (data.doUserId == userId) {
+        //   this.batton_pa = true
+        // } else {
+        //   this.batton_pa = false
+        // }
         this.taskData = data
         this.pickerOptionsTime()
         this.listProFile = data.proFileList

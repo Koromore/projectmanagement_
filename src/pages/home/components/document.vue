@@ -270,9 +270,9 @@ export default {
       tab1_act: '',
       // 项目类型2选择
       tab2_act: '',
-      businessList: [], // 业务列表
+      businessList: this.$store.state.businessList, // 业务列表
       moreShow: false, // 显示更多业务
-      clientIdList: [], //客户列表
+      clientIdList: this.$store.state.clientIdList, //客户列表
       client: '广汽本田',
       fileHistoryList: [], //文件历史数据
       fileHistoryLoading: false, //侧栏文件是否正在加载中
@@ -351,29 +351,7 @@ export default {
       //监听重新上传弹框关闭 清空数据
       this.listProFile = []
     },
-    getAllClientAndBusiness() {
-      this.$axios
-        .post('http://pms.guoxinad.com.cn/pas/clientapi/allListAjax')
-        .then(this.getAllClientAndBusinessSuss)
-    },
-    // 获取新建项目分类回调
-    getAllClientAndBusinessSuss(res) {
-      if (res.status == 200) {
-        let data = res.data
-        let clientIdList = []
-        // 循环提取名称和ID
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          let clientIdListData = {
-            value: element.clientId,
-            label: element.clientName
-          }
-          clientIdList.push(clientIdListData)
-        }
-        this.clientIdList = clientIdList
-      }
-      // console.log(res)
-    },
+    // 上传文件
     handleRemoveResult(file) {
       // console.log(file)
       let data = file.response.data
@@ -513,36 +491,6 @@ export default {
         this.listProFile = listProFile
       }
     },
-   ///////// 业务类型列表获取 start /////////
-    getBusinessListAjax() {
-      // this.loading = true
-      // if (data == undefined) {
-        let data = {
-          pageNum: 1,
-          pageSize: 100
-        }
-      // }
-      this.$axios
-        .post('/pmbs/api/business/listAjax', data)
-        .then(this.getBusinessListAjaxSuss)
-    },
-    // 业务类型列表获取回调 //
-    getBusinessListAjaxSuss(res) {
-      // this.loading = false
-      if (res.status == 200) {
-        let data = res.data.data.items
-        data.reverse()
-        let totalPages = Math.ceil(data.length/3)
-        let businessList = []
-        for (let i = 0; i < totalPages; i++) {
-          let businessListData = data.slice(i*3,i*3+3)
-          businessList.push(businessListData)
-        }
-        this.businessList = businessList
-        // console.log(this.businessList)
-      }
-    },
-    ///////// 业务类型列表获取 end /////////
     // 查询按钮
     tab1_change(id) {
       // console.log(e)
@@ -747,21 +695,14 @@ export default {
     }
   },
   // 钩子函数
-  beforeMount() {
-    //获取客户下拉数据
-    this.getAllClientAndBusiness()
-  },
+  beforeMount() {},
   mounted() {
-    
     this.getTaskfilePageList()
-
     let upType = 0
     let demandType = 0
     let uploadUrl = `/pmbs/file/upload?upType=${upType}&demandType=${demandType}`
     this.uploadUrl = uploadUrl
     this.pickerOptionsTime() // 禁用时间函数
-    this.getBusinessListAjax() // 获取业务类型
-    // console.log(this.$store.state)
   }
 }
 </script>
