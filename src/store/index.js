@@ -35,7 +35,7 @@ export default new Vuex.Store({
     isLogin: 'error', //error/success, // 是否登陆
     // isLogin: 'success', //error/success, // 是否登陆
     isRouterAlive: true, // 控制页面刷新
-    projectListNum: 0,
+    projectListNum: 1,
     proExpertTime: '',
     // 客户列表
     clientIdList: [],
@@ -93,12 +93,12 @@ export default new Vuex.Store({
      */
     clearToken(state, data) {
       console.log('拦截错误信息,应该跳登录了');
-      // window.sessionStorage.setItem('isLogin','error');
-      // state.isLogin = 'error';
-      // localStorage.removeItem('user');
-      // localStorage.removeItem('token');
-      // localStorage.removeItem('userSign');
-      // window.location.replace('http://guoxin.insun-china.com/hrm');
+      window.sessionStorage.setItem('isLogin','error');
+      state.isLogin = 'error';
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('userSign');
+      window.location.replace('http://guoxin.insun-china.com/hrm');
 
     },
     //退出登录

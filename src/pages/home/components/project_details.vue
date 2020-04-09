@@ -835,6 +835,7 @@ export default {
       } else if (type == 1) {
         this.getProjectOfUserTask(proId, sousuo)
       }
+      this.getProjectShowDetail(proId)
     },
 
     // 获取项目详情-我发起

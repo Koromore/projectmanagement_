@@ -402,7 +402,7 @@ export default {
       if (taskId) {
         // this.getDepTypeList() // 任务类型获取
         this.task_detail() // 任务详情
-        this.pickerOptionsTime()
+        // this.pickerOptionsTime()
       }
       // },
       // deep: true

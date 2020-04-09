@@ -92,8 +92,8 @@
         <!-- </div> -->
       </el-col>
       <el-col :span="24" class="tabs" v-if="userId != 152">
-        <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
         <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
+        <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
       </el-col>
       <!--------- 我发起 --------->
       <el-col :span="24" class="table table1" v-show="tabs_activity == 0">
@@ -525,10 +525,10 @@ export default {
   // 钩子函数
   mounted() {
     // this.widthheight()
-    // let id = this.tabs_activity
-    // this.findProjectList(id)
+    let id = this.tabs_activity
+    this.findProjectList(id)
     this.getParams()
-    this.getProjectList(0) // 获取项目列表
+    // this.getProjectList(0) // 获取项目列表
     this.projectListNum() //
   },
   // 方法

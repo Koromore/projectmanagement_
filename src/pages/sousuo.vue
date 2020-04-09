@@ -537,7 +537,8 @@ export default {
         pageNum: 0,
         pageSize: 0
       }
-
+let proId = this.proId
+        this.getProjectShowDetail(proId)
       // typeName typeId
     }
   },

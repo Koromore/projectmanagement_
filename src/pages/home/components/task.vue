@@ -99,8 +99,8 @@
       </el-col>
       <!--  -->
       <el-col :span="24" class="tabs" v-if="userId != 152">
-        <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
         <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
+        <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
       </el-col>
       <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-show="tabs_activity==0">
@@ -411,7 +411,7 @@ export default {
       result: '', // 完成成果
       resultBan: false, // 完成成果禁止输入
       cause: '', // 延期原因
-      tabs_activity: 0,
+      tabs_activity: 1,
       // 项目类型1选择
       tab1_act: '',
       // 项目类型2选择
@@ -705,7 +705,7 @@ export default {
       }
       if (id == 0) {
         this.getTasklistAjax(data0)
-      } else if(id == 1){
+      } else if (id == 1) {
         this.getTasklistAjax_(data1)
       }
     },
@@ -733,7 +733,7 @@ export default {
       }
       if (id == 0) {
         this.getTasklistAjax(data0)
-      }else if (id == 1) {
+      } else if (id == 1) {
         this.getTasklistAjax_(data1)
       }
     },
@@ -997,15 +997,12 @@ export default {
     //     }
     //   })
     // },
-    test() {
-      console.log('打印测试')
-    }
   },
   // 钩子函数
   mounted() {
-    this.widthheight()
+    // this.widthheight()
     // this.getAllClientAndBusiness() // 获取客户和业务
-    this.getTasklist(0) // 获取任务列表
+    this.getTasklist(1) // 获取任务列表
     // this.upload() // 上传附件地址
     // this.getBusinessListAjax() // 获取业务类型
   }
