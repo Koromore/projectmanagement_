@@ -387,7 +387,8 @@ export default {
           clientList: clientListPageData[`page${pageNum}`]
         }
         let data = {
-          pageNum: this.clientListPageNum
+          pageNum: this.clientListPageNum,
+          pageSize: 30
         }
         this.getBusinessByClientIds(pageData)
         this.getBusinessListAjax(data)
@@ -457,7 +458,8 @@ export default {
       if (res.status == 200) {
         // 获取业务类型列表
         let data = {
-          pageNum: this.businessListPageNum
+          pageNum: this.businessListPageNum,
+          pageSize: 30
         }
         this.getBusinessListAjax(data)
         // 业务类型删除成功提示
@@ -488,7 +490,8 @@ export default {
     businessListPage(page) {
       this.businessListPageNum = page
       let data = {
-        pageNum: page
+        pageNum: page,
+        pageSize: 30
       }
       this.getBusinessListAjax(data)
     },

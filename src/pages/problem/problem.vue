@@ -71,7 +71,7 @@ export default {
     getProblemListAjax() {
       this.loading = true
       let data = {
-        pageNum: 1
+        // pageNum: 1
       }
       this.$axios.post('/pmbs/api/problem/listAjax', data).then(res => {
         this.loading = false
@@ -114,9 +114,9 @@ export default {
     /////////  [download 下载附件] start /////////
     download(row) {
       let localPath = row.localPath
-      // console.log("123")
+      // console.log(row)
       let a = document.createElement('a')
-      a.download = row.picName
+      a.download = `${row.picName}`
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },

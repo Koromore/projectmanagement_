@@ -61,15 +61,14 @@
           :data="taskList"
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{height: '57px'}"
         >
-          <el-table-column prop="deptName" label="部门" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
+          <el-table-column prop="deptName" label="部门" show-overflow-tooltip min-width="240"></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="240">
             <template slot-scope="scope">
               <el-link type="primary" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态">
+          <el-table-column prop="status" label="状态" min-width="110">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -79,7 +78,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="doUserName" label="执行人" width="180">
+          <el-table-column prop="doUserName" label="执行人" min-width="180">
             <template slot-scope="scope">
               <div v-show="changeDoUserNameShow != scope.$index">
                 {{scope.row.doUserName}}
@@ -115,18 +114,18 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable width="110">
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable width="110">
-            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人" width="81"></el-table-column>
-          <el-table-column prop="overDesc" label="成果">
+          <el-table-column prop="initUserName" label="下达人" min-width="81"></el-table-column>
+          <el-table-column label="成果" min-width="130">
             <div
               class="taskfile"
               slot-scope="scope"
-              v-if="scope.row.status == 3 && scope.row.taskfileList.length != 0"
+              v-if="scope.row.taskfileList.length != 0"
               @click="download(scope.row.taskfileList[0])"
             >
               <img
@@ -151,11 +150,11 @@
                 srcset
               />
               <img v-else src="static/images/document/other.png" width="24" alt srcset />
-              <br />
+              <!-- <br /> -->
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" width="180">
+          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" min-width="180" v-if="userId!=152">
             <template slot-scope="scope">
               <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
@@ -226,9 +225,7 @@
         <el-col :span="24" class="need">
           <el-col :span="24" class="span">需求</el-col>
           <el-col :span="24" class>
-            <pre>
-            {{projectShowDetail.remark}}
-            </pre>
+            <pre>{{projectShowDetail.remark}}</pre>
           </el-col>
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
@@ -1308,9 +1305,9 @@ export default {
     //  [download 下载附件]
     download(row) {
       let localPath = row.localPath
-      // console.log("123")
       let a = document.createElement('a')
-      a.download = row.fileName
+      a.download = `${row.fileName}.${row.suffix}`
+      console.log(a.download)
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },
@@ -1476,6 +1473,8 @@ export default {
   align-items: flex-start;
 }
 .project_details .table1 .taskfile {
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
 .project_details .table2 {
@@ -1698,6 +1697,7 @@ export default {
   overflow-x: hidden;
 }
 .filenametext {
+  display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

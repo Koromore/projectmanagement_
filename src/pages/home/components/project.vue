@@ -2,7 +2,6 @@
   <div class="project" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <!-- <div class="grid-content bg-purple-dark"> -->
         <el-col :span="5" class>
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
@@ -15,7 +14,7 @@
               class="filtrateClient"
             >
               <el-option
-                v-for="item in clientIdList"
+                v-for="item in allClientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -31,7 +30,7 @@
               size="small"
               @click="tab1_change(item.businessId)"
               :class="[serviceId==item.businessId ? 'act' : '']"
-              v-for="(item, index) in businessList[0]"
+              v-for="(item, index) in allBusinessList[0]"
               :key="index"
             >{{item.businessName}}</el-button>
             <el-button
@@ -39,14 +38,14 @@
               plain
               size="small"
               icon="el-icon-more"
-              @click="tab1_more()"
+              @click.stop="tab1_more()"
               :class="[moreShow==true ? 'act more' : 'more']"
               style="border-left: 0;"
             ></el-button>
           </el-button-group>
           <el-card class="box-card" v-show="moreShow">
             <el-button-group
-              v-for="(items, index) in businessList"
+              v-for="(items, index) in allBusinessList"
               :key="index"
               v-show="index != 0"
               class="moreBus"
@@ -55,7 +54,7 @@
                 type="primary"
                 plain
                 size="small"
-                @click="tab1_change(item.businessId)"
+                @click.stop="tab1_change(item.businessId)"
                 :class="[serviceId==item.businessId ? 'act' : '']"
                 v-for="(item, index) in items"
                 :key="index"
@@ -104,14 +103,14 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="proName" label="名称" width="280" show-overflow-tooltip>
+          <el-table-column prop="proName" label="名称" show-overflow-tooltip min-width="360">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态">
+          <el-table-column prop="status" label="状态" width="150">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -120,17 +119,17 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="num" label="总任务数/待完成" min-width="128">
+          <el-table-column prop="num" label="总任务数/待完成" min-width="150">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable>
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable>
-            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="realName" label="下达人"></el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="realName" label="下达人" min-width="130"></el-table-column>
+          <el-table-column prop="tag" label="操作" min-width="180" filter-placement="bottom-end" v-if="userId!=152">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -186,14 +185,14 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="name" label="名称" width="320" show-overflow-tooltip>
+          <el-table-column prop="name" label="名称" show-overflow-tooltip min-width="360">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,1)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="state_text" label="状态">
+          <el-table-column prop="state_text" label="状态" min-width="150">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -202,21 +201,19 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable>
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="130">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable>
-            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="130">
+            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="realName" label="下达人" filter-placement="bottom-end"></el-table-column>
+          <el-table-column
+            prop="realName"
+            label="下达人"
+            filter-placement="bottom-end"
+            min-width="180"
+          ></el-table-column>
         </el-table>
-        <!-- 分页 -->
-        <!-- <el-pagination
-          background
-          layout="prev, pager, next"
-          :total="participateProjectListTota"
-          @current-change="participateProjectList"
-        ></el-pagination>-->
         <div class="paging">
           <el-pagination
             @size-change="handleSizeChange_"
@@ -305,7 +302,10 @@
 export default {
   name: 'project',
   props: {
-    update: Number
+    update: Number,
+    allBusinessList: Array,
+    allClientIdList: Array,
+    clickCloseNum: Number
   },
   data() {
     return {
@@ -446,12 +446,6 @@ export default {
   },
   // 计算属性
   // computed: {
-  //   date: function(data) {
-  //     return this.$date(data)
-  //   },
-  //   time: function(data) {
-  //     return this.$time(data)
-  //   }
   // },
   // 侦听器
   watch: {
@@ -520,16 +514,26 @@ export default {
     tabs_activity: function(newQuestion, oldQuestion) {
       let id = this.tabs_activity
       this.findProjectList(id)
+    },
+    clickCloseNum: function(newQuestion, oldQuestion) {
+      this.moreShow = false
+      console.log(this.clickCloseNum)
     }
   },
   // 钩子函数
   mounted() {
     // this.widthheight()
+    this.projectListNum() //
+    if (this.userId == 152) {
+      this.tabs_activity = 0
+      console.log(this.tabs_activity)
+    }
     let id = this.tabs_activity
     this.findProjectList(id)
     this.getParams()
     // this.getProjectList(0) // 获取项目列表
-    this.projectListNum() //
+
+    // console.log(this.businessList)
   },
   // 方法
   methods: {
@@ -956,7 +960,7 @@ export default {
       let data = `?inituserid=${userId}${clientIdData}${serviceIdData}${isUsualData}${statusData}`
       if (id == 0) {
         this.getProjectListAjax(data)
-      }else if (id == 1) {
+      } else if (id == 1) {
         this.getProjectUserjoinproject(data)
       }
     },
@@ -967,9 +971,9 @@ export default {
       let data0 = `?inituserid=${userId}`
       let data1 = `?inituserid=${userId}`
       // id 我发起0  我参与1
-      if (id==0) {
+      if (id == 0) {
         this.getProjectListAjax(data0)
-      }else if(id==1){
+      } else if (id == 1) {
         this.getProjectUserjoinproject(data0)
       }
       // console.log('获取项目列表')
@@ -1082,12 +1086,12 @@ export default {
     },
     getParams() {
       let name = this.$route.query.name
-      let clientIdList = this.clientIdList
+      let clientIdList = this.allClientIdList
       clientIdList.forEach(element => {
         if (name == element.label) {
           this.clientId = element.value
         }
-      });
+      })
     },
     // 抽屉取消按钮
     empty() {
@@ -1149,15 +1153,16 @@ export default {
   border-left: 0;
 }
 .project .top .tab1 .box-card {
-  width: 271px;
+  width: 272px;
+  padding: 0 8px;
   position: absolute;
-  top: 32px;
+  top: 36px;
   left: 50%;
-  margin-left: -136px;
+  margin-left: -147px;
   z-index: 9999;
 }
 .project .top .tab1 .box-card >>> .el-card__body {
-  padding: 20px 0;
+  padding: 9px 0;
 }
 .project .top .tab1 .box-card .moreBus {
   margin-bottom: 9px;

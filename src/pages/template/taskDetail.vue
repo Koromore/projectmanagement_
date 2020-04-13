@@ -680,35 +680,16 @@ export default {
     },
     ///////// 附件下载 end /////////
 
-    ///////// 上传附件判断 start /////////
-    // uploadIf(type) {
-    //   let listProFile = this.listProFile
-    //   let listProFileResult = this.listProFileResult
-    //   if (type == 0) {
-    //     if (listProFile.length != 0) {
-    //       this.messageWarning('只能上传一个文件')
-    //       // return false
-    //     }
-    //   } else if (type == 1) {
-    //     if (listProFileResult.length != 0) {
-    //       this.messageWarning('只能上传一个文件')
-    //       // return false
-    //     }
-    //   }
-    // },
-    ///////// 上传附件判断 end /////////
-
     ///////// 修改任务详情 start /////////
     changeTaskDeil() {
       this.closeType = 1
-      this.drawer5 = false
       let taskData = this.taskData // 任务详情
       let listProFile = this.listProFile // 需求文档
       let listProFileResult = this.listProFileResult // 结果文档
       let status = this.statusListValue
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
-      taskData.status = status
+      // taskData.status = status
       taskData.expertTime = this.$date0(taskData.expertTime)
       // taskData.oldFileId = this.taskId
       delete taskData.feedbackList
@@ -725,11 +706,22 @@ export default {
         taskData.taskfileList = []
       }
       // console.log(taskData)
-      this.taskSave(taskData)
+      if (status==2) {
+        if (listProFileResult.length == 0 || taskData.overDesc == '') {
+          this.messageError('完成结果与成果文档不能为空')
+        }else{
+          this.taskSave(taskData)
+        }
+        listProFileResult
+      }else{
+        this.taskSave(taskData)
+      }
+      // this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
     ///////// 任务修改/完成 start /////////
     taskSave(data) {
+      this.drawer5 = false
       this.$axios.post('/pmbs/api/task/save', data).then(this.taskSaveSuss)
     },
     // 任务修改/完成回调
@@ -751,7 +743,7 @@ export default {
       let localPath = row.localPath
       // console.log("123")
       let a = document.createElement('a')
-      a.download = row.fileName
+      a.download = `${row.fileName}.${row.suffix}`
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },

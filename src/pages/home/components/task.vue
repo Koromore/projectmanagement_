@@ -14,7 +14,7 @@
               class="filtrateClient"
             >
               <el-option
-                v-for="item in clientIdList"
+                v-for="item in allClientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -30,7 +30,7 @@
               size="small"
               @click="tab1_change(item.businessId)"
               :class="[serviceId==item.businessId ? 'act' : '']"
-              v-for="(item, index) in businessList[0]"
+              v-for="(item, index) in allBusinessList[0]"
               :key="index"
             >{{item.businessName}}</el-button>
             <el-button
@@ -38,14 +38,14 @@
               plain
               size="small"
               icon="el-icon-more"
-              @click="tab1_more()"
+              @click.stop="tab1_more()"
               :class="[moreShow==true ? 'act more' : 'more']"
               style="border-left: 0;"
             ></el-button>
           </el-button-group>
           <el-card class="box-card" v-show="moreShow">
             <el-button-group
-              v-for="(items, index) in businessList"
+              v-for="(items, index) in allBusinessList"
               :key="index"
               v-show="index != 0"
               class="moreBus"
@@ -54,7 +54,7 @@
                 type="primary"
                 plain
                 size="small"
-                @click="tab1_change(item.businessId)"
+                @click.stop="tab1_change(item.businessId)"
                 :class="[serviceId==item.businessId ? 'act' : '']"
                 v-for="(item, index) in items"
                 :key="index"
@@ -119,22 +119,23 @@
             :filters="filtratePro"
             :filter-method="filterName"
             show-overflow-tooltip
-            width="300"
+            min-width="300"
           ></el-table-column>
           <el-table-column
             prop="deptName"
             label="部门"
             :filters="filtrateDep"
             :filter-method="filterDepartment"
+            min-width="130"
           ></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="240">
             <el-link
               type="primary"
               slot-scope="scope"
               @click="task_detail(scope.row,0)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="执行状态">
+          <el-table-column prop="status" label="执行状态" min-width="100">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -144,9 +145,11 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="faTaskName" label="父任务"></el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable></el-table-column>
-          <el-table-column prop="tag" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column prop="faTaskName" label="父任务" min-width="160"></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="130">
+            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="tag" label="操作" min-width="180" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -186,15 +189,15 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           align="left"
         >
-          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip>
+          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="190"></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="190">
             <el-link
               type="primary"
               slot-scope="scope"
               @click="task_detail(scope.row,1)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="81">
+          <el-table-column prop="status" label="状态" min-width="81">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -204,15 +207,18 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="doUserName" label="执行人" width="90">
+          <el-table-column prop="doUserName" label="执行人" width="180">
             <template slot-scope="scope">
               <div v-show="changeDoUserNameShow != scope.$index">
                 {{scope.row.doUserName}}
                 <el-link
+                  class="change"
                   type="primary"
                   @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
                   v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                >更换</el-link>
+                >
+                  <i class="el-icon-edit"></i>
+                </el-link>
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
                 <el-select
@@ -239,18 +245,18 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable width="110">
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable width="110">
-            <template slot-scope="scope">{{$time(scope.row.overTime)}}</template>
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人" width="110"></el-table-column>
-          <el-table-column prop="taskfileList" label="成果">
+          <el-table-column prop="initUserName" label="下达人" min-width="90"></el-table-column>
+          <el-table-column prop="taskfileList" label="成果" min-width="110">
             <div
               class="taskfile"
               slot-scope="scope"
-              v-if="scope.row.status == 3 && scope.row.taskfileList.length != 0"
+              v-if="scope.row.taskfileList.length != 0"
               @click="download(scope.row.taskfileList[0])"
             >
               <img
@@ -278,7 +284,13 @@
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="operation" label="操作" width="180" filter-placement="bottom-end">
+          <el-table-column
+            prop="operation"
+            label="操作"
+            width="180"
+            filter-placement="bottom-end"
+            v-if="userId!=152"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -364,6 +376,11 @@ import taskDetail from '@/pages/template/taskDetail'
 
 export default {
   name: 'task',
+  props: {
+    allBusinessList: Array,
+    allClientIdList: Array,
+    clickCloseNum: Number
+  },
   components: {
     taskDetail
   },
@@ -485,6 +502,10 @@ export default {
     tabs_activity: function(newQuestion, oldQuestion) {
       let id = this.tabs_activity
       this.findTaskList(id)
+    },
+    clickCloseNum: function(newQuestion, oldQuestion) {
+      this.moreShow = false
+      console.log(this.clickCloseNum)
     }
   },
   // 方法
@@ -690,7 +711,8 @@ export default {
           initUserId: this.userId,
           status: this.status
         },
-        pageNum: 1
+        pageNum: 1,
+        pageSize: 30
       }
       let data1 = {
         type: 1,
@@ -701,7 +723,8 @@ export default {
           initUserId: this.userId,
           status: this.status
         },
-        pageNum: 1
+        pageNum: 1,
+        pageSize: 30
       }
       if (id == 0) {
         this.getTasklistAjax(data0)
@@ -892,7 +915,8 @@ export default {
           initUserId: this.userId,
           status: this.status
         },
-        pageNum: page
+        pageNum: page,
+        pageSize: 30
       }
       this.getTasklistAjax(data0)
     },
@@ -908,7 +932,8 @@ export default {
           initUserId: this.userId,
           status: this.status
         },
-        pageNum: page
+        pageNum: page,
+        pageSize: 30
       }
       this.getTasklistAjax_(data1)
     },
@@ -920,7 +945,7 @@ export default {
       let localPath = row.localPath
       // console.log("123")
       let a = document.createElement('a')
-      a.download = row.fileName
+      a.download = `${row.fileName}.${row.suffix}`
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },
@@ -960,7 +985,8 @@ export default {
               initUserId: this.userId,
               status: this.status
             },
-            pageNum: this.pageNum1
+            pageNum: this.pageNum1,
+            pageSize: 30
           }
           this.getTasklistAjax_(data1)
         }
@@ -984,24 +1010,16 @@ export default {
     messageError(message) {
       // 错误提示
       this.$message.error(message)
-    },
-    // MessageBox() {
-    //   this.$alert('这是一段内容', '标题名称', {
-    //     confirmButtonText: '确定',
-    //     callback: action => {
-    //       this.join_redact()
-    //       // this.$message({
-    //       //   type: 'info',
-    //       //   message: `action: ${ action }`
-    //       // });
-    //     }
-    //   })
-    // },
+    }
   },
   // 钩子函数
   mounted() {
     // this.widthheight()
     // this.getAllClientAndBusiness() // 获取客户和业务
+    // if (this.userId == 152) {
+    //   this.tabs_activity = 0
+    //   console.log(this.tabs_activity)
+    // }
     this.getTasklist(1) // 获取任务列表
     // this.upload() // 上传附件地址
     // this.getBusinessListAjax() // 获取业务类型
@@ -1040,15 +1058,16 @@ export default {
   border-left: 0;
 }
 .task .top .tab1 .box-card {
-  width: 271px;
+  width: 272px;
+  padding: 0 8px;
   position: absolute;
-  top: 32px;
+  top: 36px;
   left: 50%;
-  margin-left: -136px;
+  margin-left: -147px;
   z-index: 9999;
 }
 .task .top .tab1 .box-card >>> .el-card__body {
-  padding: 20px 0;
+  padding: 9px 0;
 }
 .task .top .tab1 .box-card .moreBus {
   margin-bottom: 9px;
@@ -1148,9 +1167,12 @@ export default {
   text-align: center;
 }
 .task .table .taskfile {
+  display: flex;
+  align-items: center;
   cursor: pointer;
 }
 .task .table .filenametext {
+  display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1307,5 +1329,8 @@ export default {
 }
 .task .elementUpload {
   width: 100%;
+}
+.task .change {
+  font-size: 18px;
 }
 </style>

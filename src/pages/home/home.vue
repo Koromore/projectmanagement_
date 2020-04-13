@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div class="home" @click="clickClose">
     <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
       <!--------- 左菜单栏 start --------->
@@ -9,15 +9,15 @@
           @click="change_show(2,'project')"
         >
           <i class="el-icon-document-copy"></i>
-          项目管理
+          项目
         </div>
         <div :class="[show_acti=='3'?'title act':'title']" @click="change_show(3,'task')">
           <i class="el-icon-finished"></i>
-          任务管理
+          任务
         </div>
         <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4,'document')">
           <i class="el-icon-folder-opened"></i>
-          文档管理
+          文档
         </div>
         <div
           :class="[show_acti=='1'?'title act':'title']"
@@ -44,7 +44,14 @@
       <el-container>
         <!--------- 内容 start --------->
         <el-main>
-          <router-view @getData="getData" ref="project" :update="update"></router-view>
+          <router-view
+            @getData="getData"
+            ref="project"
+            :update="update"
+            :allBusinessList="allBusinessList"
+            :allClientIdList="allClientIdList"
+            :clickCloseNum="clickCloseNum"
+          ></router-view>
         </el-main>
         <!---------- 内容 end --------->
       </el-container>
@@ -244,7 +251,7 @@
               <el-col
                 :span="24"
                 v-for="(items,index) in messageData"
-                class="infinite-list-item"
+                :class="[items.isread == false ? 'act' : '', 'infinite-list-item']"
                 :key="index"
               >
                 <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
@@ -454,7 +461,12 @@ export default {
       ],
       feedbackContent: '',
       feedbackFileList: [],
-      fileListFeedback: []
+      fileListFeedback: [],
+      // 所有客户/业务类型
+      allBusinessList: [],
+      allClientIdList: [],
+      // 最外层点击关闭
+      clickCloseNum: 0
     }
   },
   // 侦听器
@@ -483,12 +495,8 @@ export default {
     $route: 'router_url'
   },
   // 钩子函数
-  beforeMount(){
-    // 获取所有用户
-    this.getAllClientapiList()
-    // 获取业务类型
-    this.getBusinessListAjax()
-  },
+  beforeCreate() {},
+  beforeMount() {},
   mounted() {
     this.init()
     this.widthheight()
@@ -498,10 +506,17 @@ export default {
     // 统计/设置显示判断
     this.statisticsShowIf()
     this.setShowIf()
-    
+    // 获取所有用户
+    this.getAllClientapiList()
+    // 获取业务类型
+    this.getBusinessListAjax()
   },
   // 方法
   methods: {
+    clickClose() {
+      let clickCloseNum = this.clickCloseNum
+      this.clickCloseNum = clickCloseNum + 1
+    },
     ///////// WebSocket start /////////
     init: function() {
       if (typeof WebSocket === 'undefined') {
@@ -575,9 +590,7 @@ export default {
             clientId = element.clientId
           }
         })
-        // this.clientIdList = clientIdList
-        // this.clientId = clientId
-        this.$store.commit('getClientIdList', clientIdList)
+        this.allClientIdList = clientIdList
       }
     },
     ///////// 获取所有客户信息 end /////////
@@ -607,9 +620,7 @@ export default {
           let businessListData = data.slice(i * 3, i * 3 + 3)
           businessList.push(businessListData)
         }
-        this.$store.commit('getBusinessList', businessList)
-        // this.businessList = businessList
-        // console.log(this.businessList)
+        this.allBusinessList = businessList
       }
     },
     ///////// 业务类型列表获取 end /////////
@@ -871,7 +882,7 @@ export default {
     ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      console.log(data)
+      // console.log(data)
       this.initUserId = data.initUserId
       this.proId = data.proId
       this.status = data.status
@@ -885,7 +896,8 @@ export default {
       } else {
         this.new_project.radio1 = '1'
       }
-      this.new_project.presetTime = data.expertTime
+      this.new_project.presetTime = data.expertTime.replace(/-/g, '/')
+      // console.log(this.new_project.presetTime)
       this.new_project.remark = data.remark
       if (data.manager != null) {
         this.radio2 = '1'
@@ -1502,6 +1514,9 @@ export default {
 }
 .home .paneBox .infinite-list::-webkit-scrollbar {
   display: none; /* Chrome Safari */
+}
+.home .paneBox .infinite-list .infinite-list-item.act {
+  background: #eee;
 }
 .home .paneBox .infinite-list .infinite-list-item {
   height: 100px;

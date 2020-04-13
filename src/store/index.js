@@ -30,6 +30,11 @@ export default new Vuex.Store({
     // user: { userId: 3714, deptId:91, realName: '杨梦倩' }, //员工信息
     // user: { userId: 3820, deptId:91, realName: '黄震宇' }, //员工信息
     // user: { userId: 830, deptId:91, realName: '唐攀' }, //员工信息
+    // user: { userId: 719, deptId:45, realName: '李小曼' }, //员工信息
+    // user: { userId: 231, deptId:105, realName: '蔡玲' }, //员工信息
+    // user: { userId: 585, deptId:45, realName: '方全书' }, //员工信息
+    // user: { userId: 41, deptId:153, realName: '冯萌' }, //员工信息
+    // user: { userId: 28, deptId:90, realName: '田莉霞' }, //员工信息
     token: '', // 登录令牌
     userSign: '', // 用户信息带参
     isLogin: 'error', //error/success, // 是否登陆
@@ -37,10 +42,6 @@ export default new Vuex.Store({
     isRouterAlive: true, // 控制页面刷新
     projectListNum: 1,
     proExpertTime: '',
-    // 客户列表
-    clientIdList: [],
-    // 业务类型列表
-    businessList: []
   },
   action: {
 
@@ -49,16 +50,6 @@ export default new Vuex.Store({
     // 项目列表我参与/我发起显示
     projectListShow(state, data){
       state.projectListNum = data
-    },
-    // 获取所有用户
-    getClientIdList(state, data){
-      state.clientIdList = data
-      // console.log(data)
-    },
-    // 获取业务类型
-    getBusinessList(state, data){
-      state.businessList = data
-      // console.log(data)
     },
     /**
      * [reload 控制页面刷新]

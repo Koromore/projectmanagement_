@@ -6,9 +6,16 @@
           <el-col :span="5" class>
             <el-col :span="4" class="title">客户</el-col>
             <el-col :span="20">
-              <el-select v-model="clientId" filterable clearable placeholder="全部" size="small" class="filtrateClient">
+              <el-select
+                v-model="clientId"
+                filterable
+                clearable
+                placeholder="全部"
+                size="small"
+                class="filtrateClient"
+              >
                 <el-option
-                  v-for="item in clientIdList"
+                  v-for="item in allClientIdList"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -18,38 +25,43 @@
           </el-col>
           <el-col :span="7" class="tab tab1">
             <el-button-group>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(item.businessId)"
-              :class="[serviceId==item.businessId ? 'act' : '']"
-              v-for="(item, index) in businessList[0]"
-              :key="index"
-            >{{item.businessName}}</el-button>
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              icon="el-icon-more"
-              @click="tab1_more()"
-              :class="[moreShow==true ? 'act more' : 'more']"
-              style="border-left: 0;"
-            ></el-button>
-          </el-button-group>
-          <el-card class="box-card" v-show="moreShow">
-            <el-button-group v-for="(items, index) in businessList" :key="index" v-show="index != 0" class="moreBus">
-            <el-button
-              type="primary"
-              plain
-              size="small"
-              @click="tab1_change(item.businessId)"
-              :class="[serviceId==item.businessId ? 'act' : '']"
-              v-for="(item, index) in items"
-              :key="index"
-            >{{item.businessName}}</el-button>
-          </el-button-group>
-          </el-card>
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                @click="tab1_change(item.businessId)"
+                :class="[serviceId==item.businessId ? 'act' : '']"
+                v-for="(item, index) in allBusinessList[0]"
+                :key="index"
+              >{{item.businessName}}</el-button>
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                icon="el-icon-more"
+                @click.stop="tab1_more()"
+                :class="[moreShow==true ? 'act more' : 'more']"
+                style="border-left: 0;"
+              ></el-button>
+            </el-button-group>
+            <el-card class="box-card" v-show="moreShow">
+              <el-button-group
+                v-for="(items, index) in allBusinessList"
+                :key="index"
+                v-show="index != 0"
+                class="moreBus"
+              >
+                <el-button
+                  type="primary"
+                  plain
+                  size="small"
+                  @click.stop="tab1_change(item.businessId)"
+                  :class="[serviceId==item.businessId ? 'act' : '']"
+                  v-for="(item, index) in items"
+                  :key="index"
+                >{{item.businessName}}</el-button>
+              </el-button-group>
+            </el-card>
           </el-col>
           <el-col :span="4" class="tab tab2">
             <el-button-group>
@@ -93,7 +105,7 @@
         @row-click="rowClick"
         :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
       >
-        <el-table-column label="文档">
+        <el-table-column label="文档" show-overflow-tooltip>
           <template slot-scope="scope">
             <div @click.stop="changeNum(scope.$index,scope.row)">
               <div v-if="editable[scope.$index]">
@@ -135,11 +147,11 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="clientName" label="客户"></el-table-column>
-        <el-table-column prop="proName" label="项目"></el-table-column>
-        <el-table-column prop="taskName" label="任务"></el-table-column>
-        <el-table-column prop="updateTime" label="更新时间" sortable width="180"></el-table-column>
-        <el-table-column prop="realName" label="更新人" width="180"></el-table-column>
+        <el-table-column prop="clientName" label="客户" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="proName" label="项目" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="taskName" label="任务" show-overflow-tooltip></el-table-column>
+        <el-table-column prop="updateTime" label="更新时间" sortable width="130"></el-table-column>
+        <el-table-column prop="realName" label="更新人" width="100"></el-table-column>
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
             <el-button
@@ -251,6 +263,11 @@ import taskDetail from '@/pages/template/taskDetail'
 
 export default {
   name: 'document',
+  props: {
+    allBusinessList: Array,
+    allClientIdList: Array,
+    clickCloseNum: Number
+  },
   components: {
     taskDetail
   },
@@ -334,6 +351,34 @@ export default {
       changeNameShow: false,
       userValue: '' // 修改后执行人
     }
+  },
+  // 侦听器
+  watch: {
+    clientId: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+    // 业务类型侦听
+    serviceId: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+    // 专项/日常侦听
+    isUsual: function(newQuestion, oldQuestion) {
+      this.getTaskfilePageList()
+    },
+    clickCloseNum: function(newQuestion, oldQuestion) {
+      this.moreShow = false
+      console.log(this.clickCloseNum)
+    }
+  },
+  // 钩子函数
+  beforeMount() {},
+  mounted() {
+    this.getTaskfilePageList()
+    let upType = 0
+    let demandType = 0
+    let uploadUrl = `/pmbs/file/upload?upType=${upType}&demandType=${demandType}`
+    this.uploadUrl = uploadUrl
+    this.pickerOptionsTime() // 禁用时间函数
   },
   methods: {
     pickerOptionsTime() {
@@ -502,7 +547,7 @@ export default {
         this.serviceId = id
       }
     },
-    tab1_more(e){
+    tab1_more(e) {
       let moreShow = this.moreShow
       this.moreShow = !moreShow
     },
@@ -576,7 +621,7 @@ export default {
     download(row) {
       let localPath = row.localPath
       let a = document.createElement('a')
-      a.download = row.fileName
+      a.download = `${row.fileName}.${row.suffix}`
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
     },
@@ -640,21 +685,20 @@ export default {
           data[i].updateTime = this.$time(element.updateTime)
         }
         this.totalnum = res.data.totalRows
-        let clientIdList = this.clientIdList
-        data.forEach((element,i) => {
+        let clientIdList = this.allClientIdList
+        data.forEach((element, i) => {
           clientIdList.forEach(element_ => {
             if (element.clientId == element_.value) {
               data[i].clientName = element_.label
-              // console.log(data[i])
             }
-          });
-        });
+          })
+        })
         this.tableData = data
         // console.log(data)
       }
     },
-     // 关闭任务详情回调
-    closeDrawer(res){
+    // 关闭任务详情回调
+    closeDrawer(res) {
       // console.log(res)
       this.taskId = ''
       if (res == 1) {
@@ -680,29 +724,6 @@ export default {
       // 错误提示
       this.$message.error(message)
     }
-  },
-  watch: {
-    clientId: function(newQuestion, oldQuestion) {
-      this.getTaskfilePageList()
-    },
-    // 业务类型侦听
-    serviceId: function(newQuestion, oldQuestion) {
-      this.getTaskfilePageList()
-    },
-    // 专项/日常侦听
-    isUsual: function(newQuestion, oldQuestion) {
-      this.getTaskfilePageList()
-    }
-  },
-  // 钩子函数
-  beforeMount() {},
-  mounted() {
-    this.getTaskfilePageList()
-    let upType = 0
-    let demandType = 0
-    let uploadUrl = `/pmbs/file/upload?upType=${upType}&demandType=${demandType}`
-    this.uploadUrl = uploadUrl
-    this.pickerOptionsTime() // 禁用时间函数
   }
 }
 </script>
@@ -740,7 +761,7 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-.document .top .filtrateClient{
+.document .top .filtrateClient {
   width: 100%;
 }
 .document .top .title {
@@ -759,34 +780,35 @@ export default {
   border: none;
   color: white;
 }
-.document .top .tab1{
+.document .top .tab1 {
   position: relative;
   display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
-.document .top .tab1 button:nth-of-type(3){
+.document .top .tab1 button:nth-of-type(3) {
   border-left: 0;
 }
-.document .top .tab1 .box-card{
-  width: 271px;
+.document .top .tab1 .box-card {
+  width: 272px;
+  padding: 0 8px;
   position: absolute;
-  top: 32px;
+  top: 36px;
   left: 50%;
-  margin-left: -136px;
+  margin-left: -147px;
   z-index: 9999;
 }
-.document .top .tab1 .box-card>>>.el-card__body{
-  padding: 20px 0;
+.document .top .tab1 .box-card >>> .el-card__body {
+  padding: 9px 0;
 }
-.document .top .tab1 .box-card .moreBus{
+.document .top .tab1 .box-card .moreBus {
   margin-bottom: 9px;
 }
-.document .top button{
+.document .top button {
   width: 80px;
 }
-.document .top .more{
+.document .top .more {
   width: 32px;
   padding: 9px;
 }
@@ -890,7 +912,7 @@ export default {
   text-align: center;
   font-size: 13px;
   color: rgb(162, 162, 162);
-  cursor:pointer;
+  cursor: pointer;
 }
 .task .task_details .smname div {
   overflow: hidden;
@@ -922,7 +944,7 @@ export default {
   color: #000;
   font-size: 16px;
 }
-.task .task_details .suggest .fileListBox{
+.task .task_details .suggest .fileListBox {
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -933,9 +955,9 @@ export default {
   font-size: 13px;
   color: rgb(162, 162, 162);
   margin-top: 13px;
-  cursor:pointer;
+  cursor: pointer;
 }
-.task .task_details .suggest .fileList div{
+.task .task_details .suggest .fileList div {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
