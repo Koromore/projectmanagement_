@@ -46,7 +46,7 @@ select{outline:none; appearance:none; -webkit-appearance: none; -moz-appearance:
 }
 .el-breadcrumb__inner a, .el-breadcrumb__inner.is-link{
     font-weight: normal;
-    color: #337ab7;
+    /* color: #337ab7; */
 }
 .el-drawer{
     min-width: 480px;

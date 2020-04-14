@@ -103,14 +103,14 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="proName" label="名称" show-overflow-tooltip min-width="360">
+          <el-table-column prop="proName" label="名称" show-overflow-tooltip min-width="330">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="150">
+          <el-table-column prop="status" label="状态" width="90">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -119,17 +119,23 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="num" label="总任务数/待完成" min-width="150">
+          <el-table-column prop="num" label="总任务数/待完成" min-width="110" class-name="center">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="realName" label="下达人" min-width="130"></el-table-column>
-          <el-table-column prop="tag" label="操作" min-width="180" filter-placement="bottom-end" v-if="userId!=152">
+          <el-table-column prop="realName" label="下达人" min-width="90"></el-table-column>
+          <el-table-column
+            prop="tag"
+            label="操作"
+            min-width="160"
+            filter-placement="bottom-end"
+            v-if="userId!=152"
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -435,11 +441,11 @@ export default {
       disabled: false,
       delayReason: '', // 延迟原因内容
       // 我发起分页
-      pageNum: 1, //默认页码
+      pageNum: this.$store.state.projectPageNum, //默认页码
       totalnum: 0, //总页码
       currentData: [], //当前渲染的数据
       // 我参与分页
-      pageNum_: 1, //默认页码
+      pageNum_: this.$store.state.projectPageNum_, //默认页码
       totalnum_: 0, //总页码
       currentData_: [] //当前渲染的数据
     }
@@ -517,20 +523,21 @@ export default {
     },
     clickCloseNum: function(newQuestion, oldQuestion) {
       this.moreShow = false
-      console.log(this.clickCloseNum)
+      // console.log(this.clickCloseNum)
     }
   },
   // 钩子函数
   mounted() {
+    // console.log(this.pageNum)
+    // console.log(this.pageNum_)
     // this.widthheight()
     this.projectListNum() //
     if (this.userId == 152) {
       this.tabs_activity = 0
-      console.log(this.tabs_activity)
     }
     let id = this.tabs_activity
     this.findProjectList(id)
-    this.getParams()
+    this.getParams(id)
     // this.getProjectList(0) // 获取项目列表
 
     // console.log(this.businessList)
@@ -718,6 +725,8 @@ export default {
     ///////// 查询按钮 end /////////
     // 选项卡
     table_tab(e) {
+      this.pageNum = 1
+      this.pageNum_ = 1
       this.tabs_activity = e
       this.$store.commit('projectListShow', e)
     },
@@ -928,6 +937,15 @@ export default {
     // 跳转项目详情页面
     pathPrpjectDetails(id, type) {
       // console.log(id)
+      let page = ''
+      if (type == 0) {
+        page = this.pageNum
+        this.$store.commit('projectPageNumRecord', page)
+      } else if (type == 1) {
+        page = this.pageNum_
+        this.$store.commit('projectPageNumRecord_', page)
+      }
+      // this.$store.commit('projectPageNumRecord', page)
       this.$router.push({
         path: '/home/components/project_details',
         query: { id: id, type: type }
@@ -959,10 +977,14 @@ export default {
       }
       let data = `?inituserid=${userId}${clientIdData}${serviceIdData}${isUsualData}${statusData}`
       if (id == 0) {
+        // this.pageNum = this.$store.state.projectPageNum
         this.getProjectListAjax(data)
       } else if (id == 1) {
+        // this.pageNum_ = this.$store.state.projectPageNum
         this.getProjectUserjoinproject(data)
       }
+      // console.log(this.pageNum)
+      // console.log(this.pageNum_)
     },
     ///////// 获取项目列表 start /////////
     getProjectList(id) {
@@ -1017,6 +1039,7 @@ export default {
           (this.pageNum - 1) * 30,
           (this.pageNum - 1) * 30 + 30
         )
+        // this.$store.commit('projectPageNumRecord', 1)
         // console.log(this.currentData)
       }
     },
@@ -1040,9 +1063,10 @@ export default {
         this.totalnum_ = this.projectListJoin.length
         var json = JSON.parse(JSON.stringify(this.projectListJoin)) //拷贝数据 避免影响原始数据
         this.currentData_ = json.splice(
-          (this.pageNum - 1) * 30,
-          (this.pageNum - 1) * 30 + 30
+          (this.pageNum_ - 1) * 30,
+          (this.pageNum_ - 1) * 30 + 30
         )
+        // this.$store.commit('projectPageNumRecord', 1)
         // slice
         // this.currentData_ = json.slice(
         //   (this.pageNum - 1) * 30,
@@ -1084,7 +1108,7 @@ export default {
       )
       // console.log(this.currentData_)
     },
-    getParams() {
+    getParams(id) {
       let name = this.$route.query.name
       let clientIdList = this.allClientIdList
       clientIdList.forEach(element => {
@@ -1164,8 +1188,8 @@ export default {
 .project .top .tab1 .box-card >>> .el-card__body {
   padding: 9px 0;
 }
-.project .top .tab1 .box-card .moreBus {
-  margin-bottom: 9px;
+.project .top .tab1 .box-card .moreBus:nth-of-type(n + 3) {
+  margin-top: 9px;
 }
 .project .top button {
   width: 80px;
@@ -1378,6 +1402,10 @@ export default {
   cursor: pointer;
 }
 .paging {
+  margin-top: 24px;
+  text-align: center;
+}
+.project >>> .center .cell {
   text-align: center;
 }
 </style>

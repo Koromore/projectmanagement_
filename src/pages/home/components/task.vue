@@ -116,26 +116,28 @@
             prop="proName"
             label="所属项目"
             column-key="name"
-            :filters="filtratePro"
-            :filter-method="filterName"
             show-overflow-tooltip
-            min-width="300"
-          ></el-table-column>
+            min-width="210"
+          >
+          <!-- :filters="filtratePro"
+            :filter-method="filterName" -->
+          </el-table-column>
           <el-table-column
             prop="deptName"
             label="部门"
-            :filters="filtrateDep"
-            :filter-method="filterDepartment"
-            min-width="130"
-          ></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="240">
+            min-width="120"
+          >
+          <!-- :filters="filtrateDep"
+            :filter-method="filterDepartment" -->
+          </el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="210">
             <el-link
               type="primary"
               slot-scope="scope"
               @click="task_detail(scope.row,0)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="执行状态" min-width="100">
+          <el-table-column prop="status" label="状态" min-width="90">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -145,11 +147,11 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="faTaskName" label="父任务" min-width="160"></el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="130">
+          <el-table-column prop="faTaskName" label="父任务" min-width="130"></el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="tag" label="操作" min-width="180" filter-placement="bottom-end">
+          <el-table-column prop="tag" label="操作" min-width="160" filter-placement="bottom-end">
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -189,8 +191,8 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           align="left"
         >
-          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="190"></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="190">
+          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="115"></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="115">
             <el-link
               type="primary"
               slot-scope="scope"
@@ -209,16 +211,18 @@
           </el-table-column>
           <el-table-column prop="doUserName" label="执行人" width="180">
             <template slot-scope="scope">
-              <div v-show="changeDoUserNameShow != scope.$index">
-                {{scope.row.doUserName}}
-                <el-link
+              <div v-show="changeDoUserNameShow != scope.$index" class="doUserName">
+                <span>{{scope.row.doUserName}}</span>
+                <!-- <el-link
                   class="change"
                   type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
                   v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                >
-                  <i class="el-icon-edit"></i>
-                </el-link>
+                > -->
+                  <!-- <i class="el-icon-edit"></i> -->
+                  <img src="static/images/task/change.png" width="18" alt="" srcset="" @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5">
+                <!-- </el-link> -->
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
                 <el-select
@@ -240,19 +244,19 @@
                   slot="append"
                   type="primary"
                   size="mini"
-                  @click="changeDoUserNameAffirm(scope.row)"
+                  @click.stop="changeDoUserNameAffirm(scope.row)"
                 >确认</el-button>
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
+          <el-table-column prop="expertTime" label="预计时间" sortable width="110">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+          <el-table-column prop="overTime" label="完成时间" sortable width="110">
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人" min-width="90"></el-table-column>
-          <el-table-column prop="taskfileList" label="成果" min-width="110">
+          <el-table-column prop="initUserName" label="下达人" min-width="80"></el-table-column>
+          <el-table-column prop="taskfileList" label="成果" min-width="90">
             <div
               class="taskfile"
               slot-scope="scope"
@@ -262,32 +266,32 @@
               <img
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
                 src="static/images/document/word.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
                 src="static/images/document/excle.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
                 src="static/images/document/ppt.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
-              <img v-else src="static/images/document/other.png" width="24" alt srcset />
+              <img v-else src="static/images/document/other.png" width="20" alt srcset />
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
           <el-table-column
             prop="operation"
             label="操作"
-            width="180"
+            width="160"
             filter-placement="bottom-end"
             v-if="userId!=152"
           >
@@ -390,7 +394,7 @@ export default {
       deptId: this.$store.state.user.deptId, // 部门ID
       loading: false,
       // drawerLoading: false,
-      taskId: '',
+      taskId: 0,
       // 项目类型选择
       task_type: [],
       task_type_value: '',
@@ -505,7 +509,8 @@ export default {
     },
     clickCloseNum: function(newQuestion, oldQuestion) {
       this.moreShow = false
-      console.log(this.clickCloseNum)
+      this.changeDoUserNameShow = 'true'
+      // console.log(this.clickCloseNum)
     }
   },
   // 方法
@@ -959,7 +964,7 @@ export default {
     // 关闭任务详情回调
     closeDrawer(res) {
       // console.log(res)
-      this.taskId = ''
+      this.taskId = 0
       let tabs_activity = this.tabs_activity
       if (res == 1) {
         if (tabs_activity == 0) {
@@ -1016,11 +1021,11 @@ export default {
   mounted() {
     // this.widthheight()
     // this.getAllClientAndBusiness() // 获取客户和业务
-    // if (this.userId == 152) {
-    //   this.tabs_activity = 0
-    //   console.log(this.tabs_activity)
-    // }
-    this.getTasklist(1) // 获取任务列表
+    if (this.userId == 152) {
+      this.tabs_activity = 0
+      // console.log(this.tabs_activity)
+    }
+    this.getTasklist(this.tabs_activity) // 获取任务列表
     // this.upload() // 上传附件地址
     // this.getBusinessListAjax() // 获取业务类型
   }
@@ -1164,12 +1169,16 @@ export default {
   border-bottom: 1px solid rgb(187, 187, 187);
 }
 .task .table .page {
+  margin-top: 24px;
   text-align: center;
 }
 .task .table .taskfile {
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+.task .table .taskfile img{
+  margin-right: 6px;
 }
 .task .table .filenametext {
   display: inline-block;
@@ -1332,5 +1341,13 @@ export default {
 }
 .task .change {
   font-size: 18px;
+}
+.task .doUserName{
+  display: flex;
+  align-items: center;
+}
+.task .doUserName img{
+  margin-left: 6px;
+  cursor: pointer;
 }
 </style>

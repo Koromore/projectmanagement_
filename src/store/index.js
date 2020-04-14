@@ -42,6 +42,8 @@ export default new Vuex.Store({
     isRouterAlive: true, // 控制页面刷新
     projectListNum: 1,
     proExpertTime: '',
+    projectPageNum: 1,
+    projectPageNum_: 1
   },
   action: {
 
@@ -50,6 +52,16 @@ export default new Vuex.Store({
     // 项目列表我参与/我发起显示
     projectListShow(state, data){
       state.projectListNum = data
+    },
+    // 项目列表我发起分页记录
+    projectPageNumRecord(state, data){
+      state.projectPageNum = data
+      // console.log('我发起'+state.projectPageNum)
+    },
+    // 项目列表我参与分页记录
+    projectPageNumRecord_(state, data){
+      state.projectPageNum_ = data
+      // console.log('我参与'+state.projectPageNum_)
     },
     /**
      * [reload 控制页面刷新]

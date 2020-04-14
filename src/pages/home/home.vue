@@ -1150,6 +1150,7 @@ export default {
       ) {
         this.messageError('信息不能为空')
       } else {
+        this.drawer = false
         this.$axios
           .post('/pmbs/api/project/save', data)
           .then(this.addProjectSuss)
@@ -1160,7 +1161,6 @@ export default {
       // console.log(res)
       if (res.status == 200) {
         this.messageWin('项目添加成功')
-        this.drawer = false
         this.radio2 = 1
         // 重置信息
         this.empty()
@@ -1519,7 +1519,7 @@ export default {
   background: #eee;
 }
 .home .paneBox .infinite-list .infinite-list-item {
-  height: 100px;
+  /* height: 100px; */
   font-size: 14px;
   box-sizing: border-box;
   padding: 18px 0;

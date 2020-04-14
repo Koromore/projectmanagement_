@@ -55,7 +55,7 @@
               type="primary"
               @click="changeName()"
               v-if="taskData.isIgnore != true && taskData.listOaUser.length > 1 && taskData.status != 2 && taskData.status != 3 && taskData.status != 5 && taskData.deptId == subordinate"
-            >更换</el-link>
+            ><img src="static/images/task/change.png" width="18" alt="" srcset=""></el-link>
           </el-col>
           <el-col :span="6" class="title">状态：</el-col>
           <el-col :span="18">
@@ -97,7 +97,10 @@
                 :value="item.value"
               ></el-option>
             </el-select>
-            <span v-else-if="taskData.status==4 && taskData.doUserId != userId" class="state_color4">延期</span>
+            <span
+              v-else-if="taskData.status==4 && taskData.doUserId != userId"
+              class="state_color4"
+            >延期</span>
             <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
           </el-col>
           <el-col :span="6" class="title">预计时间：</el-col>
@@ -315,7 +318,10 @@
 <script>
 export default {
   name: 'task',
-  props: ['taskId'],
+  props: {
+    taskId: Number,
+    clickCloseNum: Number
+  },
   // {
   //   transferTask: Object
   // }, //transferTask
@@ -406,6 +412,9 @@ export default {
       }
       // },
       // deep: true
+    },
+    clickCloseNum: function(newQuestion, oldQuestion) {
+      this.changeDoUserNameShow = 'true'
     }
     // listProFile: function(newValue, oldValue) {
     //   if (newValue.length == 0) {
@@ -706,14 +715,14 @@ export default {
         taskData.taskfileList = []
       }
       // console.log(taskData)
-      if (status==2) {
+      if (status == 2) {
         if (listProFileResult.length == 0 || taskData.overDesc == '') {
           this.messageError('完成结果与成果文档不能为空')
-        }else{
+        } else {
           this.taskSave(taskData)
         }
         listProFileResult
-      }else{
+      } else {
         this.taskSave(taskData)
       }
       // this.taskSave(taskData)

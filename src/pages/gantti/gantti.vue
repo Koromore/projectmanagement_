@@ -399,6 +399,9 @@ export default {
   line-height: 54px;
   margin-bottom: 32px;
 }
+#gantti .svg-icon{
+  cursor: pointer;
+}
 /* .wl-gantt-demo {
   margin: 40px auto;
   width: 1000px;

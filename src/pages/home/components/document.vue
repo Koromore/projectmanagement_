@@ -275,7 +275,7 @@ export default {
     return {
       userId: this.$store.state.user.userId, // 用户ID
       deptId: this.$store.state.user.deptId, // 部门ID
-      taskId: '',
+      taskId: 0,
       openHistory: false, //控制文档历史记录侧栏状态
       editFileName: '', //修改的文件名
       clientId: '', //客户ID
@@ -367,7 +367,7 @@ export default {
     },
     clickCloseNum: function(newQuestion, oldQuestion) {
       this.moreShow = false
-      console.log(this.clickCloseNum)
+      // console.log(this.clickCloseNum)
     }
   },
   // 钩子函数
@@ -700,7 +700,7 @@ export default {
     // 关闭任务详情回调
     closeDrawer(res) {
       // console.log(res)
-      this.taskId = ''
+      this.taskId = 0
       if (res == 1) {
         this.getParams()
       }

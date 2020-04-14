@@ -2,8 +2,10 @@
   <div class="project_details" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <el-link @click="toProject()">项目管理</el-link>
-        <span class="project_name">/ {{proName}}</span>
+        <el-breadcrumb separator="/">
+          <el-breadcrumb-item :to="{ path: '/home/components/project?page=1' }">项目</el-breadcrumb-item>
+          <el-breadcrumb-item class="act">{{proName}}</el-breadcrumb-item>
+        </el-breadcrumb>
       </el-col>
       <el-col :span="6" class="tabs">
         <el-button-group>
@@ -62,13 +64,13 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="deptName" label="部门" show-overflow-tooltip min-width="240"></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="240">
+          <el-table-column prop="deptName" label="部门" show-overflow-tooltip min-width="120"></el-table-column>
+          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="120">
             <template slot-scope="scope">
               <el-link type="primary" @click="task_detail(scope.row)">{{scope.row.taskName}}</el-link>
             </template>
           </el-table-column>
-          <el-table-column prop="status" label="状态" min-width="110">
+          <el-table-column prop="status" label="状态" min-width="80">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -78,15 +80,24 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="doUserName" label="执行人" min-width="180">
+          <el-table-column prop="doUserName" label="执行人" width="180">
             <template slot-scope="scope">
-              <div v-show="changeDoUserNameShow != scope.$index">
-                {{scope.row.doUserName}}
-                <el-link
+              <div v-show="changeDoUserNameShow != scope.$index" class="doUserName">
+                <span>{{scope.row.doUserName}}</span>
+                <!-- <el-link
                   type="primary"
-                  @click="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
                   v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5 && scope.row.deptId == subordinate"
-                >更换</el-link>
+                >-->
+                <img
+                  src="static/images/task/change.png"
+                  width="18"
+                  alt
+                  srcset
+                  @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5 && scope.row.deptId == subordinate"
+                />
+                <!-- </el-link> -->
                 <!-- doUserId -->
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -109,19 +120,19 @@
                   slot="append"
                   type="primary"
                   size="mini"
-                  @click="changeDoUserNameAffirm(scope.row)"
+                  @click.stop="changeDoUserNameAffirm(scope.row)"
                 >确认</el-button>
               </div>
             </template>
           </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="110">
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable min-width="110">
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="initUserName" label="下达人" min-width="81"></el-table-column>
-          <el-table-column label="成果" min-width="130">
+          <el-table-column prop="initUserName" label="下达人" min-width="72"></el-table-column>
+          <el-table-column label="成果" min-width="95">
             <div
               class="taskfile"
               slot-scope="scope"
@@ -131,30 +142,36 @@
               <img
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
                 src="static/images/document/word.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
                 src="static/images/document/excle.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
                 src="static/images/document/ppt.png"
-                width="24"
+                width="20"
                 alt
                 srcset
               />
-              <img v-else src="static/images/document/other.png" width="24" alt srcset />
+              <img v-else src="static/images/document/other.png" width="20" alt srcset />
               <!-- <br /> -->
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
-          <el-table-column prop="操作" label="操作" filter-placement="bottom-end" min-width="180" v-if="userId!=152">
+          <el-table-column
+            prop="操作"
+            label="操作"
+            filter-placement="bottom-end"
+            min-width="160"
+            v-if="userId!=152"
+          >
             <template slot-scope="scope">
               <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
@@ -467,6 +484,9 @@ import taskDetail from '@/pages/template/taskDetail'
 
 export default {
   name: 'project_details',
+  props: {
+    clickCloseNum: Number
+  },
   components: {
     taskDetail
   },
@@ -481,7 +501,7 @@ export default {
       drawerLoading: false,
       proId: '', // 项目ID
       proName: '', // 项目NAME
-      taskId: '', // 任务ID
+      taskId: 0, // 任务ID
       type: '', // 项目类型 0我发起 1我参与
       loginState: true, // 避免多次点击
       project_style: '',
@@ -496,7 +516,7 @@ export default {
       taskList: [], // 任务列表
       deptList: [], // 部门列表
       departmentList: [], // 部门列表未处理
-      projectShowDetail: {delayReason: null}, // 项目详情
+      projectShowDetail: { delayReason: null }, // 项目详情
       pasProjectapiDetai: {}, // 立项详情
       // 1执行中 2审核中 3已完成 4延期
       // 我参与 我发起选项卡
@@ -592,6 +612,11 @@ export default {
       if (this.drawer5 == false) {
         this.changeNameShow = false
       }
+    },
+    clickCloseNum: function(newQuestion, oldQuestion) {
+      // this.moreShow = false
+      this.changeDoUserNameShow = 'true'
+      // console.log(this.clickCloseNum)
     }
   },
   // 方法
@@ -1297,7 +1322,7 @@ export default {
     },
     // 关闭任务详情回调
     closeDrawer(res) {
-      this.taskId = ''
+      this.taskId = 0
       if (res == 1) {
         this.getParams()
       }
@@ -1310,10 +1335,6 @@ export default {
       console.log(a.download)
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
       a.click()
-    },
-    // 跳转项目管理界面
-    toProject() {
-      this.$router.push({ path: '/home/components/project' })
     },
     // 消息提示
     messageWin(message) {
@@ -1361,12 +1382,9 @@ export default {
 .project_details .top {
   font-size: 13px;
 }
-.project_details .top .project_name {
-  display: inline-block;
-  font-weight: 700;
-  font-size: 14px;
-  height: 19px;
-  line-height: 19px;
+.project_details .top .act>>>.el-breadcrumb__inner{
+  font-weight: bold;
+  color: #000;
 }
 .project_details .top .tab {
   height: 26px;
@@ -1384,7 +1402,7 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-around;
+  justify-content: flex-end;
 }
 .project_details .detail_list img {
   width: 24px;
@@ -1392,6 +1410,9 @@ export default {
 .project_details .detail_list i {
   font-size: 24px;
   cursor: pointer;
+}
+.project_details .detail_list i:nth-of-type(n + 2) {
+  margin-left: 49px;
 }
 .project_details .detail_list .sousuo {
   display: flex;
@@ -1476,6 +1497,9 @@ export default {
   display: flex;
   align-items: center;
   cursor: pointer;
+}
+.project_details .table1 .taskfile img {
+  margin-right: 6px;
 }
 .project_details .table2 {
   display: flex;
@@ -1714,5 +1738,13 @@ pre {
 }
 .linblo {
   display: inline-block;
+}
+.project_details .doUserName {
+  display: flex;
+  align-items: center;
+}
+.project_details .doUserName img {
+  margin-left: 6px;
+  cursor: pointer;
 }
 </style>
