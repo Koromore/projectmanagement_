@@ -698,7 +698,7 @@ export default {
       let status = this.statusListValue
       taskData.proFileList = listProFile
       taskData.taskfileList = listProFileResult
-      // taskData.status = status
+      taskData.status = status
       taskData.expertTime = this.$date0(taskData.expertTime)
       // taskData.oldFileId = this.taskId
       delete taskData.feedbackList
@@ -714,14 +714,13 @@ export default {
       ) {
         taskData.taskfileList = []
       }
-      // console.log(taskData)
+      console.log(taskData)
       if (status == 2) {
         if (listProFileResult.length == 0 || taskData.overDesc == '') {
           this.messageError('完成结果与成果文档不能为空')
         } else {
           this.taskSave(taskData)
         }
-        listProFileResult
       } else {
         this.taskSave(taskData)
       }
