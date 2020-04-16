@@ -23,34 +23,42 @@
             @click="table_tab(2)"
             :class="[tabs_activity=='2' ? 'act' : '']"
           >项目需求</el-button>
-          <el-button
+          <!-- <el-button
             type="primary"
             plain
             size="small"
             @click="table_tab(3)"
             :class="[tabs_activity=='3' ? 'act' : '']"
-          >立项背景</el-button>
+          >立项背景</el-button>-->
         </el-button-group>
       </el-col>
       <el-col :span="4" :offset="13" class="detail_list">
         <el-col :span="24" v-show="!sousuo_show">
-          <i
-            @click="addtask"
-            v-if="projectShowDetail.status != 3 && knowUserShow == true"
-            class="el-icon-circle-plus-outline"
-          ></i>
-          <i @click="gantt(1)" class="el-icon-tickets"></i>
+          <el-tooltip class="item" effect="dark" content="新增任务" placement="bottom">
+            <i
+              @click="addtask"
+              v-if="projectShowDetail.status != 3 && knowUserShow == true"
+              class="el-icon-circle-plus-outline"
+            ></i>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="甘特图" placement="bottom">
+            <i @click="gantt(1)" class="el-icon-tickets"></i>
+          </el-tooltip>
           <!-- <i @click="drawer2 = true" class="el-icon-time"></i> -->
-          <i @click="sousuoShow" class="el-icon-search"></i>
+          <el-tooltip class="item" effect="dark" content="任务查询" placement="bottom">
+            <i @click.stop="sousuoShow" class="el-icon-search"></i>
+          </el-tooltip>
         </el-col>
         <el-col :span="24" class="sousuo" v-show="sousuo_show">
           <el-col :span="20">
-            <el-input placeholder="请输入内容" v-model="sousuo_input" size="small">
-              <i slot="suffix" class="el-input__icon el-icon-search" @click="sousuo"></i>
-            </el-input>
+            <div style="100%" @click.stop="sousuo_">
+              <el-input placeholder="请输入内容" v-model="sousuo_input" size="small">
+                <i slot="suffix" class="el-input__icon el-icon-search" @click.stop="sousuo"></i>
+              </el-input>
+            </div>
           </el-col>
           <el-col :span="3" :offset="1">
-            <i class="el-icon-circle-close" @click="sousuoShow"></i>
+            <i class="el-icon-circle-close" @click.stop="sousuoShow"></i>
           </el-col>
         </el-col>
       </el-col>
@@ -132,7 +140,7 @@
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
           <el-table-column prop="initUserName" label="下达人" min-width="72"></el-table-column>
-          <el-table-column label="成果" min-width="95">
+          <el-table-column label="成果" show-overflow-tooltip min-width="95">
             <div
               class="taskfile"
               slot-scope="scope"
@@ -142,25 +150,25 @@
               <img
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
                 src="static/images/document/word.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
                 src="static/images/document/excle.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
                 src="static/images/document/ppt.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
-              <img v-else src="static/images/document/other.png" width="20" alt srcset />
+              <img v-else src="static/images/document/other.png" width="16" alt srcset />
               <!-- <br /> -->
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
@@ -172,7 +180,7 @@
             min-width="160"
             v-if="userId!=152"
           >
-            <template slot-scope="scope">
+            <template slot-scope="scope" v-if="scope.row.isIgnore != true">
               <div class="linblo" v-if="userId == scope.row.initUserId">
                 <el-button
                   size="small"
@@ -204,7 +212,7 @@
                   v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 4"
                   type="info"
                   slot="reference"
-                  @click="redact(scope.row.proId,scope.row.taskId)"
+                  @click="redact(scope.row.taskId)"
                 >忽略</el-button>
                 <el-button
                   size="mini"
@@ -221,7 +229,7 @@
       <!--------- 任务列表 end --------->
       <!--------- 项目需求 start --------->
       <el-col :span="24" class="table table2" v-if="tabs_activity == 2" v-loading="loading">
-        <el-col :span="7" class="title">
+        <!-- <el-col :span="7" class="title">
           <el-col :span="24">项目名称</el-col>
           <el-col :span="24">{{projectShowDetail.proName}}</el-col>
         </el-col>
@@ -238,45 +246,59 @@
             {{projectShowDetail.businessName}}-
             {{projectShowDetail.projectType}}
           </el-col>
-        </el-col>
-        <el-col :span="24" class="need">
+        </el-col>-->
+        <el-col :span="12" class="need">
+          <el-col :span="24" class="span">信息</el-col>
+          <el-col :span="24">项目名称：{{projectShowDetail.proName}}</el-col>
+          <el-col :span="24">
+            项目类别：
+            {{pasProjectapiDetai.clientName}}-
+            {{projectShowDetail.businessName}}-
+            {{projectShowDetail.projectType}}
+          </el-col>
+          <el-col :span="24">
+            预计时间：
+            {{$date(projectShowDetail.createTime)}}
+            至{{$date(projectShowDetail.expertTime)}}
+          </el-col>
           <el-col :span="24" class="span">需求</el-col>
           <el-col :span="24" class>
             <pre>{{projectShowDetail.remark}}</pre>
           </el-col>
           <el-col :span="24" class="span">附件</el-col>
           <el-col :span="24" class="fileList">
-            <div
+            <el-tooltip
+              class="item"
+              effect="dark"
+              :content="item.fileName"
+              placement="top"
               v-for="item in projectShowDetail.listProFile"
               :key="item.index"
-              class="fileList_"
-              @click="download(item)"
             >
-              <!-- <div class="shade" @click="download(item)">
-                <i class="el-icon-download"></i>
-              </div>-->
-              <img
-                v-if="item.suffix == 'doc' || item.suffix == 'docx'"
-                src="static/images/document/word.png"
-                alt
-                srcset
-              />
-              <img
-                v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
-                src="static/images/document/excle.png"
-                alt
-                srcset
-              />
-              <img
-                v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
-                src="static/images/document/ppt.png"
-                alt
-                srcset
-              />
-              <img v-else src="static/images/document/other.png" alt srcset />
-              <br />
-              <span>{{item.fileName}}</span>
-            </div>
+              <div class="fileList_" @click="download(item)">
+                <img
+                  v-if="item.suffix == 'doc' || item.suffix == 'docx'"
+                  src="static/images/document/word.png"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'xls' || item.suffix == 'xlsx'"
+                  src="static/images/document/excle.png"
+                  alt
+                  srcset
+                />
+                <img
+                  v-else-if="item.suffix == 'ppt' || item.suffix == 'pptx'"
+                  src="static/images/document/ppt.png"
+                  alt
+                  srcset
+                />
+                <img v-else src="static/images/document/other.png" alt srcset />
+                <br />
+                <span>{{item.fileName}}</span>
+              </div>
+            </el-tooltip>
           </el-col>
           <el-col :span="24" class="span" v-if="projectShowDetail.delayReason != null">延期原因</el-col>
           <el-col
@@ -284,39 +306,74 @@
             v-if="projectShowDetail.delayReason != null"
           >{{projectShowDetail.delayReason}}</el-col>
         </el-col>
+        <el-col :span="12" class="approval need">
+          <el-col :span="24" class="span">立项背景</el-col>
+          <el-col :span="24">
+            <div class="title">立项名称</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.projectName}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">项目类别</div>:
+            &nbsp;&nbsp;
+            <span v-if="pasProjectapiDetai.proCategory == 1">正常</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 2">特殊</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 3">自有</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 4">行政</span>
+          </el-col>
+          <el-col :span="24">
+            <div class="title">合同归属地</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.companyName}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">客户名称</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.clientName}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">品牌</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.brandName}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">立项日期</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.establishTime}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">项目编号</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.projectNumber}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">项目类型</div>:
+            &nbsp;&nbsp;
+            <span v-if="pasProjectapiDetai.protype == 1">日常</span>
+            <span v-else-if="pasProjectapiDetai.protype == 2">专项</span>
+          </el-col>
+          <el-col :span="24">
+            <div class="title">项目执行周期</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.startTime}}---
+            {{pasProjectapiDetai.endTime}}
+          </el-col>
+          <el-col :span="24">
+            <div class="title">客户部服务人员</div>
+            :
+            &nbsp;&nbsp;
+            {{pasProjectapiDetai.customerServiceName}}
+          </el-col>
+        </el-col>
       </el-col>
       <!--------- 项目需求 end --------->
-      <!--------- 立项背景 start --------->
-      <el-col :span="24" class="table table3" v-if="tabs_activity == 3" v-loading="loading">
-        <el-col :span="24">立项名称：{{pasProjectapiDetai.projectName}}</el-col>
-        <el-col :span="24">
-          项目类别：
-          <span v-if="pasProjectapiDetai.proCategory == 1">正常</span>
-          <span v-else-if="pasProjectapiDetai.proCategory == 2">特殊</span>
-          <span v-else-if="pasProjectapiDetai.proCategory == 3">自有</span>
-          <span v-else-if="pasProjectapiDetai.proCategory == 4">行政</span>
-        </el-col>
-        <el-col :span="24">合同归属地：{{pasProjectapiDetai.companyName}}</el-col>
-        <el-col :span="24">客户名称：{{pasProjectapiDetai.clientName}}</el-col>
-        <el-col :span="24">品牌：{{pasProjectapiDetai.brandName}}</el-col>
-        <el-col :span="24">立项日期：{{pasProjectapiDetai.establishTime}}</el-col>
-        <el-col :span="24">项目编号：{{pasProjectapiDetai.projectNumber}}</el-col>
-        <el-col :span="24">
-          项目类型：
-          <span v-if="pasProjectapiDetai.protype == 1">日常</span>
-          <span v-else-if="pasProjectapiDetai.protype == 2">专项</span>
-        </el-col>
-        <el-col :span="24">
-          项目执行周期：
-          {{pasProjectapiDetai.startTime}}---
-          {{pasProjectapiDetai.endTime}}
-        </el-col>
-        <el-col :span="24">
-          客户部服务人员：
-          {{pasProjectapiDetai.customerServiceName}}
-        </el-col>
-      </el-col>
-      <!--------- 立项背景 end --------->
       <!--------- 抽屉创建任务 --------->
       <el-drawer title="创建任务" :visible.sync="drawer1" :with-header="false">
         <el-scrollbar style="height: 100%">
@@ -324,7 +381,7 @@
             <el-col :span="24">
               <el-col :span="6" class="title title1">创建任务</el-col>
             </el-col>
-            <el-col :span="6" class="title">父任务</el-col>
+            <el-col :span="6" class="title nobgimg">父任务</el-col>
             <el-col :span="13">
               <el-select
                 v-model="new_task.faTask"
@@ -345,7 +402,7 @@
             </el-col>
             <el-col :span="24">
               <el-col :span="6" class="title title2">执行部门</el-col>
-              <el-col :span="15" :offset="6" class="department">
+              <el-col :span="16" :offset="6" class="department">
                 <el-radio
                   v-model="new_task.department"
                   :label="items.id"
@@ -353,22 +410,19 @@
                   :key="items.index"
                   @change="getDepTypeList"
                 >{{items.name}}</el-radio>
+                <!-- <el-cascader
+                  v-model="value"
+                  :options="options"
+                  @change="handleChange">
+                </el-cascader>-->
               </el-col>
             </el-col>
 
-            <el-col :span="6" class="title">名称</el-col>
+            <el-col :span="6" class="title">任务名称</el-col>
             <el-col :span="13">
               <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
             </el-col>
-            <el-col :span="6" class="title">预计时间</el-col>
-            <el-col :span="13" class="presetTime">
-              <el-date-picker
-                v-model="new_task.presetTime"
-                type="date"
-                placeholder="选择日期"
-                :picker-options="pickerOptions"
-              ></el-date-picker>
-            </el-col>
+
             <el-col :span="6" class="title">任务类型</el-col>
             <el-col :span="13" class="task_type">
               <el-select v-model="task_type_value" placeholder="请选择任务类型" no-data-text="请先选择部门">
@@ -379,6 +433,15 @@
                   :value="item.value"
                 ></el-option>
               </el-select>
+            </el-col>
+            <el-col :span="6" class="title">预计时间</el-col>
+            <el-col :span="13" class="presetTime">
+              <el-date-picker
+                v-model="new_task.presetTime"
+                type="date"
+                placeholder="选择日期"
+                :picker-options="pickerOptions"
+              ></el-date-picker>
             </el-col>
             <el-col :span="6" class="title">需求</el-col>
             <el-col :span="13">
@@ -433,7 +496,7 @@
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer3_task}}</el-col>
-            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
             </el-col>
@@ -462,7 +525,7 @@
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer4_task}}</el-col>
-            <el-col :span="6" class="title">延期原因</el-col>
+            <el-col :span="6" class="title snow">延期原因</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
             </el-col>
@@ -616,6 +679,7 @@ export default {
     clickCloseNum: function(newQuestion, oldQuestion) {
       // this.moreShow = false
       this.changeDoUserNameShow = 'true'
+      this.sousuo_show = false
       // console.log(this.clickCloseNum)
     }
   },
@@ -705,27 +769,17 @@ export default {
       } else if (e == 2) {
         let proId = this.proId
         this.getProjectShowDetail(proId)
-      } else if (e == 3) {
-        let pasprojectId = this.projectShowDetail.pasprojectId
-        this.getProjectapiDetai(pasprojectId)
       }
     },
-    redact(proId, taskId) {
+    redact(taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
         cancelButtonText: '取消'
       })
         .then(() => {
-          let data = {
-            proId: proId,
-            taskId: taskId,
-            isIgnore: 1,
-            taskfileList: [],
-            proFileList: []
-          }
-          data.isIgnore = true
-          this.taskSave(data)
+          let data = `taskId=${taskId}`
+          this.ignoreTask(data)
         })
         .catch(action => {
           this.$message({
@@ -733,6 +787,14 @@ export default {
             message: '放弃'
           })
         })
+    },
+    ignoreTask(data) {
+      this.$axios.post('/pmbs/api/task/ignoreTask?' + data).then(res => {
+        if (res.status == 200) {
+          this.messageWin(res.data.msg)
+          this.getParams()
+        }
+      })
     },
     feedback(proId, taskId, pro, task) {
       this.drawer3 = true
@@ -771,7 +833,10 @@ export default {
     gantt(e) {
       let proId = this.$route.query.id
       let type = this.$route.query.type
-      this.$router.push({ path: '/gantti', query: { id: proId, type: type } })
+      this.$router.push({
+        path: '/gantti',
+        query: { id: proId, type: type }
+      })
     },
     sousuoShow(e) {
       this.sousuo_show = !this.sousuo_show
@@ -780,6 +845,10 @@ export default {
     sousuo() {
       // console.log(this.sousuo_input)
       this.getParams(this.sousuo_input)
+    },
+    sousuo_() {
+      // console.log(123)
+      // this.getParams(this.sousuo_input)
     },
     task_detail(taskData) {
       // let userId = this.userId
@@ -939,6 +1008,8 @@ export default {
         })
         this.knowUserShow = knowUserShow
         // console.log(knowUserShow)
+        let pasprojectId = this.projectShowDetail.pasprojectId
+        this.getProjectapiDetai(pasprojectId)
       }
     },
     ///////// 获取项目需求 end /////////
@@ -1055,7 +1126,7 @@ export default {
         deptId: department, // '所属部门id',
         doUserId: doUserId, // '参与人id',
         expertTime: expertTime, // '预计时间',
-        faTask: this.faTask, // '父任务id',
+        faTask: this.new_task.faTask, // '父任务id',
         initUserId: this.userId, //'发起人id',
         proFileList: this.listProFile, // 上传文档列表
         proId: this.proId, // '所属项目id',
@@ -1071,7 +1142,7 @@ export default {
         data.remark == '' ||
         data.deptId == ''
       ) {
-        this.messageError('信息不能为空')
+        this.messageError('带*信息不能为空')
       } else {
         this.taskSave(data)
         this.drawer1 = false
@@ -1171,7 +1242,7 @@ export default {
       }
       // console.log(data)
       if (data.feedback == '') {
-        this.messageError('信息不能为空')
+        this.messageError('带*信息不能为空')
       } else {
         this.$axios
           .post('/pmbs/api/project/taskfeedback', data)
@@ -1293,16 +1364,14 @@ export default {
           )
           let newTime = new Date()
           let data = {
-            proId: taskData.proId,
             taskId: taskData.taskId,
-            status: 3,
-            proFileList: [],
-            taskfileList: []
+            expertTime: taskData.expertTime,
+            status: 3
           }
           if (expertTime < newTime) {
             data.status = 5
           }
-          this.taskSave(data)
+          this.approveTask(data)
         })
         .catch(() => {
           this.$message({
@@ -1311,6 +1380,15 @@ export default {
           })
         })
     },
+    approveTask(data) {
+      this.$axios.post('/pmbs/api/task/approveTask', data).then(res => {
+        if (res.status == 200) {
+          this.messageWin(res.data.msg)
+          this.getParams()
+        }
+      })
+    },
+
     // 抽屉取消按钮
     empty() {
       this.drawer1 = false
@@ -1382,7 +1460,7 @@ export default {
 .project_details .top {
   font-size: 13px;
 }
-.project_details .top .act>>>.el-breadcrumb__inner{
+.project_details .top .act >>> .el-breadcrumb__inner {
   font-weight: bold;
   color: #000;
 }
@@ -1504,21 +1582,32 @@ export default {
 .project_details .table2 {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
 }
 .project_details .table2 .title {
-  height: 100px;
-  box-sizing: border-box;
-  padding: 13px;
-  border: 1px solid rgb(187, 187, 187);
-  border-radius: 4px;
-  font-weight: 400;
-  font-size: 20px;
-  color: rgb(16, 16, 16);
-  line-height: 29px;
+  display: inline-block;
+  width: 120px;
+  text-align-last: justify;
+  /* height: 100px;
+    box-sizing: border-box;
+    padding: 13px;
+    border: 1px solid rgb(187, 187, 187);
+    border-radius: 4px;
+    font-weight: 400;
+    font-size: 20px;
+    color: rgb(16, 16, 16);
+    line-height: 29px; */
 }
-
+.project_details .approval {
+  height: 100%;
+  box-sizing: border-box;
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
+  padding-left: 13px;
+}
+.project_details .approval > div {
+  margin-bottom: 6px;
+}
 .project_details .table2 .title div:nth-of-type(2) {
   font-weight: 400;
   font-size: 16px;
@@ -1533,10 +1622,15 @@ export default {
   line-height: 28px;
 }
 .project_details .table2 .need .span {
+  height: 18px;
+  line-height: 18px;
   font-weight: 400;
-  font-size: 20px;
+  font-size: 18px;
   color: rgb(16, 16, 16);
-  margin-top: 24px;
+  box-sizing: border-box;
+  padding-left: 9px;
+  border-left: 2px solid black;
+  margin: 24px 0 18px;
 }
 .project_details .table2 .need .fileList {
   width: 100%;
@@ -1614,11 +1708,7 @@ export default {
 .project_details .add_box {
   height: 100%;
   box-sizing: border-box;
-  padding: 36px 0;
-  /* display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  align-content: space-between; */
+  padding: 36px 18px;
 }
 .project_details .add_box .parent_task {
   width: 100%;
@@ -1626,14 +1716,25 @@ export default {
 .project_details .add_box > .el-col {
   margin-bottom: 16px;
 }
-.project_details .add_box .title1 {
+.project_details .add_box .title.title1 {
   font-weight: 600;
   font-size: 18px;
+  background: none;
 }
 .project_details .add_box .title {
+  height: 40px;
+  line-height: 40px;
   text-align: right;
   box-sizing: border-box;
-  padding-right: 18px;
+  padding: 0 18px;
+  text-align-last: justify;
+  background: url('../../../../static/images/task/snowflake.png') 9px center
+    no-repeat;
+  background-size: 7px;
+}
+
+.project_details .add_box .nobgimg{
+  background: none;
 }
 .project_details .add_box .upload .text {
   width: 146px;
@@ -1730,11 +1831,13 @@ export default {
   width: 100%;
 }
 pre {
+  white-space: pre-wrap;
   font-family: '微软雅黑';
   font-weight: 400;
   font-size: 16px;
   color: rgb(96, 94, 94);
   line-height: 28px;
+  margin: 0;
 }
 .linblo {
   display: inline-block;
@@ -1746,5 +1849,12 @@ pre {
 .project_details .doUserName img {
   margin-left: 6px;
   cursor: pointer;
+}
+.project_details .snow{
+  box-sizing: border-box;
+  padding-left: 9px;
+  background: url('../../../../static/images/task/snowflake.png') 0 center
+    no-repeat;
+  background-size: 7px;
 }
 </style>

@@ -15,7 +15,7 @@
                 class="filtrateClient"
               >
                 <el-option
-                  v-for="item in allClientIdList"
+                  v-for="item in userclientIdList"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value"
@@ -154,16 +154,24 @@
         <el-table-column prop="realName" label="更新人" width="100"></el-table-column>
         <el-table-column label="操作" width="240">
           <template slot-scope="scope">
-            <el-button
-              v-if="scope.row.doUserId == userId && scope.row.status!=3 && scope.row.status!=5"
-              @click="upload2(scope.$index, scope.row)"
-              size="mini"
-              icon="el-icon-upload2"
-            ></el-button>
-            <el-button @click="download(scope.row)" size="mini" icon="el-icon-download"></el-button>
+            <el-tooltip class="item" effect="dark" content="重新上传" placement="top">
+              <el-button
+                v-if="scope.row.doUserId == userId && scope.row.status!=3 && scope.row.status!=5"
+                @click="upload2(scope.$index, scope.row)"
+                size="mini"
+                icon="el-icon-upload2"
+              ></el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="下载文档" placement="top">
+              <el-button @click="download(scope.row)" size="mini" icon="el-icon-download"></el-button>
+            </el-tooltip>
             <!-- @click="enterDetail(scope.$index, scope.row)" -->
-            <el-button @click="enterDetail(scope.row)" size="mini" icon="el-icon-share"></el-button>
-            <el-button @click="lookHistory(scope.$index,scope.row)" size="mini" icon="el-icon-time"></el-button>
+            <el-tooltip class="item" effect="dark" content="任务详情" placement="top">
+              <el-button @click="enterDetail(scope.row)" size="mini" icon="el-icon-share"></el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="历史文档" placement="top">
+              <el-button @click="lookHistory(scope.$index,scope.row)" size="mini" icon="el-icon-time"></el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -266,6 +274,7 @@ export default {
   props: {
     allBusinessList: Array,
     allClientIdList: Array,
+    userclientIdList: Array,
     clickCloseNum: Number
   },
   components: {
@@ -368,6 +377,7 @@ export default {
     clickCloseNum: function(newQuestion, oldQuestion) {
       this.moreShow = false
       // console.log(this.clickCloseNum)
+      this.rowClick()
     }
   },
   // 钩子函数
@@ -677,6 +687,7 @@ export default {
     },
     // 获取文档列表回调
     getTaskfilePageListSuss(res) {
+      // console.log(res)
       this.loading = false
       if (res.status == 200) {
         let data = res.data.items

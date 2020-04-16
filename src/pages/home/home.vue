@@ -3,41 +3,53 @@
     <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
     <el-container style="height: 100vh; padding-top: 75px;">
       <!--------- 左菜单栏 start --------->
-      <el-aside width="200px" style="background-color: rgb(238, 241, 246);position: relative;">
-        <div
-          :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
-          @click="change_show(2,'project')"
-        >
-          <i class="el-icon-document-copy"></i>
-          项目
-        </div>
-        <div :class="[show_acti=='3'?'title act':'title']" @click="change_show(3,'task')">
-          <i class="el-icon-finished"></i>
-          任务
-        </div>
-        <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4,'document')">
-          <i class="el-icon-folder-opened"></i>
-          文档
-        </div>
-        <div
-          :class="[show_acti=='1'?'title act':'title']"
-          @click="change_show(1,'statistics')"
-          v-if="statisticsShow"
-        >
-          <i class="el-icon-pie-chart"></i>
-          统计
-        </div>
-        <div
-          :class="[show_acti=='5'?'title act':'title']"
-          @click="change_show(5,'set')"
-          v-if="setShow"
-        >
-          <i class="el-icon-setting"></i>
-          设置
+      <el-aside width="128px" style="background-color: rgb(238, 241, 246);position: relative;">
+        <div>
+          <div
+            :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
+            @click="change_show(2,'project')"
+          >
+            <i class="el-icon-document-copy"></i>
+            项目
+          </div>
+          <div :class="[show_acti=='3'?'title act':'title']" @click="change_show(3,'task')">
+            <i class="el-icon-finished"></i>
+            任务
+          </div>
+          <div :class="[show_acti=='4'?'title act':'title']" @click="change_show(4,'document')">
+            <i class="el-icon-folder-opened"></i>
+            文档
+          </div>
+          <div
+            :class="[show_acti=='1'?'title act':'title']"
+            @click="change_show(1,'statistics')"
+            v-if="statisticsShow"
+          >
+            <i class="el-icon-pie-chart"></i>
+            统计
+          </div>
+          <div
+            :class="[show_acti=='5'?'title act':'title']"
+            @click="change_show(5,'set')"
+            v-if="setShow"
+          >
+            <i class="el-icon-setting"></i>
+            设置
+          </div>
         </div>
         <div class="bottom">
-          <el-link @click="operator" type="primary">操作文档</el-link>|
-          <el-link @click="problemFeedback" type="primary">问题反馈</el-link>
+          <el-tooltip class="item" effect="dark" content="点击下载操作文档" placement="top">
+            <div @click="operator">
+              <i class="el-icon-document-remove"></i>
+              <br />
+              <span>操作文档</span>
+            </div>
+          </el-tooltip>
+          <div @click="problemFeedback">
+            <i class="el-icon-warning-outline"></i>
+            <br />
+            <span>问题反馈</span>
+          </div>
         </div>
       </el-aside>
       <!--------- 左菜单栏 end --------->
@@ -50,6 +62,7 @@
             :update="update"
             :allBusinessList="allBusinessList"
             :allClientIdList="allClientIdList"
+            :userclientIdList="userclientIdList"
             :clickCloseNum="clickCloseNum"
           ></router-view>
         </el-main>
@@ -64,11 +77,11 @@
             <el-col :span="6" class="title title1">{{typeName}}</el-col>
           </el-col>
           <el-col :span="6" class="title">名称</el-col>
-          <el-col :span="13">
+          <el-col :span="18">
             <el-input placeholder="请输入内容" v-model="new_project.new_name" clearable></el-input>
           </el-col>
           <el-col :span="6" class="title">客户</el-col>
-          <el-col :span="13">
+          <el-col :span="18">
             <el-select v-model="clientId" filterable clearable placeholder="请选择" class="pasproject">
               <el-option
                 v-for="item in clientList"
@@ -79,7 +92,7 @@
             </el-select>
           </el-col>
           <el-col :span="6" class="title">业务类型</el-col>
-          <el-col :span="13">
+          <el-col :span="18">
             <el-select
               v-model="businessId"
               filterable
@@ -96,7 +109,7 @@
             </el-select>
           </el-col>
           <el-col :span="6" class="title">立项</el-col>
-          <el-col :span="13">
+          <el-col :span="18">
             <el-select
               v-model="pasprojectId"
               filterable
@@ -117,7 +130,7 @@
             <el-radio v-model="new_project.radio1" label="0">日常</el-radio>
           </el-col>
           <el-col :span="6" class="title">预计时间</el-col>
-          <el-col :span="13" class="presetTime">
+          <el-col :span="18" class="presetTime">
             <el-date-picker
               v-model="new_project.presetTime"
               type="date"
@@ -125,8 +138,8 @@
               :picker-options="pickerOptions"
             ></el-date-picker>
           </el-col>
-          <el-col :span="6" class="title">需求</el-col>
-          <el-col :span="13">
+          <el-col :span="6" class="title center">需求</el-col>
+          <el-col :span="18">
             <el-input
               type="textarea"
               :autosize="{ minRows: 6, maxRows: 8}"
@@ -134,11 +147,28 @@
               v-model="new_project.remark"
             ></el-input>
           </el-col>
-          <el-col :span="18" :offset="6">
+          <el-col :span="6" class="title nobgimg">附件</el-col>
+          <!-- 上传 -->
+          <el-col :span="18" class="upload">
+            <el-upload
+              :action="uploadUrl"
+              :on-remove="handleRemove"
+              :on-success="handleSuccess"
+              :file-list="fileList"
+            >
+              <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
+            </el-upload>
+            <!-- <el-dialog :visible.sync="dialogVisible" class="upload_list">
+              <img width="100%" :src="dialogImageUrl" alt />
+            </el-dialog>-->
+          </el-col>
+          <el-col :span="6" class="title">执行选择</el-col>
+          <el-col :span="18">
             <el-radio v-model="radio2" label="1" :disabled="disabled1">项目经理</el-radio>
             <el-radio v-model="radio2" label="2" :disabled="disabled2">执行部门</el-radio>
           </el-col>
-          <el-col :span="13" :offset="6" v-show="radio2 == 1">
+          <el-col :span="18" :offset="6" v-show="radio2 == 1">
+            <div class="remind">项目经理为此项目的统筹人，负责任务分发与审核</div>
             <el-select
               v-model="new_project.managerId"
               filterable
@@ -154,7 +184,7 @@
               ></el-option>
             </el-select>
           </el-col>
-          <el-col :span="17" :offset="6" v-show="radio2 == 2">
+          <el-col :span="18" :offset="6" v-show="radio2 == 2">
             <el-checkbox-group v-model="new_project.checkList" class="check_box">
               <el-checkbox
                 :label="items.id"
@@ -164,21 +194,10 @@
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
           </el-col>
-          <el-col :span="24">
-            <el-col :span="6" class="title">知晓人</el-col>
-          </el-col>
+            <el-col :span="6" class="title nobgimg">知晓人</el-col>
           <!-- 知晓人编辑 -->
-          <el-col :span="18" :offset="6" class="know_pop">
-            <el-tag
-              :key="tag.index"
-              v-for="tag in new_project.dynamicTags"
-              closable
-              :disable-transitions="false"
-              @close="handleClose(tag)"
-              class="know_pop_list"
-            >{{tag}}</el-tag>
-          </el-col>
-          <el-col :span="9" :offset="6">
+          
+          <el-col :span="9">
             <el-select v-model="add_list" filterable clearable placeholder="请选择">
               <el-option
                 v-for="item in userList"
@@ -192,21 +211,17 @@
           <el-col :span="6" :offset="1">
             <el-button size="small" type="primary" @click="showInput">添加</el-button>
           </el-col>
-
-          <!-- 上传 -->
-          <el-col :span="13" :offset="6" class="upload">
-            <el-upload
-              :action="uploadUrl"
-              :on-remove="handleRemove"
-              :on-success="handleSuccess"
-              :file-list="fileList"
-            >
-              <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
-            </el-upload>
-            <!-- <el-dialog :visible.sync="dialogVisible" class="upload_list">
-              <img width="100%" :src="dialogImageUrl" alt />
-            </el-dialog>-->
+          <el-col :span="18" :offset="6" class="know_pop">
+            <el-tag
+              :key="tag.index"
+              v-for="tag in new_project.dynamicTags"
+              closable
+              :disable-transitions="false"
+              @close="handleClose(tag)"
+              class="know_pop_list"
+            >{{tag}}</el-tag>
           </el-col>
+          
         </el-row>
       </el-scrollbar>
       <el-row class="batton_pa">
@@ -465,6 +480,8 @@ export default {
       // 所有客户/业务类型
       allBusinessList: [],
       allClientIdList: [],
+      // 筛选客户列表
+      userclientIdList: [],
       // 最外层点击关闭
       clickCloseNum: 0
     }
@@ -506,6 +523,8 @@ export default {
     // 统计/设置显示判断
     this.statisticsShowIf()
     this.setShowIf()
+    // 获取筛选用户
+    this.getUserClientapiList()
     // 获取所有用户
     this.getAllClientapiList()
     // 获取业务类型
@@ -567,6 +586,36 @@ export default {
     },
     ///////// WebSocket end /////////
 
+    ///////// 获取筛选的客户信息 start /////////
+    getUserClientapiList() {
+      let userId = this.userId
+      this.$axios
+        .post('/pmbs/api/task/findClient?userId=' + userId)
+        .then(res => {
+          if (res.status == 200) {
+            let data = res.data
+            // console.log(res)
+            if (data != '') {
+              let userclientIdList = []
+              data.forEach(element => {
+                let clientIdListDate = {
+                  value: element.clientId,
+                  label: element.clientName
+                }
+                userclientIdList.push(clientIdListDate)
+                if (name && element.clientName == name) {
+                  clientId = element.clientId
+                }
+              })
+              // console.log(userclientIdList)
+              this.userclientIdList = userclientIdList
+              // console.log(this.userclientIdList)
+            }
+          }
+        })
+    },
+    ///////// 获取筛选的客户信息 end /////////
+
     ///////// 获取所有客户信息 start /////////
     getAllClientapiList() {
       this.$axios
@@ -578,17 +627,12 @@ export default {
       if (res.status == 200) {
         let data = res.data
         let clientIdList = []
-        let clientId = ''
-        let name = this.$route.query.name
         data.forEach(element => {
           let clientIdListDate = {
             value: element.clientId,
             label: element.clientName
           }
           clientIdList.push(clientIdListDate)
-          if (name && element.clientName == name) {
-            clientId = element.clientId
-          }
         })
         this.allClientIdList = clientIdList
       }
@@ -1148,7 +1192,7 @@ export default {
         data.remark == '' ||
         changeId == ''
       ) {
-        this.messageError('信息不能为空')
+        this.messageError('带*信息不能为空')
       } else {
         this.drawer = false
         this.$axios
@@ -1202,8 +1246,16 @@ export default {
     },
     // 操作文档链接
     operator() {
-      let newPage = window.open() // 防止浏览器拦截
-      newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
+      // let newPage = window.open() // 防止浏览器拦截
+      // newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
+      // download(row) {
+      // let localPath = row.localPath
+      // console.log("123")
+      let a = document.createElement('a')
+      a.download = `操作文档.pdf`
+      a.setAttribute('href', 'http://218.106.254.122:8084/doc/123.pdf')
+      a.click()
+      // },
     },
     ///////// 问题反馈 start /////////
     blur() {
@@ -1386,7 +1438,7 @@ export default {
 .home .add_box {
   /* height: 985px; */
   box-sizing: border-box;
-  padding: 36px 0 108px;
+  padding: 36px 49px 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1395,14 +1447,32 @@ export default {
 .home .add_box > .el-col {
   margin-bottom: 16px;
 }
-.home .add_box .title1 {
+.home .add_box .title.title1 {
+  padding: 0 13px 0 0;
   font-weight: 600;
   font-size: 18px;
+  background: none;
+}
+.home .add_box .title.center{
+  align-self: flex-start;
 }
 .home .add_box .title {
+  height: 40px;
+  line-height: 40px;
+  text-align-last: justify;
   text-align: right;
   box-sizing: border-box;
-  padding-right: 18px;
+  padding: 0 13px;
+  background: url('../../../static/images/task/snowflake.png') 3px center
+    no-repeat;
+  background-size: 7px;
+}
+.home .add_box .nobgimg{
+  background: none;
+}
+.home .add_box .remind {
+  font-size: 13px;
+  color: #999;
 }
 .home .add_box .presetTime > div {
   width: 100%;
@@ -1497,13 +1567,11 @@ export default {
   border-right: none;
 }
 .home .paneBox {
-  /* height: 100vh; */
   height: calc(100% - 120px);
   margin-top: 32px;
 }
 .home .pane {
   height: 100%;
-  /* margin-top: 32px; */
 }
 .home .paneBox .infinite-list {
   height: 100%;
@@ -1519,7 +1587,6 @@ export default {
   background: #eee;
 }
 .home .paneBox .infinite-list .infinite-list-item {
-  /* height: 100px; */
   font-size: 14px;
   box-sizing: border-box;
   padding: 18px 0;
@@ -1564,6 +1631,7 @@ export default {
 }
 .home .bottom {
   width: 100%;
+  text-align: center;
   box-sizing: border-box;
   padding: 0 13px;
   display: flex;
@@ -1572,7 +1640,18 @@ export default {
   align-items: center;
   position: absolute;
   left: 0;
-  bottom: 36px;
+  bottom: 0;
+}
+.home .bottom > div {
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+.home .bottom i {
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+.home .bottom span {
+  font-size: 13px;
 }
 .home .bottom a {
   font-size: 14px;

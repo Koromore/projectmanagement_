@@ -21,11 +21,11 @@ export default new Vuex.Store({
     // user: { userId: 982, deptId: 91, realName: '赵吉' }, //员工信息
     // user: { userId: 4001, deptId: 51, realName: '石杨' }, //员工信息
     // user: { userId: 365, deptId: 117, realName: '杨欢' }, //员工信息
-    // user: { userId: 147, deptId: 51,subordinate:51, realName: '张倩' }, //员工信息 
+    // user: { userId: 147, deptId: 51,subordinate:51, realName: '张倩' }, //员工信息
     // user: { userId: 33, deptId: 121, realName: '聂玲' }, //员工信息
     // user: { userId: 10, deptId: 102, realName: '陆彪' }, //员工信息
     // user: { userId: 194, deptId: 45, realName: '卢雄飞' }, //员工信息
-    // user: { userId: 9, deptId:27, realName: '郑开喜' }, //员工信息
+    // user: { userId: 9, deptId:27,subordinate:27, realName: '郑开喜' }, //员工信息
     // user: { userId: 4023, deptId:51, realName: '刘特' }, //员工信息
     // user: { userId: 3714, deptId:91, realName: '杨梦倩' }, //员工信息
     // user: { userId: 3820, deptId:91, realName: '黄震宇' }, //员工信息
@@ -38,6 +38,7 @@ export default new Vuex.Store({
     // user: { userId: 3910, deptId:51, realName: '黄天倚' }, //员工信息
     // user: { userId: 484, deptId:90, realName: '朱双' }, //员工信息
     // user: { userId: 3823, deptId:91, realName: '翟俊雄' }, //员工信息
+    // user: { userId: 3947, deptId:45, realName: '朱竑睿' }, //员工信息
     token: '', // 登录令牌
     userSign: '', // 用户信息带参
     isLogin: 'error', //error/success, // 是否登陆

@@ -14,7 +14,7 @@
               class="filtrateClient"
             >
               <el-option
-                v-for="item in allClientIdList"
+                v-for="item in userclientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -131,11 +131,15 @@
             :filter-method="filterDepartment" -->
           </el-table-column>
           <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="210">
+          <template slot-scope="scope">
             <el-link
               type="primary"
-              slot-scope="scope"
               @click="task_detail(scope.row,0)"
             >{{scope.row.taskName}}</el-link>
+            <el-tooltip class="item" effect="dark" :content="scope.row.faTaskName" placement="bottom">
+                <span v-if="scope.row.faTask != 0" class="faTask">父</span>
+            </el-tooltip>
+            </template>
           </el-table-column>
           <el-table-column prop="status" label="状态" min-width="90">
             <template slot-scope="scope">
@@ -147,7 +151,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="faTaskName" label="父任务" min-width="130"></el-table-column>
+          <!-- <el-table-column prop="faTaskName" label="父任务" min-width="130"></el-table-column> -->
           <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
@@ -194,9 +198,9 @@
           <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="115"></el-table-column>
           <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="115">
             <el-link
-              type="primary"
-              slot-scope="scope"
-              @click="task_detail(scope.row,1)"
+                slot-scope="scope"
+                type="primary"
+                @click="task_detail(scope.row,1)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
           <el-table-column prop="status" label="状态" min-width="81">
@@ -256,7 +260,7 @@
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
           <el-table-column prop="initUserName" label="下达人" min-width="80"></el-table-column>
-          <el-table-column prop="taskfileList" label="成果" min-width="90">
+          <el-table-column prop="taskfileList" show-overflow-tooltip label="成果" min-width="90">
             <div
               class="taskfile"
               slot-scope="scope"
@@ -266,25 +270,25 @@
               <img
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
                 src="static/images/document/word.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
                 src="static/images/document/excle.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
                 src="static/images/document/ppt.png"
-                width="20"
+                width="16"
                 alt
                 srcset
               />
-              <img v-else src="static/images/document/other.png" width="20" alt srcset />
+              <img v-else src="static/images/document/other.png" width="16" alt srcset />
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
@@ -301,7 +305,7 @@
                 v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
                 type="info"
                 slot="reference"
-                @click="join_redact(scope.row.proId,scope.row.taskId)"
+                @click="join_redact(scope.row.taskId)"
               >忽略</el-button>
               <el-button
                 size="mini"
@@ -332,7 +336,7 @@
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer2_task}}</el-col>
-            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
             </el-col>
@@ -382,7 +386,7 @@ export default {
   name: 'task',
   props: {
     allBusinessList: Array,
-    allClientIdList: Array,
+    userclientIdList: Array,
     clickCloseNum: Number
   },
   components: {
@@ -596,19 +600,19 @@ export default {
         cancelButtonText: '取消'
       })
         .then(() => {
-          let expertTime = new Date(taskData.expertTime)
+          let expertTime = new Date(
+          new Date(taskData.expertTime).getTime() + 24 * 60 * 60 * 1000
+          )
           let newTime = new Date()
-          let data = {
-            proId: taskData.proId,
-            taskId: taskData.taskId,
-            status: 3,
-            proFileList: [],
-            taskfileList: []
-          }
-          if (expertTime < newTime) {
+            let data = {
+              taskId: taskData.taskId,
+              expertTime: taskData.expertTime,
+              status: 3
+            }
+            if (expertTime < newTime) {
             data.status = 5
           }
-          this.taskSave(data)
+          this.approveTask(data)
         })
         .catch(action => {
           this.$message({
@@ -617,22 +621,26 @@ export default {
           })
         })
     },
-    join_redact(proId, taskId) {
+    // 任务完成
+    approveTask(data){
+          this.$axios
+            .post('/pmbs/api/task/approveTask', data)
+            .then(res=>{
+              if (res.status == 200) {
+                this.messageWin(res.data.msg)
+                this.getTasklist(this.tabs_activity)
+              }
+            })
+        },
+    join_redact(taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
         confirmButtonText: '确认',
         cancelButtonText: '取消'
       })
         .then(() => {
-          let data = {
-            proId: proId,
-            taskId: taskId,
-            isIgnore: 1,
-            taskfileList: [],
-            proFileList: []
-          }
-          data.isIgnore = true
-          this.taskSave(data)
+          let data = `taskId=${taskId}`
+          this.ignoreTask(data)
         })
         .catch(action => {
           this.$message({
@@ -648,6 +656,20 @@ export default {
         this.drawer3_task = task
       }
     },
+    ignoreTask(data){
+      this.$axios
+        .post('/pmbs/api/task/ignoreTask?'+ data)
+        .then(res=>{
+          if (res.status == 200) {
+            this.messageWin(res.data.msg)
+            this.getTasklist(this.tabs_activity)
+          }
+        })
+    },
+    // http://176.10.10.148:8089/pmbs/api/task/ignoreTask?taskId=1
+    // this.$axios
+          // .post('/pmbs/api/task/save', data)
+          // .then(this.changeDoUserNameAffirmSuss)
     // 筛选所属项目
     filterName(value, row) {
       return row.name === value
@@ -1349,5 +1371,22 @@ export default {
 .task .doUserName img{
   margin-left: 6px;
   cursor: pointer;
+}
+.task .faTask{
+    display: inline-block;
+    color: white;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
+    border-radius: 50%;
+    background: rgb(56, 148, 255);
+}
+.task .snow{
+  box-sizing: border-box;
+  padding-left: 9px;
+  background: url('../../../../static/images/task/snowflake.png') 0 center
+    no-repeat;
+  background-size: 7px;
 }
 </style>

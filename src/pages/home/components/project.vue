@@ -14,7 +14,7 @@
               class="filtrateClient"
             >
               <el-option
-                v-for="item in allClientIdList"
+                v-for="item in userclientIdList"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value"
@@ -94,7 +94,7 @@
         <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
         <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
       </el-col>
-      <!--------- 我发起 --------->
+      <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-show="tabs_activity == 0">
         <el-table
           v-loading="loading"
@@ -119,7 +119,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="num" label="总任务数/待完成" min-width="110" class-name="center">
+          <el-table-column prop="num" label="任务数" min-width="110" class-name="center">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
@@ -182,7 +182,7 @@
           <!-- </div> -->
         </div>
       </el-col>
-      <!--------- 我参与 --------->
+      <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="tabs_activity == 1">
         <el-table
           v-loading="loading"
@@ -192,11 +192,13 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
           <el-table-column prop="name" label="名称" show-overflow-tooltip min-width="360">
-            <el-link
-              type="primary"
-              slot-scope="scope"
-              @click.native="pathPrpjectDetails(scope.row.proId,1)"
-            >{{scope.row.proName}}</el-link>
+            <template slot-scope="scope">
+              <el-link
+                type="primary"
+                @click.native="pathPrpjectDetails(scope.row.proId,1)"
+              >{{scope.row.proName}}</el-link>
+              <el-tag type="danger" effect="dark" size="mini" v-if="scope.row.manager == userId">经理</el-tag>
+            </template>
           </el-table-column>
           <el-table-column prop="state_text" label="状态" min-width="150">
             <template slot-scope="scope">
@@ -239,12 +241,12 @@
         <el-row class="feedback">
           <el-col :span="24" class="content">
             <el-col :span="24" class="title">{{drawer1_name}}</el-col>
-            <el-col :span="6" class="title">反馈</el-col>
+            <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
             </el-col>
             <br />
-            <el-col :span="6" class="title">接受</el-col>
+            <el-col :span="6" class="title snow">接受</el-col>
             <el-col :span="19">
               <el-checkbox-group v-model="checkListDept">
                 <el-checkbox
@@ -254,7 +256,7 @@
                 >{{item.deptName}}</el-checkbox>
               </el-checkbox-group>
             </el-col>
-            <el-col :span="6" class="title">任务</el-col>
+            <el-col :span="6" class="title snow">任务</el-col>
             <el-col :span="19">
               <el-checkbox-group v-model="checkListTask">
                 <el-checkbox
@@ -290,7 +292,7 @@
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer3_name}}</el-col>
-            <el-col :span="6" class="title">延期原因</el-col>
+            <el-col :span="6" class="title snow">延期原因</el-col>
             <el-col :span="24">
               <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="delayReason"></el-input>
             </el-col>
@@ -310,7 +312,7 @@ export default {
   props: {
     update: Number,
     allBusinessList: Array,
-    allClientIdList: Array,
+    userclientIdList: Array,
     clickCloseNum: Number
   },
   data() {
@@ -654,7 +656,7 @@ export default {
     },
     handleSuccessFeedback(response, file, fileList) {
       let data = response.data
-      console.log(data)
+      // console.log(data)
       let feedbackFileList = this.feedbackFileList
       let time = new Date()
       let feedbackFileListData = {
@@ -761,7 +763,6 @@ export default {
       // this.$emit('getShopCode',value)
     },
     delayAchieve() {
-      this.drawer3 = false
       let proId = this.proId
       let overTime = this.formatData2(new Date())
       let delayReason = this.delayReason
@@ -771,7 +772,12 @@ export default {
         delayReason: delayReason, // 延期原因
         overTime: overTime
       }
-      this.getProjectSave(data)
+      if (data.delayReason == '') {
+        this.messageError('带*信息不能为空')
+      } else {
+        this.drawer3 = false
+        this.getProjectSave(data)
+      }
     },
     achieve(proDate) {
       // console.log('完成' + proId)
@@ -895,9 +901,9 @@ export default {
         moreTaskId: taskId, // 反馈任务ID
         updateTime: updateTime // 反馈时间
       }
-      console.log(data)
+      // console.log(data)
       if (data.feedback == '' || data.moreTaskId == '') {
-        this.messageError('信息不能为空')
+        this.messageError('带*信息不能为空')
       } else {
         this.$axios
           .post('/pmbs/api/project/projectFeedback', data)
@@ -1023,7 +1029,11 @@ export default {
           let unfintask = 0
           for (let j = 0; j < element.listTask.length; j++) {
             const element_ = element.listTask[j]
-            if (element_.status != 3 && element_.isIgnore != true) {
+            if (
+              element_.status != 3 &&
+              element_.status != 5 &&
+              element_.isIgnore != true
+            ) {
               unfintask++
             }
           }
@@ -1110,7 +1120,7 @@ export default {
     },
     getParams(id) {
       let name = this.$route.query.name
-      let clientIdList = this.allClientIdList
+      let clientIdList = this.userclientIdList
       clientIdList.forEach(element => {
         if (name == element.label) {
           this.clientId = element.value
@@ -1407,5 +1417,12 @@ export default {
 }
 .project >>> .center .cell {
   text-align: center;
+}
+.project .snow {
+  box-sizing: border-box;
+  padding-left: 9px;
+  background: url('../../../../static/images/task/snowflake.png') 0 center
+    no-repeat;
+  background-size: 7px;
 }
 </style>

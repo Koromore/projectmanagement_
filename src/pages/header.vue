@@ -8,14 +8,12 @@
             <i class="el-icon-warning-outline"></i>
             反馈列表
           </div>
-          <div class="add_du" @click="add_box">
-            <i class="el-icon-folder-add"></i>
-            创建
-          </div>
-          <!-- <div class="add_du" @click="send">
-            <i class="el-icon-folder-add"></i>
-            发送消息
-          </div>-->
+          <el-tooltip class="item" effect="dark" content="新建项目" placement="bottom">
+            <div class="add_du" @click="add_box">
+              <i class="el-icon-circle-plus-outline"></i>
+              创建
+            </div>
+          </el-tooltip>
           <div class="message" @click="message">
             <el-badge :value="messageNum" class="item" :hidden="messageShow">
               <i class="el-icon-bell"></i>
