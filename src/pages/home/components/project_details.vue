@@ -97,6 +97,7 @@
                   @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
                   v-if="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5 && scope.row.deptId == subordinate"
                 >-->
+
                 <img
                   src="static/images/task/change.png"
                   width="18"
@@ -229,40 +230,31 @@
       <!--------- 任务列表 end --------->
       <!--------- 项目需求 start --------->
       <el-col :span="24" class="table table2" v-if="tabs_activity == 2" v-loading="loading">
-        <!-- <el-col :span="7" class="title">
-          <el-col :span="24">项目名称</el-col>
-          <el-col :span="24">{{projectShowDetail.proName}}</el-col>
-        </el-col>
-        <el-col :span="7" class="title">
-          <el-col :span="24">预计时间</el-col>
-          <el-col
-            :span="24"
-          >{{$date_(projectShowDetail.createTime)}}--{{$date_(projectShowDetail.expertTime)}}</el-col>
-        </el-col>
-        <el-col :span="7" class="title">
-          <el-col :span="24">项目类别</el-col>
-          <el-col :span="24">
-            {{pasProjectapiDetai.clientName}}-
-            {{projectShowDetail.businessName}}-
-            {{projectShowDetail.projectType}}
-          </el-col>
-        </el-col>-->
-        <el-col :span="12" class="need">
+        <el-col :span="14" class="need">
           <el-col :span="24" class="span">信息</el-col>
-          <el-col :span="24">项目名称：{{projectShowDetail.proName}}</el-col>
-          <el-col :span="24">
-            项目类别：
-            {{pasProjectapiDetai.clientName}}-
-            {{projectShowDetail.businessName}}-
-            {{projectShowDetail.projectType}}
-          </el-col>
-          <el-col :span="24">
-            预计时间：
-            {{$date(projectShowDetail.createTime)}}
-            至{{$date(projectShowDetail.expertTime)}}
+          <el-col :span="24" class="content">
+            <span>项目名称</span>
+            <span class="colorBlack">
+              :&nbsp;&nbsp;
+              {{projectShowDetail.proName}}
+            </span>
+            <br />
+            <span>项目类别</span>
+            <span class="colorBlack">
+              :&nbsp;&nbsp;
+              {{pasProjectapiDetai.clientName}}-
+              {{projectShowDetail.businessName}}-
+              {{projectShowDetail.projectType}}
+            </span>
+            <br />
+            <span>预计时间</span>
+            <span class="colorBlack">
+              :&nbsp;&nbsp;
+              {{$date(projectShowDetail.createTime)}}至{{$date(projectShowDetail.expertTime)}}
+            </span>
           </el-col>
           <el-col :span="24" class="span">需求</el-col>
-          <el-col :span="24" class>
+          <el-col :span="24" class="content">
             <pre>{{projectShowDetail.remark}}</pre>
           </el-col>
           <el-col :span="24" class="span">附件</el-col>
@@ -306,70 +298,42 @@
             v-if="projectShowDetail.delayReason != null"
           >{{projectShowDetail.delayReason}}</el-col>
         </el-col>
-        <el-col :span="12" class="approval need">
+        <el-col :span="10" class="approval need">
           <el-col :span="24" class="span">立项背景</el-col>
-          <el-col :span="24">
+          <el-col :span="24" class="content">
             <div class="title">立项名称</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.projectName}}
-          </el-col>
-          <el-col :span="24">
-            <div class="title">项目类别</div>:
-            &nbsp;&nbsp;
-            <span v-if="pasProjectapiDetai.proCategory == 1">正常</span>
-            <span v-else-if="pasProjectapiDetai.proCategory == 2">特殊</span>
-            <span v-else-if="pasProjectapiDetai.proCategory == 3">自有</span>
-            <span v-else-if="pasProjectapiDetai.proCategory == 4">行政</span>
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.projectName}}</span>
+            <br />
+            <div class="title">项目类别</div>
+            <span v-if="pasProjectapiDetai.proCategory == 1">:&nbsp;&nbsp;正常</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 2">:&nbsp;&nbsp;特殊</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 3">:&nbsp;&nbsp;自有</span>
+            <span v-else-if="pasProjectapiDetai.proCategory == 4">:&nbsp;&nbsp;行政</span>
+            <br />
             <div class="title">合同归属地</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.companyName}}
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.companyName}}</span>
+            <br />
             <div class="title">客户名称</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.clientName}}
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.clientName}}</span>
+            <br />
             <div class="title">品牌</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.brandName}}
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.brandName}}</span>
+            <br />
             <div class="title">立项日期</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.establishTime}}
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.establishTime}}</span>
+            <br />
             <div class="title">项目编号</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.projectNumber}}
-          </el-col>
-          <el-col :span="24">
-            <div class="title">项目类型</div>:
-            &nbsp;&nbsp;
-            <span v-if="pasProjectapiDetai.protype == 1">日常</span>
-            <span v-else-if="pasProjectapiDetai.protype == 2">专项</span>
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.projectNumber}}</span>
+            <br />
+            <div class="title">项目类型</div>
+            <span v-if="pasProjectapiDetai.protype == 1">:&nbsp;&nbsp;日常</span>
+            <span v-else-if="pasProjectapiDetai.protype == 2">:&nbsp;&nbsp;专项</span>
+            <br />
             <div class="title">项目执行周期</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.startTime}}---
-            {{pasProjectapiDetai.endTime}}
-          </el-col>
-          <el-col :span="24">
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.startTime}}--- {{pasProjectapiDetai.endTime}}</span>
+            <br />
             <div class="title">客户部服务人员</div>
-            :
-            &nbsp;&nbsp;
-            {{pasProjectapiDetai.customerServiceName}}
+            <span>:&nbsp;&nbsp;{{pasProjectapiDetai.customerServiceName}}</span>
           </el-col>
         </el-col>
       </el-col>
@@ -417,12 +381,10 @@
                 </el-cascader>-->
               </el-col>
             </el-col>
-
             <el-col :span="6" class="title">任务名称</el-col>
             <el-col :span="13">
               <el-input placeholder="请输入内容" v-model="new_task.new_name" clearable></el-input>
             </el-col>
-
             <el-col :span="6" class="title">任务类型</el-col>
             <el-col :span="13" class="task_type">
               <el-select v-model="task_type_value" placeholder="请选择任务类型" no-data-text="请先选择部门">
@@ -450,6 +412,8 @@
                 :autosize="{ minRows: 6, maxRows: 8}"
                 placeholder="请输入内容"
                 v-model="new_task.remark"
+                maxlength="300"
+                show-word-limit
               ></el-input>
             </el-col>
             <!-- 上传 -->
@@ -459,7 +423,6 @@
               </el-upload>
             </el-col>
             <!-- 上传 -->
-
             <el-col :span="12" :offset="7" class="batton">
               <el-button size="small" type="info" @click="empty">取消</el-button>
               <el-button size="small" type="primary" @click="putIn">提交</el-button>
@@ -490,7 +453,6 @@
           </el-col>
         </el-row>
       </el-drawer>
-
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
@@ -498,7 +460,14 @@
             <el-col :span="24" class="title">{{drawer3_task}}</el-col>
             <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="feedbackContent"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
             <el-col :span="24" class="Upload">
               <el-divider></el-divider>
@@ -527,7 +496,14 @@
             <el-col :span="24" class="title">{{drawer4_task}}</el-col>
             <el-col :span="6" class="title snow">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="result"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="result"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -1587,27 +1563,31 @@ export default {
 }
 .project_details .table2 .title {
   display: inline-block;
-  width: 120px;
+  width: 113px;
   text-align-last: justify;
-  /* height: 100px;
-    box-sizing: border-box;
-    padding: 13px;
-    border: 1px solid rgb(187, 187, 187);
-    border-radius: 4px;
-    font-weight: 400;
-    font-size: 20px;
-    color: rgb(16, 16, 16);
-    line-height: 29px; */
+}
+.project_details pre {
+  color: #000;
+  white-space: pre-wrap;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑";
+  font-weight: 400;
+  font-size: 16px;
+  color: rgb(96, 94, 94);
+  line-height: 32px;
+  margin: 0;
 }
 .project_details .approval {
   height: 100%;
   box-sizing: border-box;
-  border-left: 1px solid rgba(0, 0, 0, 0.3);
-  padding-left: 13px;
+  padding-left: 18px;
+  color: #000;
 }
-.project_details .approval > div {
+.project_details .approval span {
+  color: #000;
+}
+/* .project_details .approval > div {
   margin-bottom: 6px;
-}
+} */
 .project_details .table2 .title div:nth-of-type(2) {
   font-weight: 400;
   font-size: 16px;
@@ -1618,19 +1598,27 @@ export default {
   /* margin-top: 36px; */
   font-weight: 400;
   font-size: 16px;
-  color: rgb(96, 94, 94);
-  line-height: 28px;
+  color: #999999;
+  line-height: 36px;
+}
+.project_details .table2 .need:nth-of-type(1) {
+  box-sizing: border-box;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  padding-right: 49px;
 }
 .project_details .table2 .need .span {
-  height: 18px;
-  line-height: 18px;
+  height: 20px;
+  line-height: 20px;
   font-weight: 400;
-  font-size: 18px;
+  font-size: 20px;
   color: rgb(16, 16, 16);
   box-sizing: border-box;
   padding-left: 9px;
   border-left: 2px solid black;
-  margin: 24px 0 18px;
+  margin: 13px 0;
+}
+.project_details .table2 .need .content {
+  margin-bottom: 49px;
 }
 .project_details .table2 .need .fileList {
   width: 100%;
@@ -1653,27 +1641,6 @@ export default {
   white-space: nowrap;
   cursor: pointer;
 }
-/* .project_details .table2 .need .fileList_:hover .shade {
-  display: flex;
-}
-.project_details .table2 .need .fileList_ .shade {
-  cursor: pointer;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: black;
-  opacity: 0.5;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  border-radius: 3px;
-}
-.project_details .table2 .need .fileList_ .shade i {
-  color: white;
-  font-size: 32px;
-} */
 .project_details .table3 > div {
   margin-top: 6px;
   font-weight: 400;
@@ -1708,7 +1675,7 @@ export default {
 .project_details .add_box {
   height: 100%;
   box-sizing: border-box;
-  padding: 36px 18px;
+  padding: 36px 24px;
 }
 .project_details .add_box .parent_task {
   width: 100%;
@@ -1733,7 +1700,7 @@ export default {
   background-size: 7px;
 }
 
-.project_details .add_box .nobgimg{
+.project_details .add_box .nobgimg {
   background: none;
 }
 .project_details .add_box .upload .text {
@@ -1830,15 +1797,6 @@ export default {
 .elementUpload {
   width: 100%;
 }
-pre {
-  white-space: pre-wrap;
-  font-family: '微软雅黑';
-  font-weight: 400;
-  font-size: 16px;
-  color: rgb(96, 94, 94);
-  line-height: 28px;
-  margin: 0;
-}
 .linblo {
   display: inline-block;
 }
@@ -1850,11 +1808,14 @@ pre {
   margin-left: 6px;
   cursor: pointer;
 }
-.project_details .snow{
+.project_details .snow {
   box-sizing: border-box;
   padding-left: 9px;
   background: url('../../../../static/images/task/snowflake.png') 0 center
     no-repeat;
   background-size: 7px;
+}
+.project_details .colorBlack {
+  color: black;
 }
 </style>

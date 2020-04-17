@@ -1,7 +1,7 @@
 <template>
   <div class="home" @click="clickClose">
     <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
-    <el-container style="height: 100vh; padding-top: 75px;">
+    <el-container style="height: 100vh; padding-top: 60px;">
       <!--------- 左菜单栏 start --------->
       <el-aside width="128px" style="background-color: rgb(238, 241, 246);position: relative;">
         <div>
@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="bottom">
-          <el-tooltip class="item" effect="dark" content="点击下载操作文档" placement="top">
+          <el-tooltip class="item" effect="dark" content="点击查看操作文档" placement="top">
             <div @click="operator">
               <i class="el-icon-document-remove"></i>
               <br />
@@ -49,6 +49,11 @@
             <i class="el-icon-warning-outline"></i>
             <br />
             <span>问题反馈</span>
+          </div>
+          <div @click="problemList" v-if="problemListShow">
+            <i class="el-icon-document"></i>
+            <br />
+            <span>反馈列表</span>
           </div>
         </div>
       </el-aside>
@@ -64,6 +69,7 @@
             :allClientIdList="allClientIdList"
             :userclientIdList="userclientIdList"
             :clickCloseNum="clickCloseNum"
+            :userList="userList"
           ></router-view>
         </el-main>
         <!---------- 内容 end --------->
@@ -108,7 +114,7 @@
               ></el-option>
             </el-select>
           </el-col>
-          <el-col :span="6" class="title">立项</el-col>
+          <el-col :span="6" class="title">所属立项</el-col>
           <el-col :span="18">
             <el-select
               v-model="pasprojectId"
@@ -145,6 +151,8 @@
               :autosize="{ minRows: 6, maxRows: 8}"
               placeholder="请输入内容"
               v-model="new_project.remark"
+              maxlength="300"
+              show-word-limit
             ></el-input>
           </el-col>
           <el-col :span="6" class="title nobgimg">附件</el-col>
@@ -158,9 +166,6 @@
             >
               <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
             </el-upload>
-            <!-- <el-dialog :visible.sync="dialogVisible" class="upload_list">
-              <img width="100%" :src="dialogImageUrl" alt />
-            </el-dialog>-->
           </el-col>
           <el-col :span="6" class="title">执行选择</el-col>
           <el-col :span="18">
@@ -194,9 +199,8 @@
               >{{items.name}}</el-checkbox>
             </el-checkbox-group>
           </el-col>
-            <el-col :span="6" class="title nobgimg">知晓人</el-col>
-          <!-- 知晓人编辑 -->
-          
+          <el-col :span="6" class="title nobgimg">知晓人</el-col>
+          <!-- 知晓人编辑 start -->
           <el-col :span="9">
             <el-select v-model="add_list" filterable clearable placeholder="请选择">
               <el-option
@@ -221,7 +225,7 @@
               class="know_pop_list"
             >{{tag}}</el-tag>
           </el-col>
-          
+          <!-- 知晓人编辑 end -->
         </el-row>
       </el-scrollbar>
       <el-row class="batton_pa">
@@ -232,7 +236,6 @@
       </el-row>
     </el-drawer>
     <!--------- 抽屉添加项目 end --------->
-
     <!--------- 抽屉消息面板 start --------->
     <el-drawer title="消息列表" :visible.sync="drawer2" :with-header="false">
       <el-row class="messageBox">
@@ -266,11 +269,11 @@
               <el-col
                 :span="24"
                 v-for="(items,index) in messageData"
-                :class="[items.isread == false ? 'act' : '', 'infinite-list-item']"
+                :class="[items.isRead == false ? 'act' : '', 'infinite-list-item']"
                 :key="index"
               >
                 <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
-                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}&nbsp;&nbsp;</el-col>
                 <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
               <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
@@ -287,11 +290,11 @@
               <el-col
                 :span="24"
                 v-for="(items,index) in messageData"
-                class="infinite-list-item"
+                :class="[items.isRead == false ? 'act' : '', 'infinite-list-item']"
                 :key="index"
               >
                 <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
-                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}&nbsp;&nbsp;</el-col>
                 <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
               <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
@@ -308,11 +311,11 @@
               <el-col
                 :span="24"
                 v-for="(items,index) in messageData"
-                class="infinite-list-item"
+                :class="[items.isRead == false ? 'act' : '', 'infinite-list-item']"
                 :key="index"
               >
                 <el-col :span="8" class="time">{{$time(items.createTime)}}</el-col>
-                <el-col :span="16" class="title">{{items.typeName}}</el-col>
+                <el-col :span="16" class="title">{{items.typeName}}&nbsp;&nbsp;</el-col>
                 <el-col :span="16" class="content" :offset="8">{{items.contents}}</el-col>
               </el-col>
               <el-col :span="24" class="noData" v-if="messageData.length == 0">暂无数据</el-col>
@@ -322,7 +325,6 @@
       </el-row>
     </el-drawer>
     <!--------- 抽屉消息面板 end --------->
-
     <!--------- 抽屉问题反馈 start --------->
     <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false">
       <el-row class="problemFeedback" v-loading="loadingFeedback">
@@ -349,7 +351,14 @@
         </el-col>
         <el-col :span="6" class="title">问题描述</el-col>
         <el-col :span="13">
-          <el-input type="textarea" :rows="6" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+          <el-input
+            type="textarea"
+            :rows="6"
+            placeholder="请输入内容"
+            v-model="feedbackContent"
+            maxlength="300"
+            show-word-limit
+          ></el-input>
         </el-col>
         <el-col :span="13" :offset="6">
           <el-upload
@@ -416,6 +425,7 @@ export default {
       businessId: '', // 分类 业务
       pasProjectList: [], // 立项信息列表
       pasprojectId: '', // 分类 立项
+      pasprojectName: '', // 分类立项名称
       checkListBan: false, // 执行部门禁用
       // 禁止选择当前时间之前的时间
       pickerOptions: {
@@ -483,7 +493,9 @@ export default {
       // 筛选客户列表
       userclientIdList: [],
       // 最外层点击关闭
-      clickCloseNum: 0
+      clickCloseNum: 0,
+      // 反馈问题列表
+      problemListShow: false
     }
   },
   // 侦听器
@@ -509,7 +521,20 @@ export default {
         this.getBusinessByClientId(data)
       }
     },
-    $route: 'router_url'
+    pasprojectId: function(newQuestion, oldQuestion) {
+      let pasProjectList = this.pasProjectList
+      if (newQuestion != '') {
+        pasProjectList.forEach((element, i) => {
+          if (element.value == newQuestion) {
+            this.pasprojectName = element.label
+          }
+        })
+      } else {
+        this.pasprojectName = ''
+      }
+      console.log(this.pasprojectName)
+    }
+    // $route: 'router_url'
   },
   // 钩子函数
   beforeCreate() {},
@@ -529,6 +554,8 @@ export default {
     this.getAllClientapiList()
     // 获取业务类型
     this.getBusinessListAjax()
+    // 判断反馈列表是否显示
+    this.problemListShowIf()
   },
   // 方法
   methods: {
@@ -658,10 +685,10 @@ export default {
       if (res.status == 200) {
         let data = res.data.data.items
         data.reverse()
-        let totalPages = Math.ceil(data.length / 3)
+        let totalPages = Math.ceil(data.length / 4)
         let businessList = []
         for (let i = 0; i < totalPages; i++) {
-          let businessListData = data.slice(i * 3, i * 3 + 3)
+          let businessListData = data.slice(i * 4, i * 4 + 4)
           businessList.push(businessListData)
         }
         this.allBusinessList = businessList
@@ -706,8 +733,29 @@ export default {
         this.messagePage = messagePage
         let unread = this.unread
         this.unread = unread + 1
-        // console.log(this.messagePage)
+        let messageLRead = []
+        data.forEach(element => {
+          let messageId = element.messageId
+          messageLRead.push(messageId)
+        })
+        let messageLReadStr = messageLRead.toString()
+        // /api/message/updateIsRead
+        // console.log(messageLReadStr)
+        let data0 = {
+          ids: messageLReadStr,
+          message: {
+            isRead: true
+          }
+        }
+        if (messageLReadStr != '') {
+          this.updateIsRead(data0)
+        }
       }
+    },
+    updateIsRead(data) {
+      this.$axios.post('/pmbs/api/message/updateIsRead', data).then(res => {
+        // console.log(res)
+      })
     },
     ///////// 信息列表 end /////////
 
@@ -1163,6 +1211,7 @@ export default {
         clientId: this.clientId, // '所属客户ID',
         serviceId: this.businessId, // '所属业务ID'
         pasprojectId: this.pasprojectId, // 立项ID
+        pasprojectName: this.pasprojectName, // 立项名称
         isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
@@ -1246,15 +1295,15 @@ export default {
     },
     // 操作文档链接
     operator() {
-      // let newPage = window.open() // 防止浏览器拦截
-      // newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
+      let newPage = window.open() // 防止浏览器拦截
+      newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
       // download(row) {
       // let localPath = row.localPath
       // console.log("123")
-      let a = document.createElement('a')
-      a.download = `操作文档.pdf`
-      a.setAttribute('href', 'http://218.106.254.122:8084/doc/123.pdf')
-      a.click()
+      // let a = document.createElement('a')
+      // a.download = `操作文档.pdf`
+      // a.setAttribute('href', 'http://218.106.254.122:8084/doc/123.pdf')
+      // a.click()
       // },
     },
     ///////// 问题反馈 start /////////
@@ -1339,6 +1388,21 @@ export default {
         })
       }
     },
+    // 跳转问题反馈页面
+    problemListShowIf() {
+      let userId = this.userId
+      let userIdList = [4001, 147, 4023, 820, 10, 9, 3985, 266, 3962]
+      let show = false
+      userIdList.forEach(element => {
+        if (element == userId) {
+          show = true
+        }
+      })
+      this.problemListShow = show
+    },
+    problemList() {
+      this.$router.push({ path: '/problem' })
+    },
     ///////// 问题反馈 end /////////
     // 消息提示
     messageWin(message) {
@@ -1422,7 +1486,7 @@ export default {
   list-style: none;
 }
 .el-aside .title:hover {
-  background: #fff;
+  background: #ffffff;
 }
 .el-aside .title.act {
   background: #fff;
@@ -1436,9 +1500,8 @@ export default {
   min-width: 1080px;
 }
 .home .add_box {
-  /* height: 985px; */
   box-sizing: border-box;
-  padding: 36px 49px 108px;
+  padding: 36px 24px 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1453,7 +1516,7 @@ export default {
   font-size: 18px;
   background: none;
 }
-.home .add_box .title.center{
+.home .add_box .title.center {
   align-self: flex-start;
 }
 .home .add_box .title {
@@ -1467,7 +1530,7 @@ export default {
     no-repeat;
   background-size: 7px;
 }
-.home .add_box .nobgimg{
+.home .add_box .nobgimg {
   background: none;
 }
 .home .add_box .remind {
@@ -1584,13 +1647,14 @@ export default {
   display: none; /* Chrome Safari */
 }
 .home .paneBox .infinite-list .infinite-list-item.act {
-  background: #eee;
+  color: black;
 }
 .home .paneBox .infinite-list .infinite-list-item {
   font-size: 14px;
   box-sizing: border-box;
-  padding: 18px 0;
+  padding: 18px 9px;
   border-bottom: 1px solid rgb(224, 227, 234);
+  color: #999;
 }
 .home .paneBox .infinite-list .infinite-list-item > div {
   /* height: 18px; */
@@ -1599,6 +1663,10 @@ export default {
 .home .paneBox .infinite-list .infinite-list-item .title {
   font-weight: bold;
   font-size: 15px;
+}
+.home .paneBox .infinite-list .infinite-list-item.act .title::after {
+  content:'●';
+  color: red;
 }
 .home .paneBox .infinite-list .infinite-list-item .content {
   margin-top: 9px;

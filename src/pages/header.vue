@@ -1,41 +1,31 @@
 <template>
   <div class="topheader">
     <el-row>
-      <el-header style="height: 75px;">
-        <img src="static/images/hander/logo.png" height="72" class="logo" alt srcset />
+      <el-header>
+        <img src="static/images/hander/logo.png" class="logo" @click="toHome" alt srcset />
         <div class="header-right">
-          <div class="add_du problemList" @click="problemList" :style="problemListStyle">
-            <i class="el-icon-warning-outline"></i>
-            反馈列表
-          </div>
           <el-tooltip class="item" effect="dark" content="新建项目" placement="bottom">
             <div class="add_du" @click="add_box">
               <i class="el-icon-circle-plus-outline"></i>
-              创建
+              <span>创建</span>
             </div>
           </el-tooltip>
           <div class="message" @click="message">
             <el-badge :value="messageNum" class="item" :hidden="messageShow">
               <i class="el-icon-bell"></i>
             </el-badge>
-            <span>消息</span>
           </div>
           <!-- 头像 -->
           <div class="usual">
-            <div class="portrait">
-              <img style="width:100%;height:100%;" :src="this.$store.state.user.headPortrait" alt />
-            </div>
-            <el-dropdown trigger="hover">
-              <span class="el-dropdown-link" style="color:#fff;">
-                {{this.$store.state.user.realName}}
-                <i class="el-icon-caret-bottom el-icon--right"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item class="clearfix">
-                  <span @click="logout">退出</span>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+            <div class="portrait"></div>
+            <span class="el-dropdown-link">
+              你好，
+              {{this.$store.state.user.realName}}
+              <i
+                class="el-icon-switch-button"
+                @click="logout"
+              ></i>
+            </span>
           </div>
         </div>
       </el-header>
@@ -70,7 +60,6 @@ export default {
   // 钩子函数
   mounted() {
     this.countIsRead()
-    this.problemListStyleCange()
   },
   methods: {
     logout() {
@@ -101,54 +90,27 @@ export default {
       this.$emit('message', {})
       // console.log(1)
     },
-    // 
+    //
     // 未读消息数量
-    countIsRead(){
+    countIsRead() {
       let userId = this.userId
-      let data =`?userId=${userId}`
-      this.$axios
-        .post('/pmbs/api/message/countIsRead' + data)
-        .then(res => {
-          if (res.status == 200) {
-            let data = res.data
-            this.messageNum = data
-            if (data == 0) {
-              this.messageShow = true
-            }else{
-              this.messageShow = false
-            }
+      let data = `?userId=${userId}`
+      this.$axios.post('/pmbs/api/message/countIsRead' + data).then(res => {
+        if (res.status == 200) {
+          let data = res.data
+          this.messageNum = data
+          if (data == 0) {
+            this.messageShow = true
+          } else {
+            this.messageShow = false
           }
-        })
-    },
-    // 跳转问题反馈页面
-    problemListStyleCange(){
-      let userId = this.userId
-      let userIdList = [4001, 147, 4023, 820, 10, 9, 3985, 266, 3962]
-      let show = false
-      userIdList.forEach(element => {
-        if (element == userId) {
-          show = true
         }
       })
-      if (show) {
-        this.problemListStyle = 'opacity: 100;'
-      }else{
-        this.problemListStyle = 'opacity: 0;'
-      }
     },
-    problemList(){
-      let userId = this.userId
-      let userIdList = [4001, 147, 4023, 820, 10, 9, 3985, 266, 3962]
-      let show = false
-      userIdList.forEach(element => {
-        if (element == userId) {
-          show = true
-        }
-      })
-      if (show) {
-        this.$router.push({ path: '/problem'})
-      }else{
-      }
+
+    // 首页
+    toHome() {
+      this.$router.push({ path: '/home' })
     }
   }
 }
@@ -160,7 +122,7 @@ export default {
   position: fixed;
   top: 0;
 }
-.topheader .message{
+.topheader .message {
   font-size: 16px;
   color: white;
 }
@@ -172,22 +134,26 @@ export default {
   float: left;
 }
 .header-right {
-  width: 432px;
+  width: 300px;
   float: right;
   color: #555555;
   font-size: 18px;
-  cursor: pointer;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
 }
-.header-right .problemList{
-  opacity: 0;
-}
 .header-right .add_du {
+  width: 54px;
+  height: 24px;
+  line-height: 24px;
   color: white;
   font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
 .header-right .add_du i {
   font-size: 18px;
@@ -195,6 +161,7 @@ export default {
 .header-right .el-icon-bell {
   color: white;
   font-size: 24px;
+  cursor: pointer;
 }
 .topheader .el-dropdown {
   font-size: 15px;
@@ -207,7 +174,8 @@ export default {
   display: block;
 }
 .topheader .el-header {
-  padding: 0px 50px;
+  height: 60px;
+  padding: 0px 50px 0 0;
   position: fixed;
   top: 0;
   width: 100%;
@@ -220,7 +188,8 @@ export default {
   align-items: center;
 }
 .topheader .el-header .logo {
-  height: 49px;
+  height: 40px;
+  cursor: pointer;
 }
 .el-badge__content {
   border: 0;
@@ -259,20 +228,21 @@ export default {
   margin-left: 10px;
   vertical-align: bottom;
 }
-.topheader .portrait {
-  width: 40px;
-  height: 40px;
-  font-size: 16px;
-  text-align: center;
-  border-radius: 50%;
-  /*background: white;*/
-  overflow: hidden;
-}
 .usual {
-  width: 121px;
+  width: 128px;
+  height: 32px;
+  line-height: 32px;
+  padding-left: 16px;
+  border-left: 1px solid white;
+  font-size: 16px;
+  color: white;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+}
+.usual i {
+  font-size: 18px;
+  cursor: pointer;
 }
 </style>

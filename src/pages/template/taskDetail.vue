@@ -25,7 +25,7 @@
           <el-col :span="24" class="paneBox">
             <el-col :span="24" class="pane" v-show="tabs_activity == 1">
               <el-col :span="5" class="title">任务名称</el-col>：
-              <el-col :span="15">
+              <el-col :span="18">
                 <template
                   v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
                 >
@@ -81,6 +81,8 @@
               <el-col :span="5" class="title">状态</el-col>：
               <el-col :span="18">
                 <span v-if="taskData.status==1" class="state_color1">执行中</span>
+                <span v-if="taskData.status==2" class="state_color2">审核中</span>
+                <span v-if="taskData.status==3" class="state_color3">已完成</span>
                 <span v-else-if="taskData.status==4" class="state_color4">延期</span>
                 <span v-else-if="taskData.status==5" class="state_color3">延期完成</span>
               </el-col>
@@ -90,6 +92,7 @@
                   v-if="taskData.doUserId == userId && taskData.status != 2 && taskData.status != 3 && taskData.status != 5"
                 >
                   <el-date-picker
+                    class="expertTime"
                     v-model="taskData.expertTime"
                     type="date"
                     placeholder="选择日期"
@@ -111,6 +114,8 @@
                     :autosize="{ minRows: 1, maxRows: 9}"
                     placeholder="请输入内容"
                     v-model="taskData.remark"
+                    maxlength="300"
+                    show-word-limit
                   ></el-input>
                 </template>
                 <template v-else>{{taskData.remark}}</template>
@@ -129,7 +134,7 @@
                     :limit="1"
                     class="elementUpload"
                   >
-                    <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
+                    <el-button size="mini" type="primary" v-if="disabled0">点击上传附件</el-button>
                   </el-upload>
                 </template>
                 <template v-else>
@@ -167,7 +172,10 @@
               </el-col>
             </el-col>
             <el-col :span="24" class="pane" v-show="tabs_activity == 2">
-              <el-col :span="6" :class="[taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5 ? 'snow' : '', 'title']">完成结果</el-col>：
+              <el-col
+                :span="6"
+                :class="[taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5 ? 'snow' : '', 'title']"
+              >完成结果</el-col>：
               <el-col :span="24">
                 <template
                   v-if="taskData.doUserId == userId && taskData.status != 3 && taskData.status != 5"
@@ -178,6 +186,8 @@
                     placeholder="请输入内容"
                     :disabled="resultBan"
                     v-model="taskData.overDesc"
+                    maxlength="300"
+                    show-word-limit
                   ></el-input>
                 </template>
                 <template v-else>{{taskData.overDesc}}</template>
@@ -196,7 +206,7 @@
                     :limit="1"
                     class="elementUpload"
                   >
-                    <el-button size="mini" type="primary" v-show="disabled1">点击上传文档</el-button>
+                    <el-button size="mini" type="primary" v-if="disabled1">点击上传文档</el-button>
                   </el-upload>
                 </template>
                 <template v-else>
@@ -289,9 +299,9 @@
         v-show="batton_pa"
         v-if="taskData.doUserId == userId && tabs_activity != 3"
       >
-        <el-col :span="12" :offset="7" class="batton">
+        <el-col :span="20" :offset="2" class="batton">
           <el-button size="small" type="info" @click="empty">取消</el-button>
-          <el-button size="small" type="primary" @click="changeTaskDeil">完成</el-button>
+          <el-button size="small" type="primary" @click="changeTaskDeil">提交</el-button>
         </el-col>
       </el-row>
     </el-drawer>
@@ -361,7 +371,7 @@ export default {
       dialogVisible: false,
       disabled: false,
       uploadUrl: '',
-      listProFile: [], // 上传文件信息列表
+      listProFile: [{}], // 上传文件信息列表
       suggest_list: [], // 任务反馈意见列表
       fileList0: [],
       // 上传文档
@@ -565,7 +575,8 @@ export default {
             fileId: element.fileId,
             fileName: element.fileName,
             name: element.fileName,
-            localPath: element.localPath
+            localPath: element.localPath,
+            suffix: element.suffix
           }
           fileList0.push(fileList0Data)
         }
@@ -577,7 +588,8 @@ export default {
             fileId: element.fileId,
             fileName: element.fileName,
             name: element.fileName,
-            localPath: element.localPath
+            localPath: element.localPath,
+            suffix: element.suffix
           }
           fileList1.push(fileList1Data)
         }
@@ -621,6 +633,7 @@ export default {
           suffix: resData.fileType //'文档后缀'
         }
         listProFile.push(listProFileData)
+        // let data = $.extend(listProFileData,listProFile[0])
         this.listProFile = listProFile
         console.log(this.listProFile)
       }
@@ -706,7 +719,7 @@ export default {
       delete taskData.feedbackList
       if (
         taskData.proFileList.length != 0 &&
-        taskData.proFileList[0].oldProFileId == null
+        taskData.proFileList[0].oldFileId == null
       ) {
         taskData.proFileList = []
       }
@@ -773,7 +786,7 @@ export default {
     /////////  [download 下载附件] start /////////
     download(row) {
       let localPath = row.localPath
-      // console.log("123")
+      // console.log(row)
       let a = document.createElement('a')
       a.download = `${row.fileName}.${row.suffix}`
       a.setAttribute('href', 'http://218.106.254.122:8084/pmbs/' + localPath)
@@ -855,7 +868,7 @@ export default {
 }
 .taskDetail .task_details {
   height: 100%;
-  padding: 36px 36px 108px 36px;
+  padding: 36px 24px 108px;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-start;
@@ -894,7 +907,7 @@ export default {
   margin-bottom: 12px;
 }
 .taskDetail .task_details .fileListBox .fileList {
-  width: 81px;
+  width: 24px;
   margin-top: 9px;
   text-align: center;
   font-size: 13px;
@@ -926,13 +939,16 @@ export default {
   flex-wrap: wrap;
   align-items: flex-start;
 }
+.taskDetail .task_details .paneBox .pane .expertTime {
+  width: 100%;
+}
 .taskDetail .task_details .paneBox .pane > div {
   margin-bottom: 24px;
 }
-.taskDetail .task_details .paneBox .pane:nth-of-type(2) > div{
+.taskDetail .task_details .paneBox .pane:nth-of-type(2) > div {
   padding-left: 9px;
 }
-.taskDetail .task_details .nobgimg{
+.taskDetail .task_details .nobgimg {
   background: none;
 }
 .taskDetail .batton_pa {

@@ -41,6 +41,7 @@
                 icon="el-icon-more"
                 @click.stop="tab1_more()"
                 :class="[moreShow==true ? 'act more' : 'more']"
+                v-if="allBusinessList[1]"
                 style="border-left: 0;"
               ></el-button>
             </el-button-group>
@@ -794,9 +795,23 @@ export default {
 .document .top .tab1 {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+}
+.document .top .tab2 {
+  position: relative;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.document .top .tab3 {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 .document .top .tab1 button:nth-of-type(3) {
   border-left: 0;
@@ -817,7 +832,8 @@ export default {
   margin-bottom: 9px;
 }
 .document .top button {
-  width: 80px;
+  width: 72px;
+  padding: 9px;
 }
 .document .top .more {
   width: 32px;

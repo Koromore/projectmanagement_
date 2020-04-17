@@ -40,6 +40,7 @@
               icon="el-icon-more"
               @click.stop="tab1_more()"
               :class="[moreShow==true ? 'act more' : 'more']"
+              v-if="allBusinessList[1]"
               style="border-left: 0;"
             ></el-button>
           </el-button-group>
@@ -94,6 +95,63 @@
         <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
         <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
       </el-col>
+      <!-- 我参与 -->
+      <el-col :span="24" class="table table2" v-show="tabs_activity == 1">
+        <el-table
+          v-loading="loading"
+          ref="filterTable"
+          :data="currentData_"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+        >
+          <el-table-column prop="name" label="项目名称" show-overflow-tooltip min-width="270">
+            <template slot-scope="scope">
+              <!-- <el-badge value="经" class="item"> -->
+
+              <el-link
+                type="primary"
+                @click.native="pathPrpjectDetails(scope.row.proId,1)"
+              >{{scope.row.proName}}</el-link>
+              <el-badge class="mark" value="经"  v-if="scope.row.manager == userId"/>
+              <!-- </el-badge> -->
+              <!-- <el-tag type="danger" effect="dark" size="mini" v-if="scope.row.manager == userId">经理</el-tag> -->
+            </template>
+          </el-table-column>
+          <el-table-column prop="pasproName" label="所属立项" show-overflow-tooltip min-width="270"></el-table-column>
+          <el-table-column prop="state_text" label="状态" min-width="130">
+            <template slot-scope="scope">
+              <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
+            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="overTime" label="完成时间" sortable min-width="100">
+            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="realName" label="下达人" filter-placement="bottom-end" min-width="81"></el-table-column>
+          <el-table-column label="操作" min-width="81">
+            <template slot-scope="scope">
+              <el-button size="mini" type="info" v-if="scope.row.manager == userId" @click="drawer4 = true">设置</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="paging">
+          <el-pagination
+            @size-change="handleSizeChange_"
+            @current-change="handleCurrentChange_"
+            :current-page="pageNum_"
+            :page-size="30"
+            layout="total, prev, pager, next"
+            :total="totalnum_"
+            background
+          ></el-pagination>
+        </div>
+      </el-col>
       <!-- 我发起 -->
       <el-col :span="24" class="table table1" v-show="tabs_activity == 0">
         <el-table
@@ -103,14 +161,14 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="proName" label="名称" show-overflow-tooltip min-width="330">
+          <el-table-column prop="proName" label="项目名称" show-overflow-tooltip min-width="300">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="90">
+          <el-table-column prop="status" label="状态" width="81">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -119,7 +177,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="num" label="任务数" min-width="110" class-name="center">
+          <el-table-column prop="num" label="任务数" min-width="90" class-name="center">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
@@ -129,6 +187,12 @@
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
           <el-table-column prop="realName" label="下达人" min-width="90"></el-table-column>
+          <el-table-column
+            prop="managerName"
+            label="项目经理"
+            filter-placement="bottom-end"
+            min-width="90"
+          ></el-table-column>
           <el-table-column
             prop="tag"
             label="操作"
@@ -182,59 +246,6 @@
           <!-- </div> -->
         </div>
       </el-col>
-      <!-- 我参与 -->
-      <el-col :span="24" class="table table2" v-show="tabs_activity == 1">
-        <el-table
-          v-loading="loading"
-          ref="filterTable"
-          :data="currentData_"
-          style="width: 100%"
-          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-        >
-          <el-table-column prop="name" label="名称" show-overflow-tooltip min-width="360">
-            <template slot-scope="scope">
-              <el-link
-                type="primary"
-                @click.native="pathPrpjectDetails(scope.row.proId,1)"
-              >{{scope.row.proName}}</el-link>
-              <el-tag type="danger" effect="dark" size="mini" v-if="scope.row.manager == userId">经理</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column prop="state_text" label="状态" min-width="150">
-            <template slot-scope="scope">
-              <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
-              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
-              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="130">
-            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
-          </el-table-column>
-          <el-table-column prop="overTime" label="完成时间" sortable min-width="130">
-            <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
-          </el-table-column>
-          <el-table-column
-            prop="realName"
-            label="下达人"
-            filter-placement="bottom-end"
-            min-width="180"
-          ></el-table-column>
-        </el-table>
-        <div class="paging">
-          <el-pagination
-            @size-change="handleSizeChange_"
-            @current-change="handleCurrentChange_"
-            :current-page="pageNum_"
-            :page-size="30"
-            layout="total, prev, pager, next"
-            :total="totalnum_"
-            background
-          ></el-pagination>
-        </div>
-      </el-col>
-
       <!-- 抽屉 -->
       <!-- 抽屉 -->
       <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
@@ -243,7 +254,14 @@
             <el-col :span="24" class="title">{{drawer1_name}}</el-col>
             <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="feedbackContent"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
             <br />
             <el-col :span="6" class="title snow">接受</el-col>
@@ -266,7 +284,6 @@
                 >{{item.taskName}}</el-checkbox>
               </el-checkbox-group>
             </el-col>
-
             <el-col :span="24" class="Upload">
               <el-divider></el-divider>
               <el-upload
@@ -287,14 +304,21 @@
           </el-col>
         </el-row>
       </el-drawer>
-      <!-- 抽屉 -->
-      <el-drawer title="任务" :visible.sync="drawer3" :with-header="false">
+      <!--------- 延迟原因抽屉 --------->
+      <el-drawer title="延期原因" :visible.sync="drawer3" :with-header="false">
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer3_name}}</el-col>
             <el-col :span="6" class="title snow">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="delayReason"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="delayReason"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -303,6 +327,91 @@
           </el-col>
         </el-row>
       </el-drawer>
+      <!--------- 设置项目担当抽屉 start --------->
+      <el-drawer title="项目担当" :visible.sync="drawer4" :with-header="false">
+        <el-scrollbar style="height: 100%">
+          <el-row class="principal">
+            <el-col :span="24" class="title">项目担当&知晓人</el-col>
+            <el-col :span="6" class="key">项目担当:</el-col>
+            <el-col :span="18" class="value prin">
+              <el-table :data="principalData" style="width: 100%" border>
+                <el-table-column prop="name" label="名称" min-width="64">
+                  <template slot-scope="scope">
+                    <div class="change" v-if="changeShow === scope.$index">
+                      <el-select
+                        v-model="principalValue"
+                        filterable
+                        placeholder="请选择"
+                        clearable
+                        size="small"
+                        style="width: 99px;"
+                      >
+                        <el-option
+                          v-for="item in principalList"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        ></el-option>
+                      </el-select>
+                      <el-button
+                        type="primary"
+                        size="mini"
+                        @click="affirmPrincipal(scope.$index)"
+                      >确认</el-button>
+                    </div>
+                    <div class="name" v-else>{{scope.row.name}}</div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="address" label="操作" min-width="36">
+                  <template slot-scope="scope">
+                    <el-link type="primary" @click="changePrincipal(scope.$index)">更换</el-link>
+                    <el-link type="primary" @click="deletePrincipal(scope.$index)">删除</el-link>
+                    <i
+                      class="el-icon-circle-plus-outline add"
+                      v-if="scope.$index == principalData.length-1"
+                      @click="addPrincipal(scope.$index)"
+                    ></i>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </el-col>
+            <el-col :span="6" class="key">知晓人:</el-col>
+            <el-col :span="18" class="value know">
+              <!-- 知晓人编辑 start -->
+              <el-col :span="18">
+                <el-select v-model="add_list" filterable clearable placeholder="请选择" size="small">
+                  <el-option
+                    v-for="item in userList"
+                    :key="item.index"
+                    :label="item.label"
+                    :value="item.value"
+                  ></el-option>
+                </el-select>
+                <!-- {{add_list}} -->
+              </el-col>
+              <el-col :span="6">
+                <el-button size="small" type="primary" @click="showInput">添加</el-button>
+              </el-col>
+              <el-col :span="24" class="know_pop">
+                <el-tag
+                  :key="tag.index"
+                  v-for="tag in dynamicTags"
+                  closable
+                  :disable-transitions="false"
+                  @close="handleClose(tag)"
+                  class="know_pop_list"
+                >{{tag}}</el-tag>
+              </el-col>
+              <!-- 知晓人编辑 end -->
+            </el-col>
+          </el-row>
+          <el-col :span="12" :offset="7" class="batton pribatton">
+            <el-button size="small" type="info" @click="empty">取消</el-button>
+            <el-button size="small" type="primary" @click="principalPull">提交</el-button>
+          </el-col>
+        </el-scrollbar>
+      </el-drawer>
+      <!--------- 设置项目担当抽屉 end --------->
     </el-row>
   </div>
 </template>
@@ -312,6 +421,7 @@ export default {
   props: {
     update: Number,
     allBusinessList: Array,
+    allClientIdList: Array,
     userclientIdList: Array,
     clickCloseNum: Number
   },
@@ -330,29 +440,16 @@ export default {
       drawer1: false,
       drawer2: false,
       drawer3: false,
+      drawer4: false,
       drawer1_name: '',
       drawer3_name: '任务名称',
       // plain: false,
       autofocus: true,
       loginState: true, // 避免多次点击
       project_style: '',
-      // 新增
-      new_project: {
-        new_name: '', // 任务名称
-        business_type: [], // 分类
-        radio1: '1', // 专项，日常
-        presetTime: '', // 预计时间
-        demand: '', // 需求
-        radio2: '1', // 项目经理,执行部门 选择
-        manager: '', // 项目经理
-        checkList: [], // 执行部门
-        dynamicTags: ['标签一', '标签二', '标签三', '标签四'] // 知晓人
-      },
-      add_list: '',
       checkList: [],
       business_type_list: [], // 业务类型列表
       deptList: [], // 部门列表
-      userList: [], // 用户列表
       // 点击编辑获取的项目详情
       projectData: {},
       // 上传附件
@@ -449,7 +546,57 @@ export default {
       // 我参与分页
       pageNum_: this.$store.state.projectPageNum_, //默认页码
       totalnum_: 0, //总页码
-      currentData_: [] //当前渲染的数据
+      currentData_: [], //当前渲染的数据
+
+      // 项目担当和知晓人设置
+      principalData: [
+        {
+          name: '姓名1',
+          address: '上海市普陀区金沙江路 1518 弄'
+        },
+        {
+          name: '姓名2',
+          address: '上海市普陀区金沙江路 1517 弄'
+        },
+        {
+          name: '姓名3',
+          address: '上海市普陀区金沙江路 1519 弄'
+        },
+        {
+          name: '姓名4',
+          address: '上海市普陀区金沙江路 1516 弄'
+        }
+      ],
+      // 项目担当人信息
+      changeShow: '',
+      principalList: [
+        {
+          value: '选项1',
+          label: '黄金糕'
+        },
+        {
+          value: '选项2',
+          label: '双皮奶'
+        },
+        {
+          value: '选项3',
+          label: '蚵仔煎'
+        },
+        {
+          value: '选项4',
+          label: '龙须面'
+        },
+        {
+          value: '选项5',
+          label: '北京烤鸭'
+        }
+      ],
+      principalValue: '',
+      principalLabel: '',
+      // 知晓人
+      add_list: '',
+      dynamicTags: [], // 知晓人
+      userList: [] // 用户列表
     }
   },
   // 计算属性
@@ -457,6 +604,16 @@ export default {
   // },
   // 侦听器
   watch: {
+    principalValue: function(newQuestion, oldQuestion) {
+      let principalList = this.principalList
+      if (newQuestion != '') {
+        principalList.forEach(element => {
+          if (element.value == newQuestion) {
+            this.principalLabel = element.label
+          }
+        })
+      }
+    },
     // 如果 `checkListDept` 发生改变，这个函数就会运行
     checkListDept: function(newQuestion, oldQuestion) {
       let taskNameListShow = []
@@ -540,6 +697,7 @@ export default {
     let id = this.tabs_activity
     this.findProjectList(id)
     this.getParams(id)
+    this.getListAjax()
     // this.getProjectList(0) // 获取项目列表
 
     // console.log(this.businessList)
@@ -1065,9 +1223,19 @@ export default {
       this.loading = false
       if (res.status == 200) {
         let projectListJoin = res.data.data
-        for (let i = 0; i < projectListJoin.length; i++) {
-          let element = projectListJoin[i]
-        }
+        // for (let i = 0; i < projectListJoin.length; i++) {
+        //   let element = projectListJoin[i]
+        // }
+        // let allClientIdList = this.allClientIdList
+        // projectListJoin.forEach((element,i) => {
+        //   // element.pasprojectId
+        //   allClientIdList.forEach(element1 => {
+        //     if (element.pasprojectId == element1.value) {
+        //       projectListJoin[i].pasprojectName = element1.label
+        //     }
+        //   });
+        // });
+        // console.log(projectListJoin)
         this.projectListJoin = projectListJoin
 
         this.totalnum_ = this.projectListJoin.length
@@ -1127,10 +1295,108 @@ export default {
         }
       })
     },
+    ///////// 用户列表获取 start /////////
+    getListAjax(res) {
+      let list = this.userList
+      if (list.length == 0) {
+        let data = { pageNum: 1 }
+        this.$axios.post('/pmbs/api/user/list', data).then(this.getListAjaxSuss)
+      }
+    },
+    // 用户列表获取回调
+    getListAjaxSuss(res) {
+      // console.log(res)
+      if (res.status == 200) {
+        let data = res.data.data
+        let userList = []
+        for (let i = 0; i < data.length; i++) {
+          let userListData = {}
+          let element = data[i]
+          userListData.value = element.userId
+          userListData.label = `${element.deptName}-${element.realName}`
+          userList.push(userListData)
+        }
+        this.userList = userList
+      }
+    },
+    ///////// 用户列表获取 end /////////
+    // 添加项目担当
+    addPrincipal(index) {
+      let principalData = this.principalData
+      let data = {
+        name: `姓名${index + 2}`,
+        address: '上海市普陀区金沙江路 1516 弄'
+      }
+      principalData.push(data)
+      this.principalData = principalData
+    },
+    // 更换项目担当
+    changePrincipal(index) {
+      this.changeShow = index
+    },
+    // 确认项目担当
+    affirmPrincipal(index) {
+      let principalData = this.principalData
+      let principalValue = this.principalValue
+      let principalLabel = this.principalLabel
+      if (principalValue == '') {
+        this.changeShow = ''
+      } else {
+        principalData[index].name = principalLabel
+        principalData[index].id = principalValue
+        this.changeShow = ''
+        this.principalValue = ''
+      }
+      console.log(this.principalData)
+    },
+    // 删除项目担当
+    deletePrincipal(index) {
+      let principalData = this.principalData
+      principalData.splice(index, 1)
+      console.log(this.principalData)
+      // this.principalData = principalData
+    },
+    // 添加知晓人标签
+    showInput() {
+      let list = this.dynamicTags
+      let add_list = this.add_list
+      let userList = this.userList
+      let cf = true
+      if (add_list != '') {
+        let add_list_data = ''
+        for (let i = 0; i < userList.length; i++) {
+          const element = userList[i]
+          if (element.value == add_list) {
+            add_list_data = element.label
+          }
+        }
+        for (let i = 0; i < list.length; i++) {
+          const element = list[i]
+          if (element == add_list_data) {
+            this.messageWarning('请勿重复添加')
+            cf = false
+          }
+        }
+        if (cf) {
+          list.push(add_list_data)
+          this.add_list = ''
+        }
+      } else if (add_list == '') {
+        this.messageWarning('信息为空')
+      }
+    },
+    // 删除知晓人标签
+    handleClose(tag) {
+      this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
+    },
+    // 项目担当知晓人页面提交
+    principalPull() {},
     // 抽屉取消按钮
     empty() {
-      this.drawer3 = false
+      this.drawer1 = false
       this.drawer2 = false
+      this.drawer3 = false
+      this.drawer4 = false
       this.feedbackContent = ''
       this.result = ''
     },
@@ -1179,9 +1445,23 @@ export default {
 .project .top .tab1 {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+}
+.project .top .tab2 {
+  position: relative;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.project .top .tab3 {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 .project .top .tab1 button:nth-of-type(3) {
   border-left: 0;
@@ -1231,8 +1511,9 @@ export default {
   color: white;
   border: 1px solid #409eff;
 }
-.project .top .tab3 >>> .el-button {
-  width: 80px;
+.project .top >>> .el-button {
+  width: 72px;
+  padding: 9px;
 }
 .project .top .tab1 div:nth-of-type(1),
 .project .top .tab2 div:nth-of-type(1) {
@@ -1408,6 +1689,36 @@ export default {
 .project .batton button {
   width: 36%;
 }
+.project .principal {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 36px 49px 130px;
+}
+.project .principal .title {
+  height: 40px;
+  line-height: 40px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+.project .principal .key {
+  text-align-last: justify;
+  box-sizing: border-box;
+  padding: 0 9px 0 0;
+}
+.project .principal .value.prin {
+  margin-bottom: 99px;
+}
+/* .project .principal .value.know {
+  margin-bottom: 13px;
+} */
+.project .principal .add {
+  color: #409eff;
+  font-size: 16px;
+}
+.project .batton.pribatton {
+  position: absolute;
+  bottom: 72px;
+}
 .pointer {
   cursor: pointer;
 }
@@ -1424,5 +1735,16 @@ export default {
   background: url('../../../../static/images/task/snowflake.png') 0 center
     no-repeat;
   background-size: 7px;
+}
+.project .know_pop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+.project .know_pop_list {
+  margin-bottom: 13px;
+  margin-left: 0;
 }
 </style>

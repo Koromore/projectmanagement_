@@ -2,28 +2,10 @@
   <div id="gantti">
     <el-row>
       <el-col :span="24">
-        <el-col :span="1" :offset="1" @click.native="return_()">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            aria-hidden="true"
-            class="svg-icon mb-icon-flip mb-angle-left"
-            width="110"
-            height="110"
-            viewBox="0 -64 1024 1024"
-            style="fill: rgb(16, 16, 16);"
-          >
-            <path
-              d="M590.541 569.139l-23.689 24.542-151.040-145.852 150.187-151.142 24.235 24.064-125.781 126.566z"
-            />
-          </svg>
+        <el-col v-if="taskList && projectShowDetail" :span="22" :offset="2" class="title">
+          <i class="el-icon-arrow-left" @click="return_()"></i>
+          {{projectShowDetail.proName}}
         </el-col>
-
-        <el-col
-          v-if="taskList && projectShowDetail"
-          :span="22"
-          :offset="2"
-          class="title"
-        >{{projectShowDetail.proName}}</el-col>
         <el-col v-if="taskList && projectShowDetail" :span="20" :offset="2" class="gantt_time"></el-col>
         <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2">
           <el-alert title="暂无数据..." type="success" :closable="false"></el-alert>
@@ -394,16 +376,16 @@ export default {
 .title {
   text-align: left;
   font-weight: 400;
-  font-size: 36px;
+  font-size: 24px;
   color: rgb(16, 16, 16);
   line-height: 54px;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
+  margin-top: 49px;
 }
-#gantti .svg-icon{
+.title i {
+  margin-right: 13px;
+  font-weight: bold;
+  font-size: 24px;
   cursor: pointer;
 }
-/* .wl-gantt-demo {
-  margin: 40px auto;
-  width: 1000px;
-} */
 </style>

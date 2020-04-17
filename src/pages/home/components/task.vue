@@ -2,7 +2,7 @@
   <div class="task" :style="project_style">
     <el-row>
       <el-col :span="24" class="top">
-        <el-col :span="5" class>
+        <el-col :span="5" class="">
           <el-col :span="4" class="title">客户</el-col>
           <el-col :span="20">
             <el-select
@@ -40,6 +40,7 @@
               icon="el-icon-more"
               @click.stop="tab1_more()"
               :class="[moreShow==true ? 'act more' : 'more']"
+              v-if="allBusinessList[1]"
               style="border-left: 0;"
             ></el-button>
           </el-button-group>
@@ -102,89 +103,6 @@
         <div @click="table_tab(1)" :class="[tabs_activity==1 ? 'act' : '']">我参与</div>
         <div @click="table_tab(0)" :class="[tabs_activity==0 ? 'act' : '']">我发起</div>
       </el-col>
-      <!-- 我发起 -->
-      <el-col :span="24" class="table table1" v-show="tabs_activity==0">
-        <el-table
-          v-loading="loading"
-          ref="filterTable"
-          :data="tasklist"
-          style="width: 100%"
-          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
-          :row-style="{'text_aling':'left'}"
-        >
-          <el-table-column
-            prop="proName"
-            label="所属项目"
-            column-key="name"
-            show-overflow-tooltip
-            min-width="210"
-          >
-          <!-- :filters="filtratePro"
-            :filter-method="filterName" -->
-          </el-table-column>
-          <el-table-column
-            prop="deptName"
-            label="部门"
-            min-width="120"
-          >
-          <!-- :filters="filtrateDep"
-            :filter-method="filterDepartment" -->
-          </el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="210">
-          <template slot-scope="scope">
-            <el-link
-              type="primary"
-              @click="task_detail(scope.row,0)"
-            >{{scope.row.taskName}}</el-link>
-            <el-tooltip class="item" effect="dark" :content="scope.row.faTaskName" placement="bottom">
-                <span v-if="scope.row.faTask != 0" class="faTask">父</span>
-            </el-tooltip>
-            </template>
-          </el-table-column>
-          <el-table-column prop="status" label="状态" min-width="90">
-            <template slot-scope="scope">
-              <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
-              <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
-              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
-              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
-              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
-              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
-            </template>
-          </el-table-column>
-          <!-- <el-table-column prop="faTaskName" label="父任务" min-width="130"></el-table-column> -->
-          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
-            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
-          </el-table-column>
-          <el-table-column prop="tag" label="操作" min-width="160" filter-placement="bottom-end">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                type="info"
-                @click="feedback(scope.row)"
-                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
-              >反馈</el-button>
-              <el-button
-                size="mini"
-                v-if="scope.row.isIgnore != true && scope.row.status == 2"
-                type="primary"
-                slot="reference"
-                @click="sponsor_achieve(scope.row)"
-              >完成</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <!-- 分页 -->
-        <el-col :span="24" class="page">
-          <el-pagination
-            background
-            layout="total, prev, pager, next"
-            :page-size="30"
-            :total="initiateTaskListTota"
-            @current-change="initiateTaskList"
-          ></el-pagination>
-        </el-col>
-      </el-col>
-      <!--  -->
       <!-- 我参与 -->
       <el-col :span="24" class="table table2" v-show="tabs_activity==1">
         <el-table
@@ -195,15 +113,15 @@
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
           align="left"
         >
-          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="115"></el-table-column>
-          <el-table-column prop="taskName" label="任务" show-overflow-tooltip min-width="115">
+          <el-table-column prop="taskName" label="任务名称" show-overflow-tooltip min-width="115">
             <el-link
-                slot-scope="scope"
-                type="primary"
-                @click="task_detail(scope.row,1)"
+              slot-scope="scope"
+              type="primary"
+              @click="task_detail(scope.row,1)"
             >{{scope.row.taskName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态" min-width="81">
+          <el-table-column prop="proName" label="所属项目" show-overflow-tooltip min-width="115"></el-table-column>
+          <el-table-column prop="status" label="状态" min-width="80">
             <template slot-scope="scope">
               <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
               <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
@@ -222,10 +140,16 @@
                   type="primary"
                   @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
                   v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
-                > -->
-                  <!-- <i class="el-icon-edit"></i> -->
-                  <img src="static/images/task/change.png" width="18" alt="" srcset="" @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
-                  v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5">
+                >-->
+                <!-- <i class="el-icon-edit"></i> -->
+                <img
+                  src="static/images/task/change.png"
+                  width="18"
+                  alt=""
+                  srcset=""
+                  @click.stop="changeDoUserName(scope.$index,scope.row.listOaUser)"
+                  v-show="scope.row.isIgnore != true && scope.row.listOaUser.length > 1 && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
+                >
                 <!-- </el-link> -->
               </div>
               <div v-show="changeDoUserNameShow == scope.$index">
@@ -271,24 +195,24 @@
                 v-if="scope.row.taskfileList[0].suffix == 'doc' || scope.row.taskfileList[0].suffix == 'docx'"
                 src="static/images/document/word.png"
                 width="16"
-                alt
-                srcset
-              />
+                alt=""
+                srcset=""
+              >
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'xls' || scope.row.taskfileList[0].suffix == 'xlsx'"
                 src="static/images/document/excle.png"
                 width="16"
-                alt
-                srcset
-              />
+                alt=""
+                srcset=""
+              >
               <img
                 v-else-if="scope.row.taskfileList[0].suffix == 'ppt' || scope.row.taskfileList[0].suffix == 'pptx'"
                 src="static/images/document/ppt.png"
                 width="16"
-                alt
-                srcset
-              />
-              <img v-else src="static/images/document/other.png" width="16" alt srcset />
+                alt=""
+                srcset=""
+              >
+              <img v-else src="static/images/document/other.png" width="16" alt="" srcset="">
               <el-link type="primary" class="filenametext">{{scope.row.taskfileList[0].fileName}}</el-link>
             </div>
           </el-table-column>
@@ -320,7 +244,7 @@
         <!-- 分页 -->
         <el-col :span="24" class="page">
           <el-pagination
-            background
+            background=""
             layout="total, prev, pager, next"
             :page-size="30"
             :total="participateTaskListTota"
@@ -328,6 +252,87 @@
           ></el-pagination>
         </el-col>
       </el-col>
+      <!-- 我发起 -->
+      <el-col :span="24" class="table table1" v-show="tabs_activity==0">
+        <el-table
+          v-loading="loading"
+          ref="filterTable"
+          :data="tasklist"
+          style="width: 100%"
+          :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
+          :row-style="{'text_aling':'left'}"
+        >
+          <el-table-column prop="taskName" label="任务名称" show-overflow-tooltip min-width="210">
+            <template slot-scope="scope">
+              <el-link type="primary" @click="task_detail(scope.row,0)">{{scope.row.taskName}}</el-link>
+              <el-tooltip
+                class="item"
+                effect="dark"
+                :content="scope.row.faTaskName"
+                placement="bottom"
+              >
+                <span v-if="scope.row.faTask != 0" class="faTask">父</span>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="proName"
+            label="所属项目"
+            column-key="name"
+            show-overflow-tooltip
+            min-width="210"
+          >
+            <!-- :filters="filtratePro"
+            :filter-method="filterName"-->
+          </el-table-column>
+          <el-table-column prop="deptName" label="部门" min-width="120">
+            <!-- :filters="filtrateDep"
+            :filter-method="filterDepartment"-->
+          </el-table-column>
+          <el-table-column prop="status" label="状态" min-width="90">
+            <template slot-scope="scope">
+              <span v-if="scope.row.isIgnore == true" class="state_color3">忽略</span>
+              <span v-else-if="scope.row.status == 1" class="state_color1">执行中</span>
+              <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
+              <span v-else-if="scope.row.status == 3" class="state_color3">完成</span>
+              <span v-else-if="scope.row.status == 4" class="state_color4">延期</span>
+              <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
+            </template>
+          </el-table-column>
+          <!-- <el-table-column prop="faTaskName" label="父任务" min-width="130"></el-table-column> -->
+          <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
+            <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
+          </el-table-column>
+          <el-table-column prop="tag" label="操作" min-width="160" filter-placement="bottom-end">
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="info"
+                @click="feedback(scope.row)"
+                v-if="scope.row.isIgnore != true && scope.row.status == 1 || scope.row.status == 2 || scope.row.status == 4"
+              >反馈</el-button>
+              <el-button
+                size="mini"
+                v-if="scope.row.isIgnore != true && scope.row.status == 2"
+                type="primary"
+                slot="reference"
+                @click="sponsor_achieve(scope.row)"
+              >完成</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <!-- 分页 -->
+        <el-col :span="24" class="page">
+          <el-pagination
+            background=""
+            layout="total, prev, pager, next"
+            :page-size="30"
+            :total="initiateTaskListTota"
+            @current-change="initiateTaskList"
+          ></el-pagination>
+        </el-col>
+      </el-col>
+      <!--  -->
       <!-- 任务详情抽屉 start -->
       <taskDetail :taskId="taskId" @closeDrawer="closeDrawer"></taskDetail>
       <!-- 任务详情抽屉 end -->
@@ -338,7 +343,14 @@
             <el-col :span="24" class="title">{{drawer2_task}}</el-col>
             <el-col :span="6" class="title snow">反馈</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="feedbackContent"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="feedbackContent"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
             <el-col :span="24" class="Upload">
               <el-divider></el-divider>
@@ -367,7 +379,14 @@
             <el-col :span="24" class="title">{{drawer3_task}}</el-col>
             <el-col :span="6" class="title">延期原因</el-col>
             <el-col :span="24">
-              <el-input type="textarea" :rows="9" placeholder="请输入内容" v-model="cause"></el-input>
+              <el-input
+                type="textarea"
+                :rows="9"
+                placeholder="请输入内容"
+                v-model="cause"
+                maxlength="300"
+                show-word-limit
+              ></el-input>
             </el-col>
           </el-col>
           <el-col :span="12" :offset="7" class="batton">
@@ -443,14 +462,8 @@ export default {
       tab2_act: '',
       suggest_list: [],
       // 状态列表
-      statusList: [
-        { value: 1, label: '执行中' },
-        { value: 2, label: '完成' }
-      ],
-      statusList_: [
-        { value: 2, label: '完成' },
-        { value: 4, label: '延期' }
-      ],
+      statusList: [{ value: 1, label: '执行中' }, { value: 2, label: '完成' }],
+      statusList_: [{ value: 2, label: '完成' }, { value: 4, label: '延期' }],
       statusListValue: '',
       // 任务详情
       taskData: {},
@@ -601,15 +614,15 @@ export default {
       })
         .then(() => {
           let expertTime = new Date(
-          new Date(taskData.expertTime).getTime() + 24 * 60 * 60 * 1000
+            new Date(taskData.expertTime).getTime() + 24 * 60 * 60 * 1000
           )
           let newTime = new Date()
-            let data = {
-              taskId: taskData.taskId,
-              expertTime: taskData.expertTime,
-              status: 3
-            }
-            if (expertTime < newTime) {
+          let data = {
+            taskId: taskData.taskId,
+            expertTime: taskData.expertTime,
+            status: 3
+          }
+          if (expertTime < newTime) {
             data.status = 5
           }
           this.approveTask(data)
@@ -622,16 +635,14 @@ export default {
         })
     },
     // 任务完成
-    approveTask(data){
-          this.$axios
-            .post('/pmbs/api/task/approveTask', data)
-            .then(res=>{
-              if (res.status == 200) {
-                this.messageWin(res.data.msg)
-                this.getTasklist(this.tabs_activity)
-              }
-            })
-        },
+    approveTask(data) {
+      this.$axios.post('/pmbs/api/task/approveTask', data).then(res => {
+        if (res.status == 200) {
+          this.messageWin(res.data.msg)
+          this.getTasklist(this.tabs_activity)
+        }
+      })
+    },
     join_redact(taskId) {
       this.$confirm('是否忽略此任务', '确认信息', {
         distinguishCancelAndClose: true,
@@ -656,20 +667,18 @@ export default {
         this.drawer3_task = task
       }
     },
-    ignoreTask(data){
-      this.$axios
-        .post('/pmbs/api/task/ignoreTask?'+ data)
-        .then(res=>{
-          if (res.status == 200) {
-            this.messageWin(res.data.msg)
-            this.getTasklist(this.tabs_activity)
-          }
-        })
+    ignoreTask(data) {
+      this.$axios.post('/pmbs/api/task/ignoreTask?' + data).then(res => {
+        if (res.status == 200) {
+          this.messageWin(res.data.msg)
+          this.getTasklist(this.tabs_activity)
+        }
+      })
     },
     // http://176.10.10.148:8089/pmbs/api/task/ignoreTask?taskId=1
     // this.$axios
-          // .post('/pmbs/api/task/save', data)
-          // .then(this.changeDoUserNameAffirmSuss)
+    // .post('/pmbs/api/task/save', data)
+    // .then(this.changeDoUserNameAffirmSuss)
     // 筛选所属项目
     filterName(value, row) {
       return row.name === value
@@ -1077,9 +1086,23 @@ export default {
 .task .top .tab1 {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+}
+.task .top .tab2 {
+  position: relative;
+  display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.task .top .tab3 {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 .task .top .tab1 button:nth-of-type(3) {
   border-left: 0;
@@ -1100,7 +1123,8 @@ export default {
   margin-bottom: 9px;
 }
 .task .top button {
-  width: 80px;
+  width: 72px;
+  padding: 9px;
 }
 .task .top .more {
   width: 32px;
@@ -1199,7 +1223,7 @@ export default {
   align-items: center;
   cursor: pointer;
 }
-.task .table .taskfile img{
+.task .table .taskfile img {
   margin-right: 6px;
 }
 .task .table .filenametext {
@@ -1364,25 +1388,25 @@ export default {
 .task .change {
   font-size: 18px;
 }
-.task .doUserName{
+.task .doUserName {
   display: flex;
   align-items: center;
 }
-.task .doUserName img{
+.task .doUserName img {
   margin-left: 6px;
   cursor: pointer;
 }
-.task .faTask{
-    display: inline-block;
-    color: white;
-    text-align: center;
-    width: 18px;
-    height: 18px;
-    line-height: 18px;
-    border-radius: 50%;
-    background: rgb(56, 148, 255);
+.task .faTask {
+  display: inline-block;
+  color: white;
+  text-align: center;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+  border-radius: 50%;
+  background: rgb(56, 148, 255);
 }
-.task .snow{
+.task .snow {
   box-sizing: border-box;
   padding-left: 9px;
   background: url('../../../../static/images/task/snowflake.png') 0 center
