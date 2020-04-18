@@ -411,7 +411,7 @@
                     </el-select>
                     <el-button type="primary" size="mini" @click="affirmPrincipal(index,item)">确认</el-button>
                   </div>
-                  <div class="name" v-else>{{item.realName+item.deleteFlag}}</div>
+                  <div class="name" v-else>{{item.realName}}</div>
                 </div>
                 <div  class="title-right">
                   <el-link type="primary" @click="changePrincipal(index,item)">更换</el-link>
@@ -1456,7 +1456,8 @@ export default {
         realName: '',
         userId: '',
         projectId: this.principalProId,
-        deleteFlag: 0
+        deleteFlag: 0,
+        id: 0
       }
       principalData.push(data)
       this.principalData = principalData
@@ -1498,7 +1499,10 @@ export default {
         this.changeShow = ''
         this.principalValue = ''
       }
-      console.log(this.principalData)
+      if (principalData[index].id == 0) {
+        principalData[index].deleteFlag = 0
+      }
+      // console.log(this.principalData)
     },
     closePrincipal() {
       this.principalData = [
@@ -1581,7 +1585,7 @@ export default {
   background: red;
 } */
 .pixi-item{
-  display:flex !important;
+  display:flex;
 }
 .title-left{
   flex: 1;

@@ -194,7 +194,7 @@
           <el-col :span="24" v-show="radio2 == 2">
             <el-col :offset="6" :span="18" class="remind">会对选中的人创建任务，执行人需完成此任务。</el-col>
             <el-col :offset="6" :span="12">
-              <el-select v-model="add_list0" filterable clearable placeholder="请选择">
+              <el-select v-model="add_list0" filterable clearable placeholder="请选择" class="userList">
                 <el-option
                   v-for="item in userList"
                   :key="item.index"
@@ -206,7 +206,7 @@
             <el-col :span="4" :offset="1">
               <el-button size="small" type="primary" @click="showInput0">添加</el-button>
             </el-col>
-            <el-col :span="24" class="know_pop">
+            <el-col :span="18" :offset="6" class="know_pop">
               <el-tag
                 :key="tag.index"
                 v-for="tag in dynamicTags0"
@@ -1635,6 +1635,9 @@ export default {
 .home .add_box .manager {
   width: 100%;
 }
+/* .home .add_box .know_pop {
+  margin-top: 16px;
+} */
 .home .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
