@@ -31,8 +31,10 @@
       @change="chooseDate"
       :top="calendar_top"
     ></calendar>
-    <div class="change-mode" @click="to_big">+ 放大</div>
-    <div class="change-mode" @click="to_small">- 缩小</div>
+    <div class="change-mode-but">
+      <div class="change-mode" @click="to_big">+ 放大</div>
+      <div class="change-mode" @click="to_small">- 缩小</div>
+    </div>
   </div>
 </template>
 <script>
@@ -318,6 +320,15 @@ export default {
 }
 </script>
 <style>
+.ganteLiuBox{
+  position: relative;
+}
+.change-mode-but{
+  position: absolute;
+  top: -72px;
+  right: 0;
+  z-index: 999;
+}
 li {
   list-style: none;
 }

@@ -6,6 +6,8 @@
           <i class="el-icon-arrow-left" @click="return_()"></i>
           {{projectShowDetail.proName}}
         </el-col>
+        <!-- <div class="change-mode" @click="to_big">+ 放大</div>
+        <div class="change-mode" @click="to_small">- 缩小</div> -->
         <el-col v-if="taskList && projectShowDetail" :span="20" :offset="2" class="gantt_time"></el-col>
         <el-col v-if="!taskList || !projectShowDetail" :span="22" :offset="2">
           <el-alert title="暂无数据..." type="success" :closable="false"></el-alert>
@@ -29,10 +31,17 @@ export default {
       userId: this.$store.state.user.userId, // 用户ID
       data: [],
       taskList: [], // 项目下的任务
-      projectShowDetail: {} // 项目详情
+      projectShowDetail: {}, // 项目详情
+      timeshow: ''
     }
   },
   methods: {
+    to_big(){
+      this.timeshow.to_big()
+    },
+    to_small(){
+      this.timeshow.to_small()
+    },
     formatData(date) {
       // var date = new Date();
       let year = date.getFullYear()
@@ -328,6 +337,8 @@ export default {
         onClick(data) {
           // console.log(data)
         }
+      }).then(res=>{
+        this.timeshow = res
       })
       // console.log('gantt')
     },

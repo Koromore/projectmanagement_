@@ -132,9 +132,11 @@
                     :fileList="fileList0"
                     :on-preview="handlePreview"
                     :limit="1"
-                    class="elementUpload"
+                    :on-exceed="exceed"
+                    ref="needFileUpload"
                   >
-                    <el-button size="mini" type="primary" v-if="disabled0">点击上传附件</el-button>
+                    <el-button size="mini" type="primary">点击上传附件</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传一个文件</div>
                   </el-upload>
                 </template>
                 <template v-else>
@@ -204,9 +206,11 @@
                     :on-preview="handlePreview"
                     :fileList="fileList1"
                     :limit="1"
-                    class="elementUpload"
+                    :on-exceed="exceed"
+                    ref="resultFileUpload"
                   >
-                    <el-button size="mini" type="primary" v-if="disabled1">点击上传文档</el-button>
+                    <el-button size="mini" type="primary">点击上传文档</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传一个文件</div>
                   </el-upload>
                 </template>
                 <template v-else>
@@ -243,52 +247,53 @@
                 </template>
               </el-col>
             </el-col>
+
             <el-col :span="24" class="pane" v-show="tabs_activity == 3">
               <el-col :span="24" class="suggest">
-                <el-scrollbar style="height: 100%;">
-                  <el-col
-                    :span="23"
-                    class="suggest_list"
-                    v-for="item in taskData.feedbackList"
-                    :key="item.index"
-                  >
-                    <el-col :span="12" class="time">{{$time(item.updateTime)}}</el-col>
-                    <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
-                    <el-col :span="24" class="content">{{item.feedback}}</el-col>
-                    <el-col :span="24" class="fileListBox">
-                      <div
-                        class="fileList"
-                        v-for="items in item.feedbackFileList"
-                        :key="items.index"
-                        @click="download(items)"
-                      >
-                        <img
-                          v-if="items.suffix == 'doc' || items.suffix == 'docx'"
-                          src="static/images/document/word.png"
-                          width="24"
-                          alt
-                          srcset
-                        />
-                        <img
-                          v-else-if="items.suffix == 'xls' || items.suffix == 'xlsx'"
-                          src="static/images/document/excle.png"
-                          width="24"
-                          alt
-                          srcset
-                        />
-                        <img
-                          v-else-if="items.suffix == 'ppt' || items.suffix == 'pptx'"
-                          src="static/images/document/ppt.png"
-                          width="24"
-                          alt
-                          srcset
-                        />
-                        <img v-else src="static/images/document/other.png" width="24" alt srcset />
-                        <div>{{items.fileName}}</div>
-                      </div>
-                    </el-col>
+                <!-- <el-scrollbar style="height: 100%;"> -->
+                <el-col
+                  :span="23"
+                  class="suggest_list"
+                  v-for="item in taskData.feedbackList"
+                  :key="item.index"
+                >
+                  <el-col :span="12" class="time">{{$time(item.updateTime)}}</el-col>
+                  <el-col :span="12" class="pop">{{item.deptName}}-{{item.feedbackUserName}}</el-col>
+                  <el-col :span="24" class="content">{{item.feedback}}</el-col>
+                  <el-col :span="24" class="fileListBox">
+                    <div
+                      class="fileList"
+                      v-for="items in item.feedbackFileList"
+                      :key="items.index"
+                      @click="download(items)"
+                    >
+                      <img
+                        v-if="items.suffix == 'doc' || items.suffix == 'docx'"
+                        src="static/images/document/word.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="items.suffix == 'xls' || items.suffix == 'xlsx'"
+                        src="static/images/document/excle.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img
+                        v-else-if="items.suffix == 'ppt' || items.suffix == 'pptx'"
+                        src="static/images/document/ppt.png"
+                        width="24"
+                        alt
+                        srcset
+                      />
+                      <img v-else src="static/images/document/other.png" width="24" alt srcset />
+                      <div>{{items.fileName}}</div>
+                    </div>
                   </el-col>
-                </el-scrollbar>
+                </el-col>
+                <!-- </el-scrollbar> -->
               </el-col>
             </el-col>
           </el-col>
@@ -648,11 +653,7 @@ export default {
       }
       this.taskFileId = data.fileId
       this.oldProFileId = data.fileId
-      this.listProFile = [
-        {
-          oldFileId: data.fileId // 原文档ID
-        }
-      ]
+      this.listProFile = []
     },
     ///////// 任务需求附件上传 end /////////
 
@@ -697,6 +698,12 @@ export default {
     },
     ///////// 任务成果附件上传 end /////////
 
+    ///////// 附件上传限制提示 start /////////
+    exceed() {
+      this.messageWarning('只能上传一个文件')
+    },
+    ///////// 附件上传限制提示 end /////////
+
     ///////// 附件下载 start /////////
     handlePreview(file) {
       // console.log(file)
@@ -719,7 +726,7 @@ export default {
       delete taskData.feedbackList
       if (
         taskData.proFileList.length != 0 &&
-        taskData.proFileList[0].oldFileId == null
+        taskData.proFileList[0].oldProFileId == null
       ) {
         taskData.proFileList = []
       }
@@ -730,6 +737,7 @@ export default {
         taskData.taskfileList = []
       }
       taskData.doUserId = this.doUserId
+      // console.log(this.listProFile)
       // console.log(taskData)
       let tabs_activity = this.tabs_activity
       if (tabs_activity == 1) {
@@ -742,25 +750,22 @@ export default {
           overDesc: taskData.overDesc,
           taskfileList: taskData.taskfileList
         }
-        this.finishTask(data)
+        if (data.overDesc == '') {
+          this.messageError('带*信息不能为空')
+        } else {
+          // console.log(data)
+          this.finishTask(data)
+        }
       }
-      // if (status == 2) {
-      //   if (taskData.overDesc == '') {
-      //     this.messageError('完成结果不能为空')
-      //   } else {
-      //     this.taskSave(taskData)
-      //   }
-      // } else {
-      //   this.taskSave(taskData)
-      // }
-      // this.taskSave(taskData)
     },
     ///////// 修改任务详情 end /////////
     ///////// 任务提交审核中 start /////////
     finishTask(data) {
       this.drawer5 = false
       this.$axios.post('/pmbs/api/task/finishTask', data).then(res => {
-        console.log(res)
+        if (res.status == 200) {
+          this.messageWin(res.data.msg)
+        }
       })
     },
     ///////// 任务提交审核中 end /////////
@@ -805,6 +810,8 @@ export default {
       this.oldFileId = ''
       this.closeType = 0
       this.changeNameShow = false
+      this.$refs['needFileUpload'].clearFiles()
+      this.$refs['resultFileUpload'].clearFiles()
     },
     // 消息提示
     messageWin(message) {
@@ -895,21 +902,16 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.taskDetail .task_details .suggest {
+/* .taskDetail .task_details .suggest {
   height: 172px;
-}
-/* .taskDetail .task_details .suggest .el-scrollbar{
-  height: 100%;
-  overflow-x: scroll;
 } */
 .taskDetail .task_details .suggest .suggest_list {
-  /* height: 48px; */
   margin-bottom: 12px;
 }
 .taskDetail .task_details .fileListBox .fileList {
-  width: 24px;
+  width: 72px;
   margin-top: 9px;
-  text-align: center;
+  text-align: left;
   font-size: 13px;
   color: rgb(162, 162, 162);
   cursor: pointer;
@@ -930,8 +932,10 @@ export default {
   text-align: right;
 }
 .taskDetail .task_details .suggest .suggest_list .content {
+  margin-top: 6px;
   color: #000;
   font-size: 16px;
+  word-break: break-all;
 }
 
 .taskDetail .task_details .paneBox .pane {

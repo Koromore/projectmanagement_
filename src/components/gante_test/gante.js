@@ -21,7 +21,7 @@ export default {
           document.querySelector(container).appendChild(gante.$el)
         }
         gante.init(params)
-        resolve()
+        resolve(gante)
       })
     }
 

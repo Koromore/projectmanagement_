@@ -170,38 +170,64 @@
           <el-col :span="6" class="title">执行选择</el-col>
           <el-col :span="18">
             <el-radio v-model="radio2" label="1" :disabled="disabled1">项目经理</el-radio>
-            <el-radio v-model="radio2" label="2" :disabled="disabled2">执行部门</el-radio>
+            <el-radio v-model="radio2" label="2" :disabled="disabled2">执行人</el-radio>
           </el-col>
-          <el-col :span="18" :offset="6" v-show="radio2 == 1">
-            <div class="remind">项目经理为此项目的统筹人，负责任务分发与审核</div>
-            <el-select
-              v-model="new_project.managerId"
-              filterable
-              clearable
-              placeholder="请选择"
-              class="userList"
-            >
-              <el-option
-                v-for="item in userList"
-                :key="item.index"
-                :label="item.label"
-                :value="item.value"
-              ></el-option>
-            </el-select>
+          <el-col :span="24" v-show="radio2 == 1">
+            <el-col :offset="6" :span="18" class="remind">项目经理为此项目的统筹人，负责任务分发与审核</el-col>
+            <el-col :offset="6" :span="12">
+              <el-select
+                v-model="new_project.managerId"
+                filterable
+                clearable
+                placeholder="请选择"
+                class="userList"
+              >
+                <el-option
+                  v-for="item in userList"
+                  :key="item.index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
           </el-col>
-          <el-col :span="18" :offset="6" v-show="radio2 == 2">
-            <el-checkbox-group v-model="new_project.checkList" class="check_box">
+          <el-col :span="24" v-show="radio2 == 2">
+            <el-col :offset="6" :span="18" class="remind">会对选中的人创建任务，执行人需完成此任务。</el-col>
+            <el-col :offset="6" :span="12">
+              <el-select v-model="add_list0" filterable clearable placeholder="请选择">
+                <el-option
+                  v-for="item in userList"
+                  :key="item.index"
+                  :label="item.label"
+                  :value="item.value"
+                ></el-option>
+              </el-select>
+            </el-col>
+            <el-col :span="4" :offset="1">
+              <el-button size="small" type="primary" @click="showInput0">添加</el-button>
+            </el-col>
+            <el-col :span="24" class="know_pop">
+              <el-tag
+                :key="tag.index"
+                v-for="tag in dynamicTags0"
+                closable
+                :disable-transitions="false"
+                @close="handleClose0(tag)"
+                class="know_pop_list"
+              >{{tag}}</el-tag>
+            </el-col>
+            <!-- <el-checkbox-group v-model="new_project.checkList" class="check_box">
               <el-checkbox
                 :label="items.id"
                 v-for="items in deptList"
                 :key="items.index"
                 :disabled="checkListBan"
               >{{items.name}}</el-checkbox>
-            </el-checkbox-group>
+            </el-checkbox-group>-->
           </el-col>
           <el-col :span="6" class="title nobgimg">知晓人</el-col>
           <!-- 知晓人编辑 start -->
-          <el-col :span="9">
+          <el-col :span="12" class="knowAdd">
             <el-select v-model="add_list" filterable clearable placeholder="请选择">
               <el-option
                 v-for="item in userList"
@@ -212,7 +238,7 @@
             </el-select>
             <!-- {{add_list}} -->
           </el-col>
-          <el-col :span="6" :offset="1">
+          <el-col :span="4" :offset="1">
             <el-button size="small" type="primary" @click="showInput">添加</el-button>
           </el-col>
           <el-col :span="18" :offset="6" class="know_pop">
@@ -229,7 +255,7 @@
         </el-row>
       </el-scrollbar>
       <el-row class="batton_pa">
-        <el-col :span="12" :offset="7" class="batton">
+        <el-col :span="24" class="batton">
           <el-button size="small" type="info" @click="empty()">取消</el-button>
           <el-button size="small" type="primary" @click="addProject">提交</el-button>
         </el-col>
@@ -435,6 +461,8 @@ export default {
       },
       // 知晓人
       add_list: '',
+      add_list0: '',
+      dynamicTags0: [], // 知晓人
       // 上传附件
       dialogImageUrl: '123',
       dialogVisible: false,
@@ -532,7 +560,7 @@ export default {
       } else {
         this.pasprojectName = ''
       }
-      console.log(this.pasprojectName)
+      // console.log(this.pasprojectName)
     }
     // $route: 'router_url'
   },
@@ -832,6 +860,40 @@ export default {
         this.new_project.dynamicTags.indexOf(tag),
         1
       )
+    },
+    // 添加知晓人标签
+    showInput0() {
+      let list = this.dynamicTags0
+      let add_list = this.add_list0
+      let userList = this.userList
+      let cf = true
+      if (add_list != '') {
+        let add_list_data = ''
+        for (let i = 0; i < userList.length; i++) {
+          const element = userList[i]
+          if (element.value == add_list) {
+            add_list_data = element.label
+          }
+        }
+        for (let i = 0; i < list.length; i++) {
+          const element = list[i]
+          if (element == add_list_data) {
+            this.messageWarning('请勿重复添加')
+            cf = false
+          }
+        }
+        if (cf) {
+          list.push(add_list_data)
+          this.add_list0 = ''
+        }
+      } else if (add_list == '') {
+        this.messageWarning('信息为空')
+      }
+      console.log(this.dynamicTags0)
+    },
+    // 删除知晓人标签
+    handleClose0(tag) {
+      this.dynamicTags0.splice(this.dynamicTags0.indexOf(tag), 1)
     },
     ///////// 接受子组件数据 start /////////
     getMsgFormSon(data) {
@@ -1186,7 +1248,8 @@ export default {
       let department = checkList.join(',')
       // 知晓人名称列表
       let dynamicTags = this.new_project.dynamicTags
-      // console.log(dynamicTags)
+      let dynamicTags0 = this.dynamicTags0
+      // console.log(dynamicTags0)
       let knowUserList = []
       for (let i = 0; i < dynamicTags.length; i++) {
         let element = dynamicTags[i]
@@ -1211,7 +1274,7 @@ export default {
         clientId: this.clientId, // '所属客户ID',
         serviceId: this.businessId, // '所属业务ID'
         pasprojectId: this.pasprojectId, // 立项ID
-        pasprojectName: this.pasprojectName, // 立项名称
+        pasproName: this.pasprojectName, // 立项名称
         isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
@@ -1227,10 +1290,23 @@ export default {
         changeId = this.new_project.managerId
         data.manager = changeId // '项目经理id',
       } else if (radio2 == 2) {
-        changeId = department
+        let knowUserList0 = []
+        for (let i = 0; i < dynamicTags0.length; i++) {
+          let element = dynamicTags0[i]
+          let knowUserListData = ''
+          for (let j = 0; j < userList.length; j++) {
+            let element_ = userList[j]
+            if (element == element_.label) {
+              knowUserListData = element_.value
+            }
+          }
+          knowUserList0.push(knowUserListData)
+        }
+        // console.log(knowUserList0)
+        changeId = knowUserList0.join(',')
         data.department = changeId // '参与部门ID',
       }
-      // console.log(data)
+      console.log(data)
       if (
         data.proName == '' ||
         this.new_project.business_type == [] ||
@@ -1501,7 +1577,7 @@ export default {
 }
 .home .add_box {
   box-sizing: border-box;
-  padding: 36px 24px 108px;
+  padding: 36px 49px 108px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1511,7 +1587,7 @@ export default {
   margin-bottom: 16px;
 }
 .home .add_box .title.title1 {
-  padding: 0 13px 0 0;
+  padding: 0 9px 0 0;
   font-weight: 600;
   font-size: 18px;
   background: none;
@@ -1525,13 +1601,14 @@ export default {
   text-align-last: justify;
   text-align: right;
   box-sizing: border-box;
-  padding: 0 13px;
-  background: url('../../../static/images/task/snowflake.png') 3px center
+  padding: 0 9px;
+  background: url('../../../static/images/task/snowflake.png') left center
     no-repeat;
   background-size: 7px;
 }
 .home .add_box .nobgimg {
   background: none;
+  align-self: flex-start;
 }
 .home .add_box .remind {
   font-size: 13px;
@@ -1573,7 +1650,7 @@ export default {
 }
 .home .batton_pa {
   width: 100%;
-  padding: 36px;
+  /* padding: 36px; */
   background: white;
   position: absolute;
   bottom: 0;
@@ -1581,6 +1658,9 @@ export default {
   z-index: 9;
 }
 .home .batton {
+  height: 72px;
+  box-sizing: border-box;
+  padding: 0 49px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -1665,7 +1745,7 @@ export default {
   font-size: 15px;
 }
 .home .paneBox .infinite-list .infinite-list-item.act .title::after {
-  content:'●';
+  content: '●';
   color: red;
 }
 .home .paneBox .infinite-list .infinite-list-item .content {
@@ -1727,5 +1807,8 @@ export default {
 .home >>> .el-table td,
 .home >>> .el-table th {
   padding: 9px 0;
+}
+.home .knowAdd >>> .el-select{
+  width: 100%;
 }
 </style>

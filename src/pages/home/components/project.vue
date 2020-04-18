@@ -112,7 +112,7 @@
                 type="primary"
                 @click.native="pathPrpjectDetails(scope.row.proId,1)"
               >{{scope.row.proName}}</el-link>
-              <el-badge class="mark" value="经"  v-if="scope.row.manager == userId"/>
+              <el-badge class="mark" value="经" v-if="scope.row.manager == userId" />
               <!-- </el-badge> -->
               <!-- <el-tag type="danger" effect="dark" size="mini" v-if="scope.row.manager == userId">经理</el-tag> -->
             </template>
@@ -136,7 +136,12 @@
           <el-table-column prop="realName" label="下达人" filter-placement="bottom-end" min-width="81"></el-table-column>
           <el-table-column label="操作" min-width="81">
             <template slot-scope="scope">
-              <el-button size="mini" type="info" v-if="scope.row.manager == userId" @click="drawer4 = true">设置</el-button>
+              <el-button
+                size="mini"
+                type="info"
+                v-if="scope.row.manager == userId"
+                @click="openPrincipal(scope.row.proId)"
+              >设置</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -161,14 +166,15 @@
           style="width: 100%"
           :header-cell-style="{background:'rgb(236, 235, 235)',color:'#000'}"
         >
-          <el-table-column prop="proName" label="项目名称" show-overflow-tooltip min-width="300">
+          <el-table-column prop="proName" label="项目名称" show-overflow-tooltip min-width="180">
             <el-link
               type="primary"
               slot-scope="scope"
               @click.native="pathPrpjectDetails(scope.row.proId,0)"
             >{{scope.row.proName}}</el-link>
           </el-table-column>
-          <el-table-column prop="status" label="状态" width="81">
+          <el-table-column prop="pasproName" label="所属立项" show-overflow-tooltip min-width="180"></el-table-column>
+          <el-table-column prop="status" label="状态" width="80">
             <template slot-scope="scope">
               <span v-if="scope.row.status == 1" class="state_color1">执行中</span>
               <span v-else-if="scope.row.status == 2" class="state_color2">审核中</span>
@@ -248,7 +254,7 @@
       </el-col>
       <!-- 抽屉 -->
       <!-- 抽屉 -->
-      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false">
+      <el-drawer title="任务" :visible.sync="drawer1" :with-header="false" @close="feedbackClose">
         <el-row class="feedback">
           <el-col :span="24" class="content">
             <el-col :span="24" class="title">{{drawer1_name}}</el-col>
@@ -284,17 +290,18 @@
                 >{{item.taskName}}</el-checkbox>
               </el-checkbox-group>
             </el-col>
+            <el-col :span="6" class="title snow">附件</el-col>
             <el-col :span="24" class="Upload">
-              <el-divider></el-divider>
               <el-upload
                 action="/pmbs/file/upload?upType=0&demandType=1"
                 :on-remove="handleRemoveFeedback"
                 :on-success="handleSuccessFeedback"
                 :limit="1"
-                ref="upload"
+                :on-exceed="exceed"
+                ref="feedbackUpload"
                 class="elementUpload"
               >
-                <el-button size="mini" type="primary" v-show="disabled0">点击上传文档</el-button>
+                <el-button size="mini" type="primary">点击上传文档</el-button>
               </el-upload>
             </el-col>
           </el-col>
@@ -321,22 +328,22 @@
               ></el-input>
             </el-col>
           </el-col>
-          <el-col :span="12" :offset="7" class="batton">
+          <el-col :span="24" class="batton">
             <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary" @click="delayAchieve">提交</el-button>
           </el-col>
         </el-row>
       </el-drawer>
       <!--------- 设置项目担当抽屉 start --------->
-      <el-drawer title="项目担当" :visible.sync="drawer4" :with-header="false">
+      <el-drawer title="项目担当" :visible.sync="drawer4" :with-header="false" @close="closePrincipal">
         <el-scrollbar style="height: 100%">
           <el-row class="principal">
             <el-col :span="24" class="title">项目担当&知晓人</el-col>
             <el-col :span="6" class="key">项目担当:</el-col>
             <el-col :span="18" class="value prin">
-              <el-table :data="principalData" style="width: 100%" border>
-                <el-table-column prop="name" label="名称" min-width="64">
-                  <template slot-scope="scope">
+              <!-- <el-table :data="principalData" style="width: 100%" border>
+                <el-table-column prop="realName" label="名称" min-width="64">
+                  <template slot-scope="scope" v-show="scope.row.deleteFlag!=1">
                     <div class="change" v-if="changeShow === scope.$index">
                       <el-select
                         v-model="principalValue"
@@ -356,16 +363,17 @@
                       <el-button
                         type="primary"
                         size="mini"
-                        @click="affirmPrincipal(scope.$index)"
+                        @click="affirmPrincipal(scope.$index,scope.row)"
                       >确认</el-button>
+                      {{scope.row.deleteFlag}}
                     </div>
-                    <div class="name" v-else>{{scope.row.name}}</div>
+                    <div class="name" v-else>{{scope.row.realName}}</div>
                   </template>
                 </el-table-column>
                 <el-table-column prop="address" label="操作" min-width="36">
                   <template slot-scope="scope">
-                    <el-link type="primary" @click="changePrincipal(scope.$index)">更换</el-link>
-                    <el-link type="primary" @click="deletePrincipal(scope.$index)">删除</el-link>
+                      <el-link type="primary" @click="changePrincipal(scope.$index,scope.row)">更换</el-link>
+                      <el-link type="primary" @click="deletePrincipal(scope.$index,scope.row)">删除</el-link>
                     <i
                       class="el-icon-circle-plus-outline add"
                       v-if="scope.$index == principalData.length-1"
@@ -373,7 +381,48 @@
                     ></i>
                   </template>
                 </el-table-column>
-              </el-table>
+              </el-table>-->
+              <div  class="pixi-item">
+                <div  class="title-left">名称</div>
+                <div  class="title-right">操作</div>
+              </div>
+              <div
+                v-for="(item,index) in principalData"
+                :key="index"
+                v-show="item.deleteFlag != 1"
+                class="pixi-item"
+              >
+                <div  class="title-left">
+                  <div class="change" v-if="changeShow === index">
+                    <el-select
+                      v-model="principalValue"
+                      filterable
+                      placeholder="请选择"
+                      clearable
+                      size="small"
+                      style="width: 99px;"
+                    >
+                      <el-option
+                        v-for="item in principalList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      ></el-option>
+                    </el-select>
+                    <el-button type="primary" size="mini" @click="affirmPrincipal(index,item)">确认</el-button>
+                  </div>
+                  <div class="name" v-else>{{item.realName+item.deleteFlag}}</div>
+                </div>
+                <div  class="title-right">
+                  <el-link type="primary" @click="changePrincipal(index,item)">更换</el-link>
+                  <el-link type="primary" @click="deletePrincipal(index,item)">删除</el-link>
+                  <i
+                    class="el-icon-circle-plus-outline add"
+                    v-if="index == principalData.length-1"
+                    @click="addPrincipal(index)"
+                  ></i>
+                </div>
+              </div>
             </el-col>
             <el-col :span="6" class="key">知晓人:</el-col>
             <el-col :span="18" class="value know">
@@ -405,11 +454,11 @@
               <!-- 知晓人编辑 end -->
             </el-col>
           </el-row>
-          <el-col :span="12" :offset="7" class="batton pribatton">
-            <el-button size="small" type="info" @click="empty">取消</el-button>
-            <el-button size="small" type="primary" @click="principalPull">提交</el-button>
-          </el-col>
         </el-scrollbar>
+        <el-col :span="24" class="batton pribatton">
+          <el-button size="small" type="info" @click="empty">取消</el-button>
+          <el-button size="small" type="primary" @click="principalPull">提交</el-button>
+        </el-col>
       </el-drawer>
       <!--------- 设置项目担当抽屉 end --------->
     </el-row>
@@ -551,52 +600,25 @@ export default {
       // 项目担当和知晓人设置
       principalData: [
         {
-          name: '姓名1',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          name: '姓名2',
-          address: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          name: '姓名3',
-          address: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          name: '姓名4',
-          address: '上海市普陀区金沙江路 1516 弄'
+          realName: '姓名',
+          userId: 0,
+          projectId: 0,
+          deleteFlag: 0,
+          id: 0
         }
       ],
+      putinPrincipalData: [],
       // 项目担当人信息
       changeShow: '',
-      principalList: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        },
-        {
-          value: '选项2',
-          label: '双皮奶'
-        },
-        {
-          value: '选项3',
-          label: '蚵仔煎'
-        },
-        {
-          value: '选项4',
-          label: '龙须面'
-        },
-        {
-          value: '选项5',
-          label: '北京烤鸭'
-        }
-      ],
+      principalList: [],
       principalValue: '',
       principalLabel: '',
+      principalProId: '',
       // 知晓人
       add_list: '',
       dynamicTags: [], // 知晓人
-      userList: [] // 用户列表
+      userList: [], // 用户列表
+      knowUser: []
     }
   },
   // 计算属性
@@ -835,6 +857,16 @@ export default {
         this.disabled0 = false
       }
     },
+    exceed() {
+      this.messageWarning('只能上传一个文件')
+    },
+    feedbackClose() {
+      this.$refs['feedbackUpload'].clearFiles()
+      this.feedbackFileList = []
+      this.feedbackContent = ''
+      this.checkListDept = []
+      this.checkListTask = []
+    },
     ///////// 上传附件 start /////////
     // 获取浏览器宽高
     widthheight() {
@@ -902,7 +934,7 @@ export default {
 
       let feedbackFileList = this.feedbackFileList
       if (feedbackFileList.length != 0) {
-        this.$refs['upload'].clearFiles()
+        this.$refs['feedbackUpload'].clearFiles()
         this.feedbackFileList = []
       }
     },
@@ -1320,41 +1352,165 @@ export default {
       }
     },
     ///////// 用户列表获取 end /////////
+    // 项目担当知晓人页面提交
+    // 0新增  1删除  2更换  3不管  deleteFlag
+    openPrincipal(id) {
+      this.drawer4 = true
+      this.principalProId = id
+      this.getPrincipalList()
+      this.principalData[0].projectId = id
+    },
+    getPrincipalList() {
+      let proId = this.principalProId
+      let userId = this.userId
+      let data = `proId=${proId}&userId=${userId}`
+      // http://nwne722jqh.52http.com/api/project/Implementset
+      // /pmbs/api/project/Implementset
+      this.$axios.post('/pmbs/api/project/Implementset?' + data).then(res => {
+        // console.log(res)
+        if (res.status == 200) {
+          let data = res.data.data
+          let listUser = data.listUser
+          let listBear = data.listBear
+          let listKnowUser = data.listKnowUser
+          let principalData = []
+          if (listBear.length != 0) {
+            listBear.forEach(element => {
+              let data = {
+                projectId: element.projectId,
+                userId: element.userId,
+                realName: element.realName,
+                id: element.id,
+                deleteFlag: 3
+              }
+              principalData.push(data)
+            })
+            // "projectId":74,"realName":"冯永强","updateTime":null,"userId":266
+            this.principalData = principalData
+          } else if (listBear.length == 0) {
+            this.changeShow = 0
+          }
+          let principalList = []
+          listUser.forEach(element => {
+            let listUserData = {
+              value: element.userId,
+              label: element.realName
+            }
+            principalList.push(listUserData)
+          })
+          this.principalList = principalList
+          console.log(this.principalData)
+          let knowUser = []
+          listKnowUser.forEach(element => {
+            let data = `${element.deptName}-${element.realName}`
+            knowUser.push(data)
+          })
+          this.dynamicTags = knowUser
+        }
+      })
+    },
+    principalPull() {
+      let userList = this.userList
+
+      let dynamicTags = this.dynamicTags
+      let knowUserList = []
+
+      for (let i = 0; i < dynamicTags.length; i++) {
+        let element = dynamicTags[i]
+        let knowUserListData = ''
+        for (let j = 0; j < userList.length; j++) {
+          let element_ = userList[j]
+          if (element == element_.label) {
+            knowUserListData = element_.value
+          }
+        }
+        knowUserList.push(knowUserListData)
+      }
+      // console.log(knowUserList)
+      let knowUser = knowUserList.join(',')
+      let data = {
+        proId: this.principalProId,
+        bearUserIds: JSON.stringify(this.principalData),
+        knowUserIds: knowUser
+      }
+      let formData = new FormData()
+      formData.append('proId', data.proId)
+      formData.append('bearUserIds', data.bearUserIds)
+      formData.append('knowUserIds', data.knowUserIds)
+      // http://nwne722jqh.52http.com/api/project/ImplementsetSave
+      // /pmbs/api/project/ImplementsetSave
+      this.drawer4 = false
+      this.$axios
+        .post('/pmbs/api/project/ImplementsetSave', formData)
+        .then(res => {
+          console.log(res)
+          if (res.status == 200) {
+            this.messageWin(res.data.data)
+          }
+        })
+    },
     // 添加项目担当
     addPrincipal(index) {
       let principalData = this.principalData
       let data = {
-        name: `姓名${index + 2}`,
-        address: '上海市普陀区金沙江路 1516 弄'
+        realName: '',
+        userId: '',
+        projectId: this.principalProId,
+        deleteFlag: 0
       }
       principalData.push(data)
       this.principalData = principalData
+      this.changeShow = index + 1
+    },
+    // 删除项目担当
+    deletePrincipal(index, data) {
+      let principalData = this.principalData
+      let putinPrincipalData = this.putinPrincipalData
+      // principalData.splice(index, 1)
+      principalData[index].deleteFlag = 1
+      // data.deleteFlag = 1
+      console.log(data)
+      // putinPrincipalData.push(data)
+      // console.log(this.principalData)
+      this.principalData = principalData
     },
     // 更换项目担当
-    changePrincipal(index) {
+    changePrincipal(index, data) {
+      let principalData = this.principalData
+      if (data.userId != 0) {
+        principalData[index].deleteFlag = 2
+      }
       this.changeShow = index
     },
     // 确认项目担当
-    affirmPrincipal(index) {
+    affirmPrincipal(index, data) {
       let principalData = this.principalData
       let principalValue = this.principalValue
       let principalLabel = this.principalLabel
       if (principalValue == '') {
         this.changeShow = ''
+        if (principalData[index].deleteFlag == 2) {
+          principalData[index].deleteFlag = 3
+        }
       } else {
-        principalData[index].name = principalLabel
-        principalData[index].id = principalValue
+        principalData[index].realName = principalLabel
+        principalData[index].userId = principalValue
         this.changeShow = ''
         this.principalValue = ''
       }
       console.log(this.principalData)
     },
-    // 删除项目担当
-    deletePrincipal(index) {
-      let principalData = this.principalData
-      principalData.splice(index, 1)
-      console.log(this.principalData)
-      // this.principalData = principalData
+    closePrincipal() {
+      this.principalData = [
+        {
+          realName: '姓名',
+          userId: 0,
+          projectId: 0,
+          deleteFlag: 0,
+          id: 0
+        }
+      ]
+      this.putinPrincipalData = []
     },
     // 添加知晓人标签
     showInput() {
@@ -1389,8 +1545,6 @@ export default {
     handleClose(tag) {
       this.dynamicTags.splice(this.dynamicTags.indexOf(tag), 1)
     },
-    // 项目担当知晓人页面提交
-    principalPull() {},
     // 抽屉取消按钮
     empty() {
       this.drawer1 = false
@@ -1426,6 +1580,23 @@ export default {
 /* .project {
   background: red;
 } */
+.pixi-item{
+  display:flex !important;
+}
+.title-left{
+  flex: 1;
+   border-right: 1px solid #EBEEF5;
+  border-bottom: 1px solid #EBEEF5;
+  padding: 9px 10px !important;
+  line-height: 24px !important;
+}
+.title-right{
+  width: 100px;
+  border-right: 1px solid #EBEEF5;
+  border-bottom: 1px solid #EBEEF5;
+  padding: 9px 10px !important;
+  line-height: 24px !important;
+}
 .project .top {
   height: 36px;
   margin-bottom: 13px;
@@ -1588,7 +1759,7 @@ export default {
 }
 .feedback {
   height: 100%;
-  padding: 36px;
+  padding: 36px 49px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -1707,7 +1878,18 @@ export default {
 }
 .project .principal .value.prin {
   margin-bottom: 99px;
+  /* border: 1px solid black; */
+    border: 1px solid #EBEEF5;
+    border-right:none;
+  border-bottom:none;
+  font-size: 14px;
 }
+.project .principal .value.prin .title {
+  margin: 0;
+}
+/* .project .principal .value.prin div {
+  box-sizing: border-box;
+} */
 /* .project .principal .value.know {
   margin-bottom: 13px;
 } */
@@ -1716,8 +1898,11 @@ export default {
   font-size: 16px;
 }
 .project .batton.pribatton {
+  height: 72px;
+  box-sizing: border-box;
+  padding: 0 49px;
   position: absolute;
-  bottom: 72px;
+  bottom: 0;
 }
 .pointer {
   cursor: pointer;
