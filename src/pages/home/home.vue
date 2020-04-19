@@ -1,6 +1,6 @@
 <template>
   <div class="home" @click="clickClose">
-    <Header @func="getMsgFormSon" @message="getMessage" :unread="unread"></Header>
+    <Header @func="getMsgFormSon" @message="getMessage" :unread="unread" @sousuo="getSearchWord"></Header>
     <el-container style="height: 100vh; padding-top: 60px;">
       <!--------- 左菜单栏 start --------->
       <el-aside width="128px" style="background-color: rgb(238, 241, 246);position: relative;">
@@ -70,19 +70,26 @@
             :userclientIdList="userclientIdList"
             :clickCloseNum="clickCloseNum"
             :userList="userList"
+            :searchWordData="searchWordData"
           ></router-view>
         </el-main>
         <!---------- 内容 end --------->
       </el-container>
     </el-container>
     <!--------- 抽屉添加项目 start --------->
-    <el-drawer title="添加项目" :visible.sync="drawer" :with-header="false">
+    <el-drawer
+      title="添加项目"
+      :visible.sync="drawer"
+      :with-header="false"
+      @open="openSaveProject"
+      @close="closeSaveProject"
+    >
       <el-scrollbar style="height: 100%">
         <el-row class="add_box">
           <el-col :span="24">
             <el-col :span="6" class="title title1">{{typeName}}</el-col>
           </el-col>
-          <el-col :span="6" class="title">名称</el-col>
+          <el-col :span="6" class="title">项目名称</el-col>
           <el-col :span="18">
             <el-input placeholder="请输入内容" v-model="new_project.new_name" clearable></el-input>
           </el-col>
@@ -122,6 +129,7 @@
               clearable
               placeholder="请选择"
               class="pasproject"
+              @change="changePasprojectId"
             >
               <el-option
                 v-for="item in pasProjectList"
@@ -131,10 +139,10 @@
               ></el-option>
             </el-select>
           </el-col>
-          <el-col :span="18" :offset="6">
+          <!-- <el-col :span="18" :offset="6">
             <el-radio v-model="new_project.radio1" label="1">专项</el-radio>
             <el-radio v-model="new_project.radio1" label="0">日常</el-radio>
-          </el-col>
+          </el-col>-->
           <el-col :span="6" class="title">预计时间</el-col>
           <el-col :span="18" class="presetTime">
             <el-date-picker
@@ -194,7 +202,14 @@
           <el-col :span="24" v-show="radio2 == 2">
             <el-col :offset="6" :span="18" class="remind">会对选中的人创建任务，执行人需完成此任务。</el-col>
             <el-col :offset="6" :span="12">
-              <el-select v-model="add_list0" filterable clearable placeholder="请选择" class="userList">
+              <el-select
+                v-model="add_list0"
+                filterable
+                clearable
+                :disabled="disabledDouser"
+                placeholder="请选择"
+                class="userList"
+              >
                 <el-option
                   v-for="item in userList"
                   :key="item.index"
@@ -204,13 +219,18 @@
               </el-select>
             </el-col>
             <el-col :span="4" :offset="1">
-              <el-button size="small" type="primary" @click="showInput0">添加</el-button>
+              <el-button
+                size="small"
+                type="primary"
+                @click="showInput0"
+                :disabled="disabledDouser"
+              >添加</el-button>
             </el-col>
-            <el-col :span="18" :offset="6" class="know_pop">
+            <el-col :span="18" :offset="6" class="doUser">
               <el-tag
                 :key="tag.index"
                 v-for="tag in dynamicTags0"
-                closable
+                :closable="!disabledDouser"
                 :disable-transitions="false"
                 @close="handleClose0(tag)"
                 class="know_pop_list"
@@ -352,12 +372,12 @@
     </el-drawer>
     <!--------- 抽屉消息面板 end --------->
     <!--------- 抽屉问题反馈 start --------->
-    <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false">
+    <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false" @close="feedbackClose">
       <el-row class="problemFeedback" v-loading="loadingFeedback">
         <el-col :span="24">
           <el-col :span="6" class="title title1">问题反馈</el-col>
         </el-col>
-        <el-col :span="6" class="title">问题版块</el-col>
+        <el-col :span="6" class="title snow">问题版块</el-col>
         <el-col :span="13">
           <el-select
             v-model="feedbackType"
@@ -375,7 +395,7 @@
             ></el-option>
           </el-select>
         </el-col>
-        <el-col :span="6" class="title">问题描述</el-col>
+        <el-col :span="6" class="title snow">问题描述</el-col>
         <el-col :span="13">
           <el-input
             type="textarea"
@@ -386,17 +406,19 @@
             show-word-limit
           ></el-input>
         </el-col>
-        <el-col :span="13" :offset="6">
+        <el-col :span="6" class="title">附件</el-col>
+        <el-col :span="13">
           <el-upload
             action="/pmbs/file/upload?upType=0&demandType=0"
             :on-success="handleFeedbackSuccess"
             :on-remove="handleFeedbackRemove"
             :file-list="fileListFeedback"
+            ref="feedbackUpload"
           >
             <el-button size="mini" type="primary" v-show="disabled0">点击上传附件</el-button>
           </el-upload>
         </el-col>
-        <el-col :span="12" :offset="7" class="batton">
+        <el-col :span="24" class="batton">
           <el-button size="small" type="info" @click="closeProblem">取消</el-button>
           <el-button size="small" type="primary" @click="problemSave">提交</el-button>
         </el-col>
@@ -437,7 +459,7 @@ export default {
       // 新增
       new_project: {
         new_name: '', // 任务名称
-        radio1: '0', // 专项，日常
+        isUsual: '', // 专项，日常
         presetTime: '', // 预计时间
         remark: '', // 需求
         manager: '', // 项目经理
@@ -453,6 +475,7 @@ export default {
       pasprojectId: '', // 分类 立项
       pasprojectName: '', // 分类立项名称
       checkListBan: false, // 执行部门禁用
+      disabledDouser: true, // 是否禁用执行人
       // 禁止选择当前时间之前的时间
       pickerOptions: {
         disabledDate(time) {
@@ -523,7 +546,12 @@ export default {
       // 最外层点击关闭
       clickCloseNum: 0,
       // 反馈问题列表
-      problemListShow: false
+      problemListShow: false,
+      // 搜索关键字
+      searchWordData: {
+        key: 0,
+        value: ''
+      } 
     }
   },
   // 侦听器
@@ -561,8 +589,11 @@ export default {
         this.pasprojectName = ''
       }
       // console.log(this.pasprojectName)
+    },
+    $route(to, from) {
+      // console.log(to.path)
+      this.router_url()
     }
-    // $route: 'router_url'
   },
   // 钩子函数
   beforeCreate() {},
@@ -584,6 +615,8 @@ export default {
     this.getBusinessListAjax()
     // 判断反馈列表是否显示
     this.problemListShowIf()
+    // 获取用户列表
+    this.getListAjax()
   },
   // 方法
   methods: {
@@ -895,21 +928,15 @@ export default {
     handleClose0(tag) {
       this.dynamicTags0.splice(this.dynamicTags0.indexOf(tag), 1)
     },
-    ///////// 接受子组件数据 start /////////
-    getMsgFormSon(data) {
-      this.drawer = true
-      // 获取立项用户列表
-      this.getClientapiListAjax()
+    // 打开项目添加/修改抽屉
+    openSaveProject() {
       // 获取部门列表
       this.getDeptList()
-      // 获取用户列表
-      this.getListAjax()
-      // 新建项目
-      this.typeName = '创建项目'
-      // this.$router.push({ path: '/home/components/project' })
-      // this.$router.replace('/home/components/project').catch(err => {
-      //   console.log(err)
-      // })
+      // 获取立项用户列表
+      this.getClientapiListAjax()
+    },
+    // 关闭项目添加/修改抽屉
+    closeSaveProject() {
       // 点击新建项目时置空信息
       this.initUserId = '' // 项目发起人
       this.proData = {} // 项目详情
@@ -923,6 +950,7 @@ export default {
       this.new_project.checkList = [] // 执行部门
       this.new_project.remark = '' // 需求
       this.new_project.dynamicTags = [] // 知晓人
+      this.dynamicTags0 = [] // 执行人
       this.new_project.managerId = '' // 项目经理
       this.disabled1 = false
       this.disabled2 = false
@@ -930,20 +958,20 @@ export default {
       this.listProFile = []
       this.checkListBan = false
     },
+    ///////// 接受子组件数据 start /////////
+    getMsgFormSon(data) {
+      this.drawer = true
+      // 新建项目
+      this.typeName = '创建项目'
+      this.disabledDouser = false // 不禁用执行人
+    },
     getData(data) {
-      // 获取立项用户列表
-      this.getClientapiListAjax()
-      // 获取部门列表
-      this.getDeptList()
-      // 获取用户列表
-      this.getListAjax()
+      this.drawer = true
       // 获取项目详情
       this.getProjectShowDetail(data)
-      this.drawer = true
       // 编辑项目
       this.typeName = '编辑项目'
-      // this.proData = data
-      // console.log(data)
+      this.disabledDouser = true // 禁用执行人
     },
     getMessage() {
       this.drawer2 = true
@@ -1036,7 +1064,9 @@ export default {
     ///////// 立项列表获取 end /////////
     // 获取项目详情
     getProjectShowDetail(data) {
-      // console.log(data)
+      console.log(data)
+      // 用户列表
+      let userList = this.userList
       this.initUserId = data.initUserId
       this.proId = data.proId
       this.status = data.status
@@ -1045,11 +1075,11 @@ export default {
       this.businessId = data.serviceId
       this.pasprojectId = data.pasprojectId
       // this.new_project.business_type = [data.clientId, data.serviceId]
-      if (data.isUsual == false) {
-        this.new_project.radio1 = '0'
-      } else {
-        this.new_project.radio1 = '1'
-      }
+      // if (data.isUsual == false) {
+      //   this.new_project.radio1 = '0'
+      // } else {
+      //   this.new_project.radio1 = '1'
+      // }
       this.new_project.presetTime = data.expertTime.replace(/-/g, '/')
       // console.log(this.new_project.presetTime)
       this.new_project.remark = data.remark
@@ -1061,25 +1091,42 @@ export default {
         this.radio2 = '2'
         this.disabled1 = true
         let department = data.department.split(',')
-        let checkList = []
+        let doUserList = []
         for (let i = 0; i < department.length; i++) {
           let element = department[i]
           let deparData = parseInt(element)
-          checkList.push(deparData)
+          doUserList.push(deparData)
         }
-        this.new_project.checkList = checkList
+        // this.new_project.checkList = checkList
+        let doUserNamelist = []
+        for (let i = 0; i < doUserList.length; i++) {
+          let element = doUserList[i]
+          let doUserListData = ''
+          for (let j = 0; j < userList.length; j++) {
+            let element_ = userList[j]
+            if (element == element_.value) {
+              doUserListData = element_.label
+            }
+          }
+          doUserNamelist.push(doUserListData)
+          // console.log(knowUserListName)
+        }
+        this.dynamicTags0 = doUserNamelist
       }
       this.checkListBan = true
+
       if (data.knowUser != '') {
         let knowUserListS = data.knowUser.split(',')
         let knowUserList = []
+        // console.log(knowUserListS)
         for (let i = 0; i < knowUserListS.length; i++) {
           let element = knowUserListS[i]
           let knowUserListData = parseInt(element)
           knowUserList.push(knowUserListData)
         }
-        // 用户列表
-        let userList = this.userList
+        // console.log(knowUserList)
+
+        console.log(userList)
         let knowUserListName = []
         for (let i = 0; i < knowUserList.length; i++) {
           let element = knowUserList[i]
@@ -1091,6 +1138,7 @@ export default {
             }
           }
           knowUserListName.push(knowUserListData)
+          // console.log(knowUserListName)
         }
         this.new_project.dynamicTags = knowUserListName
         let listProFile = data.listProFile
@@ -1236,6 +1284,38 @@ export default {
     },
     ///////// 用户列表获取 end /////////
 
+    ///////// suoshu end /////////
+    changePasprojectId(res) {
+      console.log(res)
+      if (res != '') {
+        this.getProjectapiDetai(res)
+      }
+    },
+    ///////// 用户列表获取 end /////////
+
+    ///////// 获取立项背景 start /////////
+    getProjectapiDetai(pasprojectId) {
+      this.loading = true
+      // let proId = pasprojectId
+      let data = `?projectId=${pasprojectId}`
+      this.$axios
+        .post(
+          'http://pms.guoxinad.com.cn/pas/projectapi/projectDetailAjax' + data
+        )
+        .then(res => {
+          console.log(res)
+          if (res.status == 200) {
+            let data = res.data
+            if (data.protype == 2) {
+              this.new_project.isUsual = 1
+            } else if (data.protype == 1) {
+              this.new_project.isUsual = 0
+            }
+          }
+        })
+    },
+    ///////// 获取立项背景 end /////////
+
     ///////// 新增项目 start /////////
     addProject() {
       let userId = this.$store.state.user.userId
@@ -1275,7 +1355,7 @@ export default {
         serviceId: this.businessId, // '所属业务ID'
         pasprojectId: this.pasprojectId, // 立项ID
         pasproName: this.pasprojectName, // 立项名称
-        isUsual: this.new_project.radio1, // '专项日常（0-日常，1-专项）',
+        isUsual: this.new_project.isUsual, // '专项日常（0-日常，1-专项）',
         expertTime: this.new_project.presetTime, // '预计完成时间',
         remark: this.new_project.remark, // '需求',
         knowUser: knowUser, // '知晓人id，多个用逗号隔开',
@@ -1306,7 +1386,7 @@ export default {
         changeId = knowUserList0.join(',')
         data.department = changeId // '参与部门ID',
       }
-      console.log(data)
+      // console.log(data)
       if (
         data.proName == '' ||
         this.new_project.business_type == [] ||
@@ -1372,23 +1452,21 @@ export default {
     // 操作文档链接
     operator() {
       let newPage = window.open() // 防止浏览器拦截
-      newPage.location.href = 'http://218.106.254.122:8084/doc/123.pdf'
+      newPage.location.href =
+        'http://218.106.254.122:8084/doc/OperationDocument.pdf'
       // download(row) {
       // let localPath = row.localPath
       // console.log("123")
       // let a = document.createElement('a')
       // a.download = `操作文档.pdf`
-      // a.setAttribute('href', 'http://218.106.254.122:8084/doc/123.pdf')
+      // a.setAttribute('href', 'http://218.106.254.122:8084/doc/OperationDocument.pdf')
       // a.click()
       // },
     },
     ///////// 问题反馈 start /////////
-    blur() {
-      this.$refs['input'].blur()
-    },
     problemFeedback() {
       this.drawer3 = true
-      setTimeout(this.blur, 100)
+      setTimeout(this.blur(), 100)
     },
     // 问题反馈文件上传回调
     handleFeedbackSuccess(response, file, fileList) {
@@ -1437,9 +1515,17 @@ export default {
       this.fileListFeedback = []
       this.drawer3 = false
     },
+    blur() {
+      this.$refs['input'].blur()
+    },
+    feedbackClose() {
+      this.$refs['feedbackUpload'].clearFiles()
+      this.feedbackType = ''
+      this.feedbackFileList = []
+      this.feedbackContent = ''
+    },
     // 问题反馈新增
     problemSave() {
-      this.loadingFeedback = true
       let data = {
         description: this.feedbackContent,
         moduleType: this.feedbackType,
@@ -1452,8 +1538,9 @@ export default {
         data.moduleType == '' ||
         data.pictureList.length == 0
       ) {
-        this.messageError('信息不能为空')
+        this.messageError('带*信息不能为空')
       } else {
+        this.loadingFeedback = true
         this.$axios.post('/pmbs/api/problem/save', data).then(res => {
           this.loadingFeedback = false
           console.log(res)
@@ -1480,6 +1567,10 @@ export default {
       this.$router.push({ path: '/problem' })
     },
     ///////// 问题反馈 end /////////
+    getSearchWord(data) {
+      this.searchWordData = data
+      // console.log(this.searchWordData)
+    },
     // 消息提示
     messageWin(message) {
       // 成功提示
@@ -1611,6 +1702,7 @@ export default {
   align-self: flex-start;
 }
 .home .add_box .remind {
+  margin-top: -24px;
   font-size: 13px;
   color: #999;
 }
@@ -1635,9 +1727,9 @@ export default {
 .home .add_box .manager {
   width: 100%;
 }
-/* .home .add_box .know_pop {
+.home .add_box .doUser {
   margin-top: 16px;
-} */
+}
 .home .add_box .know_pop span {
   margin-left: 0;
   margin-right: 9px;
@@ -1747,16 +1839,16 @@ export default {
   font-weight: bold;
   font-size: 15px;
 }
-.home .paneBox .infinite-list .infinite-list-item.act .title::after {
+/* .home .paneBox .infinite-list .infinite-list-item.act .title::after {
   content: '●';
   color: red;
-}
+} */
 .home .paneBox .infinite-list .infinite-list-item .content {
   margin-top: 9px;
 }
 .home .problemFeedback {
   height: 100%;
-  padding: 36px;
+  padding: 36px 49px;
   position: relative;
 }
 .home .problemFeedback > div {
@@ -1768,14 +1860,20 @@ export default {
   margin: 0 0 13px;
 }
 .home .problemFeedback .title {
+  text-align-last: justify;
   text-align: right;
   box-sizing: border-box;
-  padding-right: 18px;
+  padding: 0 18px 0 9px;
 }
 .home .problemFeedback .batton {
   position: absolute;
   bottom: 108px;
   left: 0;
+}
+.home .snow {
+  background: url('../../../static/images/task/snowflake.png') left center
+    no-repeat;
+  background-size: 7px;
 }
 .noData {
   text-align: center;
@@ -1811,7 +1909,7 @@ export default {
 .home >>> .el-table th {
   padding: 9px 0;
 }
-.home .knowAdd >>> .el-select{
+.home .knowAdd >>> .el-select {
   width: 100%;
 }
 </style>

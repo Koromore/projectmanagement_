@@ -335,7 +335,13 @@
         </el-row>
       </el-drawer>
       <!--------- 设置项目担当抽屉 start --------->
-      <el-drawer title="项目担当" :visible.sync="drawer4" :with-header="false" @close="closePrincipal">
+      <el-drawer
+        title="项目担当"
+        :visible.sync="drawer4"
+        :with-header="false"
+        @close="closePrincipal"
+        @opened="openedPrincipal"
+      >
         <el-scrollbar style="height: 100%">
           <el-row class="principal">
             <el-col :span="24" class="title">项目担当&知晓人</el-col>
@@ -382,20 +388,22 @@
                   </template>
                 </el-table-column>
               </el-table>-->
-              <div  class="pixi-item">
-                <div  class="title-left">名称</div>
-                <div  class="title-right">操作</div>
+              <!--------- 担当列表 start --------->
+              <!-- 列表 -->
+              <div class="pixi-item">
+                <div class="title-left">名称</div>
+                <div class="title-right">操作</div>
               </div>
               <div
                 v-for="(item,index) in principalData"
                 :key="index"
-                v-show="item.deleteFlag != 1"
+                v-show="item.deleteFlag != 1 && item.deleteFlag != 4"
                 class="pixi-item"
               >
-                <div  class="title-left">
+                <div class="title-left">
                   <div class="change" v-if="changeShow === index">
                     <el-select
-                      v-model="principalValue"
+                      v-model="principalValueChange"
                       filterable
                       placeholder="请选择"
                       clearable
@@ -409,26 +417,68 @@
                         :value="item.value"
                       ></el-option>
                     </el-select>
-                    <el-button type="primary" size="mini" @click="affirmPrincipal(index,item)">确认</el-button>
+                    <el-button
+                      type="primary"
+                      size="mini"
+                      @click="affirmPrincipalChange(index,item)"
+                    >确认</el-button>
                   </div>
-                  <div class="name" v-else>{{item.realName}}</div>
+                  <div class="name" v-else>
+                    {{item.realName}}
+                    <img
+                      src="static/images/task/change.png"
+                      width="18"
+                      alt
+                      srcset
+                      @click="changePrincipal(index,item)"
+                    />
+                  </div>
                 </div>
-                <div  class="title-right">
-                  <el-link type="primary" @click="changePrincipal(index,item)">更换</el-link>
-                  <el-link type="primary" @click="deletePrincipal(index,item)">删除</el-link>
-                  <i
-                    class="el-icon-circle-plus-outline add"
-                    v-if="index == principalData.length-1"
-                    @click="addPrincipal(index)"
-                  ></i>
+                <div class="title-right">
+                  <el-link type="primary" @click="deletePrincipal(index,item)">
+                    <i class="el-icon-close"></i>
+                  </el-link>
                 </div>
               </div>
+              <!-- 添加 -->
+              <div class="pixi-item">
+                <div class="title-left">
+                  <div class="change">
+                    <el-select
+                      v-model="principalValueAdd"
+                      filterable
+                      placeholder="请选择"
+                      clearable
+                      size="small"
+                      style="width: 99px;"
+                      ref="prinInput"
+                    >
+                      <el-option
+                        v-for="item in principalList"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                      ></el-option>
+                    </el-select>
+                    <el-button type="primary" size="mini" @click="addPrincipal()">确认</el-button>
+                  </div>
+                </div>
+                <div class="title-right"></div>
+              </div>
+              <!--------- 担当列表 end --------->
             </el-col>
             <el-col :span="6" class="key">知晓人:</el-col>
             <el-col :span="18" class="value know">
               <!-- 知晓人编辑 start -->
               <el-col :span="18">
-                <el-select v-model="add_list" filterable clearable placeholder="请选择" size="small">
+                <el-select
+                  v-model="add_list"
+                  filterable
+                  clearable
+                  placeholder="请选择"
+                  size="small"
+                  ref="knowInput"
+                >
                   <el-option
                     v-for="item in userList"
                     :key="item.index"
@@ -472,7 +522,8 @@ export default {
     allBusinessList: Array,
     allClientIdList: Array,
     userclientIdList: Array,
-    clickCloseNum: Number
+    clickCloseNum: Number,
+    searchWordData: Object
   },
   data() {
     return {
@@ -599,20 +650,21 @@ export default {
 
       // 项目担当和知晓人设置
       principalData: [
-        {
-          realName: '姓名',
-          userId: 0,
-          projectId: 0,
-          deleteFlag: 0,
-          id: 0
-        }
+        // {
+        //   realName: '姓名',
+        //   userId: 0,
+        //   projectId: 0,
+        //   deleteFlag: 0,
+        //   id: 0
+        // }
       ],
-      putinPrincipalData: [],
       // 项目担当人信息
       changeShow: '',
       principalList: [],
-      principalValue: '',
-      principalLabel: '',
+      principalValueChange: '',
+      principalLabelChange: '',
+      principalValueAdd: '',
+      principalLabelAdd: '',
       principalProId: '',
       // 知晓人
       add_list: '',
@@ -626,12 +678,22 @@ export default {
   // },
   // 侦听器
   watch: {
-    principalValue: function(newQuestion, oldQuestion) {
+    principalValueChange: function(newQuestion, oldQuestion) {
       let principalList = this.principalList
       if (newQuestion != '') {
         principalList.forEach(element => {
           if (element.value == newQuestion) {
-            this.principalLabel = element.label
+            this.principalLabelChange = element.label
+          }
+        })
+      }
+    },
+    principalValueAdd: function(newQuestion, oldQuestion) {
+      let principalList = this.principalList
+      if (newQuestion != '') {
+        principalList.forEach(element => {
+          if (element.value == newQuestion) {
+            this.principalLabelAdd = element.label
           }
         })
       }
@@ -705,6 +767,14 @@ export default {
     clickCloseNum: function(newQuestion, oldQuestion) {
       this.moreShow = false
       // console.log(this.clickCloseNum)
+    },
+    // 搜索关键字
+    searchWordData: function(newQuestion, oldQuestion){
+      // console.log(newQuestion)
+      let searchWord = newQuestion.value
+      let id = this.tabs_activity
+      this.getProjectList(id,searchWord)
+      // console.log(oldQuestion)
     }
   },
   // 钩子函数
@@ -939,15 +1009,6 @@ export default {
       }
     },
     aredact(proDetail) {
-      // console.log('编辑' + id)
-      // this.drawer2 = true
-      // this.getProjectShowDetail(id)
-      // 获取部门列表
-      // this.getDeptList()
-      // 获取用户列表
-      // this.getListAjax()
-      // 获取新建项目分类
-      // this.getAllClientAndBusiness()
       // 向父组件传值
       this.$emit('getData', proDetail)
       // this.$emit('getShopCode',value)
@@ -1183,16 +1244,22 @@ export default {
       // console.log(this.pageNum_)
     },
     ///////// 获取项目列表 start /////////
-    getProjectList(id) {
+    getProjectList(id,searchWord) {
       // console.log(name)
+      let proName = ''
+      if (searchWord!=undefined && searchWord!='') {
+        proName = `&proName=${searchWord}`
+      }
       let userId = this.userId
-      let data0 = `?inituserid=${userId}`
-      let data1 = `?inituserid=${userId}`
+      let inituserid = `?inituserid=${userId}`
+      let data = inituserid + proName
+      // console.log(data)
+      // let data = `?inituserid=${userId}`
       // id 我发起0  我参与1
       if (id == 0) {
-        this.getProjectListAjax(data0)
+        this.getProjectListAjax(data)
       } else if (id == 1) {
-        this.getProjectUserjoinproject(data0)
+        this.getProjectUserjoinproject(data)
       }
       // console.log('获取项目列表')
     },
@@ -1358,7 +1425,15 @@ export default {
       this.drawer4 = true
       this.principalProId = id
       this.getPrincipalList()
-      this.principalData[0].projectId = id
+    },
+    openedPrincipal() {
+      // console.log(123)
+      if (this.$refs['prinInput'] != undefined) {
+        this.$refs['prinInput'].blur()
+      }
+      if (this.$refs['knowInput'] != undefined) {
+        this.$refs['knowInput'].blur()
+      }
     },
     getPrincipalList() {
       let proId = this.principalProId
@@ -1388,6 +1463,7 @@ export default {
             // "projectId":74,"realName":"冯永强","updateTime":null,"userId":266
             this.principalData = principalData
           } else if (listBear.length == 0) {
+            this.principalData = []
             this.changeShow = 0
           }
           let principalList = []
@@ -1399,7 +1475,7 @@ export default {
             principalList.push(listUserData)
           })
           this.principalList = principalList
-          console.log(this.principalData)
+          // console.log(this.principalData)
           let knowUser = []
           listKnowUser.forEach(element => {
             let data = `${element.deptName}-${element.realName}`
@@ -1409,12 +1485,73 @@ export default {
         }
       })
     },
+    // 添加项目担当
+    addPrincipal() {
+      let principalData = this.principalData
+      let data = {
+        realName: this.principalLabelAdd,
+        userId: this.principalValueAdd,
+        projectId: this.principalProId,
+        deleteFlag: 0,
+        id: 0
+      }
+      principalData.push(data)
+      this.principalData = principalData
+      this.changeShow = ''
+      this.principalValueAdd = ''
+      this.principalLabelAdd = ''
+    },
+    // 删除项目担当
+    deletePrincipal(index, data) {
+      let principalData = this.principalData
+      if (data.id == 0) {
+        principalData[index].deleteFlag = 4
+      } else {
+        principalData[index].deleteFlag = 1
+      }
+      // console.log(data)
+      this.principalData = principalData
+    },
+    // 更换项目担当
+    changePrincipal(index, data) {
+      let principalData = this.principalData
+      if (principalData[index].deleteFlag) {
+      } else {
+      }
+      if (data.id != 0) {
+        principalData[index].deleteFlag = 2
+      } else {
+        principalData[index].deleteFlag = 0
+      }
+      this.changeShow = index
+    },
+    // 确认项目担当
+    affirmPrincipalChange(index, data) {
+      let principalData = this.principalData
+      let principalValue = this.principalValueChange
+      let principalLabel = this.principalLabelChange
+      if (principalValue == '') {
+        this.changeShow = ''
+        if (principalData[index].deleteFlag == 2) {
+          principalData[index].deleteFlag = 3
+        }
+      } else {
+        if (data.id == 0) {
+          principalData[index].deleteFlag = 0
+        } else {
+          principalData[index].deleteFlag = 2
+        }
+        principalData[index].realName = principalLabel
+        principalData[index].userId = principalValue
+        this.changeShow = ''
+        this.principalValue = ''
+      }
+    },
+    // 提交项目担当和知晓人
     principalPull() {
       let userList = this.userList
-
       let dynamicTags = this.dynamicTags
       let knowUserList = []
-
       for (let i = 0; i < dynamicTags.length; i++) {
         let element = dynamicTags[i]
         let knowUserListData = ''
@@ -1431,8 +1568,10 @@ export default {
       let data = {
         proId: this.principalProId,
         bearUserIds: JSON.stringify(this.principalData),
+        // bearUserIds: this.principalData,
         knowUserIds: knowUser
       }
+      // console.log(data)
       let formData = new FormData()
       formData.append('proId', data.proId)
       formData.append('bearUserIds', data.bearUserIds)
@@ -1443,78 +1582,21 @@ export default {
       this.$axios
         .post('/pmbs/api/project/ImplementsetSave', formData)
         .then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.status == 200) {
             this.messageWin(res.data.data)
           }
         })
     },
-    // 添加项目担当
-    addPrincipal(index) {
-      let principalData = this.principalData
-      let data = {
-        realName: '',
-        userId: '',
-        projectId: this.principalProId,
-        deleteFlag: 0,
-        id: 0
-      }
-      principalData.push(data)
-      this.principalData = principalData
-      this.changeShow = index + 1
-    },
-    // 删除项目担当
-    deletePrincipal(index, data) {
-      let principalData = this.principalData
-      let putinPrincipalData = this.putinPrincipalData
-      // principalData.splice(index, 1)
-      principalData[index].deleteFlag = 1
-      // data.deleteFlag = 1
-      console.log(data)
-      // putinPrincipalData.push(data)
-      // console.log(this.principalData)
-      this.principalData = principalData
-    },
-    // 更换项目担当
-    changePrincipal(index, data) {
-      let principalData = this.principalData
-      if (data.userId != 0) {
-        principalData[index].deleteFlag = 2
-      }
-      this.changeShow = index
-    },
-    // 确认项目担当
-    affirmPrincipal(index, data) {
-      let principalData = this.principalData
-      let principalValue = this.principalValue
-      let principalLabel = this.principalLabel
-      if (principalValue == '') {
-        this.changeShow = ''
-        if (principalData[index].deleteFlag == 2) {
-          principalData[index].deleteFlag = 3
-        }
-      } else {
-        principalData[index].realName = principalLabel
-        principalData[index].userId = principalValue
-        this.changeShow = ''
-        this.principalValue = ''
-      }
-      if (principalData[index].id == 0) {
-        principalData[index].deleteFlag = 0
-      }
-      // console.log(this.principalData)
-    },
     closePrincipal() {
-      this.principalData = [
-        {
-          realName: '姓名',
-          userId: 0,
-          projectId: 0,
-          deleteFlag: 0,
-          id: 0
-        }
-      ]
-      this.putinPrincipalData = []
+      this.principalData = []
+      this.changeShow= ''
+      this.principalList= []
+      this.principalValueChange= ''
+      this.principalLabelChange= ''
+      this.principalValueAdd= ''
+      this.principalLabelAdd= ''
+      this.principalProId= ''
     },
     // 添加知晓人标签
     showInput() {
@@ -1584,20 +1666,20 @@ export default {
 /* .project {
   background: red;
 } */
-.pixi-item{
-  display:flex;
+.pixi-item {
+  display: flex;
 }
-.title-left{
+.title-left {
   flex: 1;
-   border-right: 1px solid #EBEEF5;
-  border-bottom: 1px solid #EBEEF5;
+  border-right: 1px solid #ebeef5;
+  border-bottom: 1px solid #ebeef5;
   padding: 9px 10px !important;
   line-height: 24px !important;
 }
-.title-right{
-  width: 100px;
-  border-right: 1px solid #EBEEF5;
-  border-bottom: 1px solid #EBEEF5;
+.title-right {
+  width: 81px;
+  border-right: 1px solid #ebeef5;
+  border-bottom: 1px solid #ebeef5;
   padding: 9px 10px !important;
   line-height: 24px !important;
 }
@@ -1883,9 +1965,9 @@ export default {
 .project .principal .value.prin {
   margin-bottom: 99px;
   /* border: 1px solid black; */
-    border: 1px solid #EBEEF5;
-    border-right:none;
-  border-bottom:none;
+  border: 1px solid #ebeef5;
+  border-right: none;
+  border-bottom: none;
   font-size: 14px;
 }
 .project .principal .value.prin .title {

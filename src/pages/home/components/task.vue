@@ -337,7 +337,7 @@
       <taskDetail :taskId="taskId" @closeDrawer="closeDrawer"></taskDetail>
       <!-- 任务详情抽屉 end -->
       <!-- 抽屉-反馈 -->
-      <el-drawer title="任务" :visible.sync="drawer2" :with-header="false">
+      <el-drawer title="任务" :visible.sync="drawer2" :with-header="false" @close="feedbackClose">
         <el-row class="feedback">
           <el-col :span="24">
             <el-col :span="24" class="title">{{drawer2_task}}</el-col>
@@ -352,21 +352,23 @@
                 show-word-limit
               ></el-input>
             </el-col>
+            <el-col :span="6" class="title" style="margin-top: 24px;">附件</el-col>
             <el-col :span="24" class="Upload">
-              <el-divider></el-divider>
               <el-upload
                 action="/pmbs/file/upload?upType=1&demandType=1"
                 :on-remove="handleRemoveFeedback"
                 :on-success="handleSuccessFeedback"
-                ref="upload"
                 :limit="1"
+                :on-exceed="exceed"
+                ref="feedbackUpload"
                 class="elementUpload"
               >
                 <el-button size="mini" type="primary">点击上传文档</el-button>
+                <div slot="tip" class="el-upload__tip">只能上传一个文件</div>
               </el-upload>
             </el-col>
           </el-col>
-          <el-col :span="12" :offset="7" class="batton">
+          <el-col :span="24" class="batton">
             <el-button size="small" type="info" @click="empty">取消</el-button>
             <el-button size="small" type="primary" @click="taskFeedback">提交</el-button>
           </el-col>
@@ -406,7 +408,8 @@ export default {
   props: {
     allBusinessList: Array,
     userclientIdList: Array,
-    clickCloseNum: Number
+    clickCloseNum: Number,
+    searchWordData: Object
   },
   components: {
     taskDetail
@@ -528,6 +531,14 @@ export default {
       this.moreShow = false
       this.changeDoUserNameShow = 'true'
       // console.log(this.clickCloseNum)
+    },
+    // 搜索关键字
+    searchWordData: function(newQuestion, oldQuestion){
+      console.log(newQuestion)
+      let searchWord = newQuestion.value
+      let id = this.tabs_activity
+      this.getTasklist(id,searchWord)
+      // console.log(oldQuestion)
     }
   },
   // 方法
@@ -772,7 +783,7 @@ export default {
       return Array.from(new Set(arr))
     },
     // 获取任务列表
-    getTasklist(id) {
+    getTasklist(id,searchWord) {
       // console.log("123")
       let data0 = {
         type: 0,
@@ -789,6 +800,10 @@ export default {
         },
         pageNum: 1,
         pageSize: 30
+      }
+      if (searchWord!=undefined && searchWord!='') {
+        data0.task.taskName = searchWord
+        data1.task.taskName = searchWord
       }
       if (id == 0) {
         this.getTasklistAjax(data0)
@@ -894,6 +909,14 @@ export default {
         updateTime: time
       }
       feedbackFileList.push(feedbackFileListData)
+    },
+    exceed() {
+      this.messageWarning('只能上传一个文件')
+    },
+    feedbackClose() {
+      this.$refs['feedbackUpload'].clearFiles()
+      this.feedbackFileList = []
+      this.feedbackContent = ''
     },
     ///////// 上传附件 end /////////
     // 任务反馈
@@ -1361,7 +1384,7 @@ export default {
 }
 .feedback {
   height: 100%;
-  padding: 36px;
+  padding: 36px 49px;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;

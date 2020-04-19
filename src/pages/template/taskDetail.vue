@@ -810,8 +810,12 @@ export default {
       this.oldFileId = ''
       this.closeType = 0
       this.changeNameShow = false
-      this.$refs['needFileUpload'].clearFiles()
-      this.$refs['resultFileUpload'].clearFiles()
+      if (this.$refs['needFileUpload']!=undefined) {
+        this.$refs['needFileUpload'].clearFiles()
+      }
+      if (this.$refs['resultFileUpload']!=undefined) {
+        this.$refs['resultFileUpload'].clearFiles()
+      }
     },
     // 消息提示
     messageWin(message) {

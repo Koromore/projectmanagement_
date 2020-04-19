@@ -4,6 +4,23 @@
       <el-header>
         <img src="static/images/hander/logo.png" class="logo" @click="toHome" alt srcset />
         <div class="header-right">
+          <el-input
+            placeholder="请输入内容"
+            v-model="searchWord"
+            class="input-with-select search"
+            size="small"
+            clearable
+            :disabled="searchDisabled"
+            @keyup.enter.native="searchStart"
+            @clear="searchStart"
+          >
+            <el-select v-model="select" slot="prepend" placeholder="请选择" :disabled="searchDisabled">
+              <el-option label="项目" value="1"></el-option>
+              <el-option label="任务" value="2"></el-option>
+              <el-option label="文档" value="3"></el-option>
+            </el-select>
+            <el-button slot="append" icon="el-icon-search" @click="searchStart" :disabled="searchDisabled"></el-button>
+          </el-input>
           <el-tooltip class="item" effect="dark" content="新建项目" placement="bottom">
             <div class="add_du" @click="add_box">
               <i class="el-icon-circle-plus-outline"></i>
@@ -45,7 +62,11 @@ export default {
       problemListStyle: '', // 反馈列表按钮样式
       // 未读消息数据
       messageNum: 0,
-      messageShow: false
+      messageShow: false,
+      searchDisabled: false,
+      select: '1', // 搜索维度
+      searchWord: '', // 搜索关键字
+      searchWordKey: 0
       // drawer2: true,
     }
   },
@@ -111,6 +132,32 @@ export default {
     // 首页
     toHome() {
       this.$router.push({ path: '/home' })
+    },
+    // 开始搜索
+    searchStart(){
+      let select = this.select // 搜索维度
+      this.searchWordKey+1
+      let searchWord = {
+        key: this.searchWordKey,
+        value: this.searchWord
+      }
+      // this.searchWord // 搜索关键字
+      // console.log(select)
+      // console.log(searchWord)
+      let oldUrl = this.$route.path
+      // console.log(oldUrl)
+      let url1 = '/home/components/project'
+      let url2 = '/home/components/task'
+      let url3 = '/home/components/document'
+      if (select == 1 && oldUrl != url1) {
+        this.$router.push({ path: url1 })
+      }else if (select == 2 && oldUrl != url2) {
+        this.$router.push({ path: url2 })
+      }else if (select == 3 && oldUrl != url3) {
+        this.$router.push({ path: url3 })
+      }
+      // this.$router.push({ path: url })
+      this.$emit('sousuo', searchWord)
     }
   }
 }
@@ -134,7 +181,8 @@ export default {
   float: left;
 }
 .header-right {
-  width: 300px;
+  /* width: 300px; */
+  width: 600px;
   float: right;
   color: #555555;
   font-size: 18px;
@@ -143,6 +191,23 @@ export default {
   align-items: center;
   justify-content: space-between;
 }
+.header-right .search {
+  width: 281px;
+  background: none;
+  color: white;
+  /* opacity: 0; */
+}
+.header-right .search div,
+.header-right .search input{
+  color: white;
+  background: none;
+}
+.topheader .el-select .el-input {
+  width: 72px;
+}
+/* .topheader .input-with-select .el-input-group__prepend {
+  background-color: #fff;
+} */
 .header-right .add_du {
   width: 54px;
   height: 24px;

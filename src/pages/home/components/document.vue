@@ -83,7 +83,7 @@
             </el-button-group>
           </el-col>
           <el-col :span="8" class="tab tab3">
-            <el-input
+            <!-- <el-input
               @keyup.enter.native="searchHandle"
               placeholder="搜索"
               size="small"
@@ -91,7 +91,7 @@
               class="sousuo"
             >
               <el-button @click="searchHandle" slot="append" size="small" icon="el-icon-search"></el-button>
-            </el-input>
+            </el-input> -->
           </el-col>
         </el-col>
       </el-row>
@@ -276,7 +276,8 @@ export default {
     allBusinessList: Array,
     allClientIdList: Array,
     userclientIdList: Array,
-    clickCloseNum: Number
+    clickCloseNum: Number,
+    searchWordData: Object
   },
   components: {
     taskDetail
@@ -379,6 +380,13 @@ export default {
       this.moreShow = false
       // console.log(this.clickCloseNum)
       this.rowClick()
+    },
+    // 搜索关键字
+    searchWordData: function(newQuestion, oldQuestion){
+      // console.log(newQuestion)
+      this.name = newQuestion.value
+      this.searchHandle()
+      // console.log(oldQuestion)
     }
   },
   // 钩子函数
