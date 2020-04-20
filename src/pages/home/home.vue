@@ -3,8 +3,8 @@
     <Header @func="getMsgFormSon" @message="getMessage" :unread="unread" @sousuo="getSearchWord"></Header>
     <el-container style="height: 100vh; padding-top: 60px;">
       <!--------- 左菜单栏 start --------->
-      <el-aside width="128px" style="background-color: rgb(238, 241, 246);position: relative;">
-        <div>
+      <el-aside width="128px" style="background-color: rgb(238, 241, 246);position: relative;" class="leftNav">
+        <div class="navList">
           <div
             :class="[show_acti=='2' || show_acti=='6'?'title act':'title']"
             @click="change_show(2,'project')"
@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="bottom">
-          <el-tooltip class="item" effect="dark" content="点击查看操作文档" placement="top">
+          <el-tooltip class="item" effect="dark" content="点击查看操作文档" placement="top" :hide-after="1000" :tabindex="-1">
             <div @click="operator">
               <i class="el-icon-document-remove"></i>
               <br />
@@ -202,7 +202,7 @@
           <el-col :span="24" v-show="radio2 == 2">
             <el-col :offset="6" :span="18" class="remind">会对选中的人创建任务，执行人需完成此任务。</el-col>
             <el-col :offset="6" :span="12">
-              <el-select
+              <!-- <el-select
                 v-model="add_list0"
                 filterable
                 clearable
@@ -216,7 +216,13 @@
                   :label="item.label"
                   :value="item.value"
                 ></el-option>
-              </el-select>
+              </el-select> -->
+              <el-cascader
+                v-model="doUserAdd"
+                :options="deptList"
+                clearable
+                filterable
+              ></el-cascader>
             </el-col>
             <el-col :span="4" :offset="1">
               <el-button
@@ -372,7 +378,7 @@
     </el-drawer>
     <!--------- 抽屉消息面板 end --------->
     <!--------- 抽屉问题反馈 start --------->
-    <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false" @close="feedbackClose">
+    <el-drawer title="问题反馈" :visible.sync="drawer3" :with-header="false" @close="feedbackClose" @opened="feedbackOpened">
       <el-row class="problemFeedback" v-loading="loadingFeedback">
         <el-col :span="24">
           <el-col :span="6" class="title title1">问题反馈</el-col>
@@ -467,6 +473,7 @@ export default {
         checkList: [], // 执行部门
         dynamicTags: [] // 知晓人
       },
+      doUserAdd: [],
       clientList: [], // 客户列表
       clientId: '', // 分类 客户
       businessList: [], // 业务列表
@@ -551,7 +558,7 @@ export default {
       searchWordData: {
         key: 0,
         value: ''
-      } 
+      }
     }
   },
   // 侦听器
@@ -894,13 +901,14 @@ export default {
         1
       )
     },
-    // 添加知晓人标签
+    // 添加执行人标签
     showInput0() {
+      let doUserAdd = this.doUserAdd
       let list = this.dynamicTags0
-      let add_list = this.add_list0
+      let add_list = doUserAdd[1]
       let userList = this.userList
       let cf = true
-      if (add_list != '') {
+      if (add_list != '' && add_list != undefined) {
         let add_list_data = ''
         for (let i = 0; i < userList.length; i++) {
           const element = userList[i]
@@ -917,14 +925,14 @@ export default {
         }
         if (cf) {
           list.push(add_list_data)
-          this.add_list0 = ''
+          this.doUserAdd = []
         }
-      } else if (add_list == '') {
-        this.messageWarning('信息为空')
+      } else {
+        this.messageWarning('信息不能为空')
       }
-      console.log(this.dynamicTags0)
+      // console.log(this.dynamicTags0)
     },
-    // 删除知晓人标签
+    // 删除执行人标签
     handleClose0(tag) {
       this.dynamicTags0.splice(this.dynamicTags0.indexOf(tag), 1)
     },
@@ -1226,7 +1234,7 @@ export default {
       // console.log(this.listProFile)
     },
     ///////// 上传附件 end /////////
-    // 部门列表获取
+    ///////// 部门-用户列表获取 start /////////
     getDeptList(res) {
       let list = this.deptList
       if (list.length == 0) {
@@ -1243,19 +1251,32 @@ export default {
         let data = res.data.data
         let deptId = this.deptId
         let deptList = []
-        for (let i = 0; i < data.length; i++) {
-          let element = data[i]
-          if (element.deptId != deptId) {
-            let deptListData = {}
-            deptListData.id = element.deptId
-            deptListData.name = element.deptName
-            deptList.push(deptListData)
+        data.forEach((element, i) => {
+          let deptListData = {
+            value: element.deptId,
+            label: element.deptName,
+            children: []
           }
-        }
+          let listUser = element.listUser
+          // console.log(listUser)
+          if (listUser != null) {
+            listUser.forEach((element0, j) => {
+              let childrenData = {
+                value: element0.userId,
+                label: element0.realName
+              }
+              deptListData.children.push(childrenData)
+            })
+          }
+
+          deptList.push(deptListData)
+        })
         this.deptList = deptList
-        // console.log(deptList)
+        // this.departmentList = data
       }
     },
+    ///////// 部门-用户列表获取 end /////////
+
     ///////// 用户列表获取 start /////////
     getListAjax(res) {
       let list = this.userList
@@ -1284,14 +1305,14 @@ export default {
     },
     ///////// 用户列表获取 end /////////
 
-    ///////// suoshu end /////////
+    ///////// 搜索 start /////////
     changePasprojectId(res) {
       console.log(res)
       if (res != '') {
         this.getProjectapiDetai(res)
       }
     },
-    ///////// 用户列表获取 end /////////
+    ///////// 搜索 end /////////
 
     ///////// 获取立项背景 start /////////
     getProjectapiDetai(pasprojectId) {
@@ -1466,8 +1487,9 @@ export default {
     ///////// 问题反馈 start /////////
     problemFeedback() {
       this.drawer3 = true
-      setTimeout(this.blur(), 100)
+      // setTimeout(this.blur(), 100)
     },
+    
     // 问题反馈文件上传回调
     handleFeedbackSuccess(response, file, fileList) {
       // console.log(fileList)
@@ -1515,7 +1537,7 @@ export default {
       this.fileListFeedback = []
       this.drawer3 = false
     },
-    blur() {
+    feedbackOpened(){
       this.$refs['input'].blur()
     },
     feedbackClose() {
@@ -1762,7 +1784,7 @@ export default {
   justify-content: space-between;
 }
 .home .batton button {
-  width: 36%;
+  width: 39%;
 }
 .home >>> .el-drawer__body {
   height: 100%;
@@ -1863,11 +1885,12 @@ export default {
   text-align-last: justify;
   text-align: right;
   box-sizing: border-box;
-  padding: 0 18px 0 9px;
+  padding: 0 13px 0 9px;
 }
 .home .problemFeedback .batton {
+  background: white;
   position: absolute;
-  bottom: 108px;
+  bottom: 0;
   left: 0;
 }
 .home .snow {
@@ -1878,6 +1901,13 @@ export default {
 .noData {
   text-align: center;
 }
+.home .leftNav{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-content: space-between;
+}
 .home .bottom {
   width: 100%;
   text-align: center;
@@ -1887,9 +1917,12 @@ export default {
   flex-wrap: wrap;
   justify-content: space-around;
   align-items: center;
-  position: absolute;
+  /* position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: 0; */
+}
+.home .navList{
+  width: 100%;
 }
 .home .bottom > div {
   margin-bottom: 18px;

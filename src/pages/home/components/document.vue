@@ -1018,7 +1018,7 @@ export default {
   justify-content: space-between;
 }
 .task .batton button {
-  width: 36%;
+  width: 39%;
 }
 .feedback {
   height: 100%;

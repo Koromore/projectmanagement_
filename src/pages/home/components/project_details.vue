@@ -268,6 +268,7 @@
               placement="top"
               v-for="item in projectShowDetail.listProFile"
               :key="item.index"
+              tabindex=""
             >
               <div class="fileList_" @click="download(item)">
                 <img
@@ -1772,7 +1773,7 @@ export default {
   justify-content: space-between;
 }
 .project_details .add_box .batton button {
-  width: 36%;
+  width: 39%;
 }
 .project_details .add_box .department .el-radio {
   width: 50%;
@@ -1818,7 +1819,7 @@ export default {
   bottom: 0;
 }
 .project_details .batton button {
-  width: 36%;
+  width: 39%;
 }
 
 .project_details .batton_pa {

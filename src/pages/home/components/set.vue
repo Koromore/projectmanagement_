@@ -634,6 +634,6 @@ export default {
   justify-content: space-between;
 }
 .set .add_box .batton button {
-  width: 36%;
+  width: 39%;
 }
 </style>

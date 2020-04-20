@@ -107,12 +107,13 @@
           <el-table-column prop="name" label="项目名称" show-overflow-tooltip min-width="270">
             <template slot-scope="scope">
               <!-- <el-badge value="经" class="item"> -->
-
               <el-link
                 type="primary"
                 @click.native="pathPrpjectDetails(scope.row.proId,1)"
               >{{scope.row.proName}}</el-link>
               <el-badge class="mark" value="经" v-if="scope.row.manager == userId" />
+              <el-badge class="mark" value="担" v-if="scope.row.listBearShow" />
+              <!-- <el-badge class="mark" value="经" v-if="scope.row.manager == userId" /> -->
               <!-- </el-badge> -->
               <!-- <el-tag type="danger" effect="dark" size="mini" v-if="scope.row.manager == userId">经理</el-tag> -->
             </template>
@@ -135,7 +136,7 @@
           </el-table-column>
           <el-table-column prop="realName" label="下达人" filter-placement="bottom-end" min-width="81"></el-table-column>
           <el-table-column label="操作" min-width="81">
-            <template slot-scope="scope">
+            <template slot-scope="scope" v-if="scope.row.status == 1 || scope.row.status == 4">
               <el-button
                 size="mini"
                 type="info"
@@ -183,7 +184,7 @@
               <span v-else-if="scope.row.status == 5" class="state_color3">延期完成</span>
             </template>
           </el-table-column>
-          <el-table-column prop="num" label="任务数" min-width="90" class-name="center">
+          <el-table-column prop="num" label="任务数" min-width="64" class-name="center">
             <template slot-scope="scope">{{scope.row.listTask.length}}/{{scope.row.unfintask}}</template>
           </el-table-column>
           <el-table-column prop="expertTime" label="预计时间" sortable min-width="100">
@@ -192,12 +193,12 @@
           <el-table-column prop="overTime" label="完成时间" sortable min-width="100">
             <template slot-scope="scope">{{$date(scope.row.overTime)}}</template>
           </el-table-column>
-          <el-table-column prop="realName" label="下达人" min-width="90"></el-table-column>
+          <el-table-column prop="realName" label="下达人" min-width="81"></el-table-column>
           <el-table-column
             prop="managerName"
             label="项目经理"
             filter-placement="bottom-end"
-            min-width="90"
+            min-width="81"
           ></el-table-column>
           <el-table-column
             prop="tag"
@@ -347,48 +348,7 @@
             <el-col :span="24" class="title">项目担当&知晓人</el-col>
             <el-col :span="6" class="key">项目担当:</el-col>
             <el-col :span="18" class="value prin">
-              <!-- <el-table :data="principalData" style="width: 100%" border>
-                <el-table-column prop="realName" label="名称" min-width="64">
-                  <template slot-scope="scope" v-show="scope.row.deleteFlag!=1">
-                    <div class="change" v-if="changeShow === scope.$index">
-                      <el-select
-                        v-model="principalValue"
-                        filterable
-                        placeholder="请选择"
-                        clearable
-                        size="small"
-                        style="width: 99px;"
-                      >
-                        <el-option
-                          v-for="item in principalList"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
-                        ></el-option>
-                      </el-select>
-                      <el-button
-                        type="primary"
-                        size="mini"
-                        @click="affirmPrincipal(scope.$index,scope.row)"
-                      >确认</el-button>
-                      {{scope.row.deleteFlag}}
-                    </div>
-                    <div class="name" v-else>{{scope.row.realName}}</div>
-                  </template>
-                </el-table-column>
-                <el-table-column prop="address" label="操作" min-width="36">
-                  <template slot-scope="scope">
-                      <el-link type="primary" @click="changePrincipal(scope.$index,scope.row)">更换</el-link>
-                      <el-link type="primary" @click="deletePrincipal(scope.$index,scope.row)">删除</el-link>
-                    <i
-                      class="el-icon-circle-plus-outline add"
-                      v-if="scope.$index == principalData.length-1"
-                      @click="addPrincipal(scope.$index)"
-                    ></i>
-                  </template>
-                </el-table-column>
-              </el-table>-->
-              <!--------- 担当列表 start --------->
+              <!--------- 项目担当 start --------->
               <!-- 列表 -->
               <div class="pixi-item">
                 <div class="title-left">名称</div>
@@ -666,6 +626,7 @@ export default {
       principalValueAdd: '',
       principalLabelAdd: '',
       principalProId: '',
+      listBearShow: false,
       // 知晓人
       add_list: '',
       dynamicTags: [], // 知晓人
@@ -769,11 +730,11 @@ export default {
       // console.log(this.clickCloseNum)
     },
     // 搜索关键字
-    searchWordData: function(newQuestion, oldQuestion){
+    searchWordData: function(newQuestion, oldQuestion) {
       // console.log(newQuestion)
       let searchWord = newQuestion.value
       let id = this.tabs_activity
-      this.getProjectList(id,searchWord)
+      this.getProjectList(id, searchWord)
       // console.log(oldQuestion)
     }
   },
@@ -1103,6 +1064,9 @@ export default {
       this.$axios
         .post('/pmbs/api/project/projectOfTask' + data)
         .then(this.getProjectTaskListInitSuss)
+        .catch(res => {
+          console.log(res)
+        })
     },
     // 获取我发起项目下所有任务回调
     getProjectTaskListInitSuss(res) {
@@ -1244,10 +1208,10 @@ export default {
       // console.log(this.pageNum_)
     },
     ///////// 获取项目列表 start /////////
-    getProjectList(id,searchWord) {
+    getProjectList(id, searchWord) {
       // console.log(name)
       let proName = ''
-      if (searchWord!=undefined && searchWord!='') {
+      if (searchWord != undefined && searchWord != '') {
         proName = `&proName=${searchWord}`
       }
       let userId = this.userId
@@ -1335,6 +1299,15 @@ export default {
         //   });
         // });
         // console.log(projectListJoin)
+        let userId = this.userId
+        projectListJoin.forEach((element, i) => {
+          projectListJoin[i].listBearShow
+          element.listBear.forEach((element0, j) => {
+            if (userId == element0.userId) {
+              projectListJoin[i].listBearShow = true
+            }
+          })
+        });
         this.projectListJoin = projectListJoin
 
         this.totalnum_ = this.projectListJoin.length
@@ -1590,13 +1563,13 @@ export default {
     },
     closePrincipal() {
       this.principalData = []
-      this.changeShow= ''
-      this.principalList= []
-      this.principalValueChange= ''
-      this.principalLabelChange= ''
-      this.principalValueAdd= ''
-      this.principalLabelAdd= ''
-      this.principalProId= ''
+      this.changeShow = ''
+      this.principalList = []
+      this.principalValueChange = ''
+      this.principalLabelChange = ''
+      this.principalValueAdd = ''
+      this.principalLabelAdd = ''
+      this.principalProId = ''
     },
     // 添加知晓人标签
     showInput() {
@@ -1944,7 +1917,7 @@ export default {
   justify-content: space-between;
 }
 .project .batton button {
-  width: 36%;
+  width: 39%;
 }
 .project .principal {
   height: 100%;

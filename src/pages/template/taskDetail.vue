@@ -980,7 +980,7 @@ export default {
   justify-content: space-between;
 }
 .taskDetail .batton button {
-  width: 36%;
+  width: 39%;
 }
 .taskDetail >>> .el-drawer__body {
   height: 100%;

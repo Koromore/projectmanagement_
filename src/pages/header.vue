@@ -240,7 +240,7 @@ export default {
 }
 .topheader .el-header {
   height: 60px;
-  padding: 0px 50px 0 0;
+  padding-right: 24px;
   position: fixed;
   top: 0;
   width: 100%;
@@ -297,7 +297,7 @@ export default {
   width: 128px;
   height: 32px;
   line-height: 32px;
-  padding-left: 16px;
+  padding-left: 9px;
   border-left: 1px solid white;
   font-size: 16px;
   color: white;

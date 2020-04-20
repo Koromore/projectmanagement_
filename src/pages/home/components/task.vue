@@ -223,7 +223,7 @@
             filter-placement="bottom-end"
             v-if="userId!=152"
           >
-            <template slot-scope="scope">
+            <template slot-scope="scope" v-if="scope.row.isIgnore!=true&&scope.row.isIgnore!=1">
               <el-button
                 size="mini"
                 v-if="scope.row.isIgnore != true && scope.row.status != 2 && scope.row.status != 3 && scope.row.status != 5"
@@ -304,7 +304,7 @@
             <template slot-scope="scope">{{$date(scope.row.expertTime)}}</template>
           </el-table-column>
           <el-table-column prop="tag" label="操作" min-width="160" filter-placement="bottom-end">
-            <template slot-scope="scope">
+            <template slot-scope="scope" v-if="scope.row.isIgnore!=true&&scope.row.isIgnore!=1">
               <el-button
                 size="mini"
                 type="info"
@@ -1380,7 +1380,7 @@ export default {
   justify-content: space-between;
 }
 .task .batton button {
-  width: 36%;
+  width: 39%;
 }
 .feedback {
   height: 100%;
